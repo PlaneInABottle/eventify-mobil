@@ -9,14 +9,17 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/images/app-icon-all.png",
+    "extra": {
+      "eas": {
+        "projectId": "f4041b07-f880-402e-a827-738e4d35187d"
+      }
+    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
     "newArchEnabled": false,
     "jsEngine": "hermes",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
       "package": "com.eventify.app",
