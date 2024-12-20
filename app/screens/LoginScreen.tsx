@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite"
-import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
-import { TextInput, TextStyle, ViewStyle } from "react-native"
+import { ComponentType, FC, useRef, useState, useMemo } from "react"
+import { TextInput, TextStyle, View, ViewStyle, Pressable } from "react-native"
 import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
 import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
@@ -10,13 +10,18 @@ import { TxKeyPath } from "@/i18n"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
+const loginErrorToTx = {
+  rejected: "loginScreen:errors.rejected",
+  unauthorized: "loginScreen:errors.unauthorized",
+  cannotConnect: "loginScreen:errors.cannotConnect",
+} as const
+
 export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
   const authPasswordInput = useRef<TextInput>(null)
 
   const [authPassword, setAuthPassword] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [attemptsCount, setAttemptsCount] = useState(0)
   const {
     authenticationStore: { authEmail, setAuthEmail, login, validationError, error: loginError },
   } = useStores()
@@ -26,38 +31,22 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     theme: { colors },
   } = useAppTheme()
 
-  // TODO: Will be removed
-  // useEffect(() => {
-  //   // Here is where you could fetch credentials from keychain or storage
-  //   // and pre-fill the form fields.
-  //   setAuthEmail("ymiirza@gmadgdfgdfgil.com")
-  //   setAuthPassword("123")
-
-  //   // Return a "cleanup" function that React will run when the component unmounts
-  //   return () => {
-  //     setAuthPassword("")
-  //     setAuthEmail("")
-  //   }
-  // }, [setAuthEmail])
-
   const error = isSubmitted ? validationError : ""
 
   function handleLogin() {
     setIsSubmitted(true)
-    setAttemptsCount(attemptsCount + 1)
 
     if (validationError) return
 
-    // Make a request to your server to get an authentication token.
-    // If successful, reset the fields and set the token.
     login(authEmail, authPassword)
     setIsSubmitted(false)
     setAuthPassword("")
     setAuthEmail("")
+  }
 
-    // We'll mock this with a fake token.
-    // setAuthToken(String(Date.now()))
-    // distributeAuthToken()
+  function handleForgotPassword() {
+    // TODO: Implement forgot password flow
+    console.log("Forgot password")
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -82,58 +71,79 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       contentContainerStyle={themed($screenContentContainer)}
       safeAreaEdges={["top", "bottom"]}
     >
-      <Text testID="login-heading" tx="loginScreen:logIn" preset="heading" style={themed($logIn)} />
-      <Text tx="loginScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
-      {/* TODO: Will be removed */}
-      {/* {attemptsCount > 2 && (
-        <Text tx="loginScreen:hint" size="sm" weight="light" style={themed($hint)} />
-      )} */}
-      {loginError && (
+      <View style={themed($topContainer)}>
         <Text
-          tx={`loginScreen:errors.${loginError}` as TxKeyPath}
-          size="sm"
-          weight="light"
-          style={themed($hint)}
+          testID="login-heading"
+          tx="loginScreen:logIn"
+          preset="heading"
+          style={themed($logIn)}
         />
-      )}
+        <Text tx="loginScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
+      </View>
 
-      <TextField
-        value={authEmail}
-        onChangeText={setAuthEmail}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="email"
-        autoCorrect={false}
-        keyboardType="email-address"
-        labelTx="loginScreen:emailFieldLabel"
-        placeholderTx="loginScreen:emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
-        onSubmitEditing={() => authPasswordInput.current?.focus()}
-      />
+      <View style={themed($formContainer)}>
+        {loginError && (
+          <Text
+            tx={loginErrorToTx[loginError as keyof typeof loginErrorToTx] as TxKeyPath}
+            size="sm"
+            weight="light"
+            style={themed($hint)}
+          />
+        )}
 
-      <TextField
-        ref={authPasswordInput}
-        value={authPassword}
-        onChangeText={setAuthPassword}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="password"
-        autoCorrect={false}
-        secureTextEntry={isAuthPasswordHidden}
-        labelTx="loginScreen:passwordFieldLabel"
-        placeholderTx="loginScreen:passwordFieldPlaceholder"
-        onSubmitEditing={handleLogin}
-        RightAccessory={PasswordRightAccessory}
-      />
+        <TextField
+          value={authEmail}
+          onChangeText={setAuthEmail}
+          containerStyle={themed($textField)}
+          autoCapitalize="none"
+          autoComplete="email"
+          autoCorrect={false}
+          keyboardType="email-address"
+          labelTx="loginScreen:emailFieldLabel"
+          placeholderTx="loginScreen:emailFieldPlaceholder"
+          helper={error}
+          status={error ? "error" : undefined}
+          onSubmitEditing={() => authPasswordInput.current?.focus()}
+        />
 
-      <Button
-        testID="login-button"
-        tx="loginScreen:tapToLogIn"
-        style={themed($tapButton)}
-        preset="reversed"
-        onPress={handleLogin}
-      />
+        <TextField
+          ref={authPasswordInput}
+          value={authPassword}
+          onChangeText={setAuthPassword}
+          containerStyle={themed($textField)}
+          autoCapitalize="none"
+          autoComplete="password"
+          autoCorrect={false}
+          secureTextEntry={isAuthPasswordHidden}
+          labelTx="loginScreen:passwordFieldLabel"
+          placeholderTx="loginScreen:passwordFieldPlaceholder"
+          onSubmitEditing={handleLogin}
+          RightAccessory={PasswordRightAccessory}
+        />
+
+        <Pressable
+          onPress={handleForgotPassword}
+          style={({ pressed }) => [
+            themed($forgotPasswordContainer),
+            pressed && themed($forgotPasswordPressed),
+          ]}
+        >
+          <Text
+            tx="loginScreen:forgotPasswordText"
+            size="sm"
+            weight="medium"
+            style={themed($forgotPasswordText)}
+          />
+        </Pressable>
+
+        <Button
+          testID="login-button"
+          tx="loginScreen:tapToLogIn"
+          style={themed($tapButton)}
+          preset="reversed"
+          onPress={handleLogin}
+        />
+      </View>
     </Screen>
   )
 })
@@ -141,6 +151,14 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xxl,
   paddingHorizontal: spacing.lg,
+})
+
+const $topContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingBottom: spacing.xl,
+})
+
+const $formContainer: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
 })
 
 const $logIn: ThemedStyle<TextStyle> = ({ spacing }) => ({
@@ -152,7 +170,7 @@ const $enterDetails: ThemedStyle<TextStyle> = ({ spacing }) => ({
 })
 
 const $hint: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.tint,
+  color: colors.error,
   marginBottom: spacing.md,
 })
 
@@ -160,6 +178,19 @@ const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
 })
 
-const $tapButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.xs,
+const $forgotPasswordContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "flex-end",
+  marginBottom: spacing.xl,
+})
+
+const $forgotPasswordPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  opacity: 0.7,
+})
+
+const $forgotPasswordText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
+})
+
+const $tapButton: ThemedStyle<ViewStyle> = () => ({
+  minWidth: "100%",
 })

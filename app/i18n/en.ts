@@ -8,6 +8,7 @@ const en = {
     logOut: "Log Out",
     login: "Log In",
     register: "Register",
+    forgotPassword: "Forgot Password?",
   },
   welcomeScreen: {
     welcome: "Welcome to Eventify",
@@ -38,15 +39,15 @@ const en = {
     invalidEmail: "Invalid email address.",
   },
   loginScreen: {
-    logIn: "Log In",
+    logIn: "Welcome Back!",
     enterDetails:
-      "Enter your details below to unlock top secret info. You'll never guess what we've got waiting. Or maybe you will; it's not rocket science here.",
+      "Sign in to your account to discover and join amazing events happening around you.",
     emailFieldLabel: "Email",
     passwordFieldLabel: "Password",
     emailFieldPlaceholder: "Enter your email address",
-    passwordFieldPlaceholder: "Super secret password here",
-    tapToLogIn: "Tap to log in!",
-    hint: "Hint: you can use any email address and your favorite password :)",
+    passwordFieldPlaceholder: "Enter your password",
+    tapToLogIn: "Sign In",
+    forgotPasswordText: "Trouble signing in?",
     errors: {
       rejected: "Invalid email or password",
       unauthorized: "Check your email and password and try again.",
