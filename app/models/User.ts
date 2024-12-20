@@ -4,9 +4,8 @@ import { MediaModel } from "./Media"
 export const UserModel = types.model("User").props({
   id: types.identifierNumber,
   roles: types.string,
-  profilePicture: types.union(
-    types.number,
-    types.maybe(types.reference(types.late(() => MediaModel))),
+  profilePicture: types.maybe(
+    types.union(types.number, types.maybe(types.reference(types.late(() => MediaModel)))),
   ),
   email: types.string,
   loginAttempts: types.number,
