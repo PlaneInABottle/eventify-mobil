@@ -17,7 +17,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
   const {
-    authenticationStore: { authEmail, setAuthEmail, setAuthToken, validationError },
+    authenticationStore: { authEmail, setAuthEmail, login, validationError, error: loginError },
   } = useStores()
 
   const {
@@ -25,22 +25,23 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     theme: { colors },
   } = useAppTheme()
 
-  useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    setAuthEmail("ignite@infinite.red")
-    setAuthPassword("ign1teIsAwes0m3")
+  // TODO: Will be removed
+  // useEffect(() => {
+  //   // Here is where you could fetch credentials from keychain or storage
+  //   // and pre-fill the form fields.
+  //   setAuthEmail("ymiirza@gmadgdfgdfgil.com")
+  //   setAuthPassword("123")
 
-    // Return a "cleanup" function that React will run when the component unmounts
-    return () => {
-      setAuthPassword("")
-      setAuthEmail("")
-    }
-  }, [setAuthEmail])
+  //   // Return a "cleanup" function that React will run when the component unmounts
+  //   return () => {
+  //     setAuthPassword("")
+  //     setAuthEmail("")
+  //   }
+  // }, [setAuthEmail])
 
   const error = isSubmitted ? validationError : ""
 
-  function login() {
+  function handleLogin() {
     setIsSubmitted(true)
     setAttemptsCount(attemptsCount + 1)
 
@@ -48,12 +49,14 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 
     // Make a request to your server to get an authentication token.
     // If successful, reset the fields and set the token.
+    login(authEmail, authPassword)
     setIsSubmitted(false)
     setAuthPassword("")
     setAuthEmail("")
 
     // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
+    // setAuthToken(String(Date.now()))
+    // distributeAuthToken()
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -80,8 +83,17 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     >
       <Text testID="login-heading" tx="loginScreen:logIn" preset="heading" style={themed($logIn)} />
       <Text tx="loginScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
-      {attemptsCount > 2 && (
+      {/* TODO: Will be removed */}
+      {/* {attemptsCount > 2 && (
         <Text tx="loginScreen:hint" size="sm" weight="light" style={themed($hint)} />
+      )} */}
+      {loginError && (
+        <Text
+          tx={`loginScreen:errors.${loginError}`}
+          size="sm"
+          weight="light"
+          style={themed($hint)}
+        />
       )}
 
       <TextField
@@ -110,7 +122,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         secureTextEntry={isAuthPasswordHidden}
         labelTx="loginScreen:passwordFieldLabel"
         placeholderTx="loginScreen:passwordFieldPlaceholder"
-        onSubmitEditing={login}
+        onSubmitEditing={handleLogin}
         RightAccessory={PasswordRightAccessory}
       />
 
@@ -119,7 +131,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         tx="loginScreen:tapToLogIn"
         style={themed($tapButton)}
         preset="reversed"
-        onPress={login}
+        onPress={handleLogin}
       />
     </Screen>
   )

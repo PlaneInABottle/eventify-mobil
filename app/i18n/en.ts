@@ -42,6 +42,10 @@ const en = {
     passwordFieldPlaceholder: "Super secret password here",
     tapToLogIn: "Tap to log in!",
     hint: "Hint: you can use any email address and your favorite password :)",
+    errors: {
+      rejected: "Invalid email or password",
+      unauthorized: "Check your email and password and try again.",
+    },
   },
   demoNavigator: {
     componentsTab: "Components",
