@@ -6,8 +6,13 @@ const en = {
     cancel: "Cancel",
     back: "Back",
     logOut: "Log Out",
+    login: "Log In",
+    register: "Register",
   },
   welcomeScreen: {
+    welcome: "Welcome to Eventify",
+    tagLine: "Your one-stop platform for discovering and creating amazing events",
+    joinUs: "Join our community today!",
     postscript:
       "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
     readyForLaunch: "Your app, almost ready for launch!",

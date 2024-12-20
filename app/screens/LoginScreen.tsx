@@ -6,6 +6,7 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
+import { TxKeyPath } from "@/i18n"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
@@ -89,7 +90,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       )} */}
       {loginError && (
         <Text
-          tx={`loginScreen:errors.${loginError}`}
+          tx={`loginScreen:errors.${loginError}` as TxKeyPath}
           size="sm"
           weight="light"
           style={themed($hint)}

@@ -3,10 +3,8 @@ import { FC } from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { Button, Text, Screen } from "@/components"
 import { isRTL } from "../i18n"
-import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import { $styles, type ThemedStyle } from "@/theme"
-import { useHeader } from "../utils/useHeader"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 import { useAppTheme } from "@/utils/useAppTheme"
 
@@ -17,23 +15,11 @@ interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
 export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen(_props) {
   const { themed, theme } = useAppTheme()
-
   const { navigation } = _props
-  const {
-    authenticationStore: { logout },
-  } = useStores()
 
-  function goNext() {
-    navigation.navigate("Demo", { screen: "DemoShowroom", params: {} })
+  function goToLogin() {
+    navigation.navigate("Login")
   }
-
-  useHeader(
-    {
-      rightTx: "common:logOut",
-      onRightPress: logout,
-    },
-    [logout],
-  )
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
 
@@ -44,10 +30,10 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
         <Text
           testID="welcome-heading"
           style={themed($welcomeHeading)}
-          tx="welcomeScreen:readyForLaunch"
+          tx="welcomeScreen:welcome"
           preset="heading"
         />
-        <Text tx="welcomeScreen:exciting" preset="subheading" />
+        <Text tx="welcomeScreen:tagLine" preset="subheading" style={themed($tagLine)} />
         <Image
           style={$welcomeFace}
           source={welcomeFace}
@@ -57,14 +43,23 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
       </View>
 
       <View style={themed([$bottomContainer, $bottomContainerInsets])}>
-        <Text tx="welcomeScreen:postscript" size="md" />
+        <Text tx="welcomeScreen:joinUs" size="md" style={themed($joinText)} />
 
-        <Button
-          testID="next-screen-button"
-          preset="reversed"
-          tx="welcomeScreen:letsGo"
-          onPress={goNext}
-        />
+        <View style={themed($buttonsContainer)}>
+          <Button
+            testID="login-button"
+            preset="reversed"
+            tx="common:login"
+            onPress={goToLogin}
+            style={themed($loginButton)}
+          />
+          <Button
+            testID="register-button"
+            preset="default"
+            tx="common:register"
+            style={themed($registerButton)}
+          />
+        </View>
       </View>
     </Screen>
   )
@@ -81,7 +76,7 @@ const $topContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $bottomContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexShrink: 1,
   flexGrow: 0,
-  flexBasis: "43%",
+  flexBasis: "33%",
   backgroundColor: colors.palette.neutral100,
   borderTopLeftRadius: 16,
   borderTopRightRadius: 16,
@@ -106,4 +101,27 @@ const $welcomeFace: ImageStyle = {
 
 const $welcomeHeading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
+  textAlign: "center",
+})
+
+const $tagLine: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xl,
+  textAlign: "center",
+})
+
+const $joinText: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  textAlign: "center",
+  marginBottom: spacing.lg,
+})
+
+const $buttonsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.md,
+})
+
+const $loginButton: ThemedStyle<ViewStyle> = () => ({
+  minWidth: "100%",
+})
+
+const $registerButton: ThemedStyle<ViewStyle> = () => ({
+  minWidth: "100%",
 })
