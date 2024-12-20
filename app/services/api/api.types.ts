@@ -1,3 +1,5 @@
+import { UserSnapshotIn } from "@/models/User"
+import { MediaSnapshotIn } from "@/models/Media"
 /**
  * These types indicate the shape of the data you expect to receive from your
  * API endpoint, assuming it's a JSON object like we have.
@@ -21,6 +23,11 @@ export interface EpisodeItem {
   categories: string[]
 }
 
+export interface ApiLoginResponse {
+  user: UserSnapshotIn & { profilePicture: MediaSnapshotIn }
+  token: string
+  exp: number
+}
 export interface ApiFeedResponse {
   status: string
   feed: {

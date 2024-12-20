@@ -8,8 +8,9 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
-import type { ApiConfig, ApiFeedResponse } from "./api.types"
+import type { ApiConfig, ApiFeedResponse, ApiLoginResponse } from "./api.types"
 import type { EpisodeSnapshotIn } from "../../models/Episode"
+import { UserSnapshotIn } from "@/models/User"
 
 /**
  * Configuring the apisauce instance.
@@ -41,7 +42,49 @@ export class Api {
     })
   }
 
+  async login(
+    email: string,
+    password: string,
+  ): Promise<
+    | {
+        kind: "ok"
+        user: UserSnapshotIn
+        token: string
+        exp: number
+      }
+    | GeneralApiProblem
+  > {
+    const response: ApiResponse<ApiLoginResponse> = await this.apisauce.post("/users/login", {
+      email,
+      password,
+    })
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    try {
+      const data = response.data
+      if (!data?.user) {
+        return { kind: "bad-data" }
+      }
+      const user = {
+        ...data.user,
+        profilePictureUrl: data.user.profilePicture ? data.user.profilePicture.url : undefined,
+      }
+      const token = data?.token ?? ""
+      const exp = data?.exp ?? 0
+      return { kind: "ok", user, token, exp }
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+      }
+      return { kind: "bad-data" }
+    }
+  }
+
   /**
+   *
    * Gets a list of recent React Native Radio episodes.
    */
   async getEpisodes(): Promise<{ kind: "ok"; episodes: EpisodeSnapshotIn[] } | GeneralApiProblem> {
