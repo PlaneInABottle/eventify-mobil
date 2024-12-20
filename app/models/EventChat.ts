@@ -3,7 +3,7 @@ import { EventModel } from "./Event"
 import { ChatMessageModel } from "./ChatMessage"
 
 export const EventChatModel = types.model("EventChat").props({
-  id: types.identifierNumber,
+  id: types.identifier,
   event: types.reference(EventModel),
   messages: types.array(ChatMessageModel),
   updatedAt: types.string,

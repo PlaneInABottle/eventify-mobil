@@ -2,7 +2,7 @@ import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
 import { UserModel } from "./User"
 
 export const ChatMessageModel = types.model("ChatMessage").props({
-  id: types.identifierNumber,
+  id: types.identifier,
   content: types.string,
   sender: types.reference(UserModel),
   eventChatId: types.number,

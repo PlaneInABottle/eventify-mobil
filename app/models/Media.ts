@@ -1,7 +1,7 @@
 import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
 
 export const MediaModel = types.model("Media").props({
-  id: types.identifierNumber,
+  id: types.identifier,
   alt: types.maybe(types.string),
   uploadedBy: types.union(
     types.number,
