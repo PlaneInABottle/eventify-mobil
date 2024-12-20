@@ -21,6 +21,10 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
     navigation.navigate("Login")
   }
 
+  function goToRegister() {
+    navigation.navigate("Register")
+  }
+
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
 
   return (
@@ -58,6 +62,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
             preset="default"
             tx="common:register"
             style={themed($registerButton)}
+            onPress={goToRegister}
           />
         </View>
       </View>

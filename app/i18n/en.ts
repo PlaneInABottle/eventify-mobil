@@ -54,6 +54,17 @@ const en = {
       cannotConnect: "Cannot connect to the server. Please try again later.",
     },
   },
+  registerScreen: {
+    signUp: "Create Account",
+    createAccount: "Join us and start discovering amazing events near you.",
+    emailFieldLabel: "Email",
+    passwordFieldLabel: "Password",
+    confirmPasswordFieldLabel: "Confirm Password",
+    emailFieldPlaceholder: "Enter your email address",
+    passwordFieldPlaceholder: "Enter your password",
+    confirmPasswordFieldPlaceholder: "Confirm your password",
+    tapToSignUp: "Sign Up",
+  },
   demoNavigator: {
     componentsTab: "Components",
     debugTab: "Debug",
