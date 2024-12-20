@@ -6,7 +6,7 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { useHeader } from "@/utils/useHeader"
+// import { useHeader } from "@/utils/useHeader"
 
 interface RegisterScreenProps extends AppStackScreenProps<"Register"> {}
 

@@ -19,6 +19,7 @@ const loginErrorToTx = {
 export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
   const authPasswordInput = useRef<TextInput>(null)
 
+  const { navigation } = _props
   const [authPassword, setAuthPassword] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -47,6 +48,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   function handleForgotPassword() {
     // TODO: Implement forgot password flow
     console.log("Forgot password")
+    navigation.navigate("ForgotPassword")
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
