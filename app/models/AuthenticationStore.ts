@@ -1,6 +1,7 @@
 import { api } from "@/services/api"
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree"
 import { getRootStore } from "./helpers/getRootStore"
+import { toCamelCase } from "@/utils/toCamelCase"
 
 export const AuthenticationStoreModel = types
   .model("AuthenticationStore")
@@ -10,7 +11,7 @@ export const AuthenticationStoreModel = types
   })
   .volatile(() => ({
     isLoading: false,
-    error: null,
+    error: null as string | null,
   }))
   .views((store) => ({
     get isAuthenticated() {
@@ -56,7 +57,7 @@ export const AuthenticationStoreModel = types
         store.distributeAuthToken(response.token)
         store.error = null
       } else {
-        store.error = response.kind
+        store.error = toCamelCase(response.kind)
       }
     }),
   }))

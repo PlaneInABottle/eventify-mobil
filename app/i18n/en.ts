@@ -45,6 +45,7 @@ const en = {
     errors: {
       rejected: "Invalid email or password",
       unauthorized: "Check your email and password and try again.",
+      cannotConnect: "Cannot connect to the server. Please try again later.",
     },
   },
   demoNavigator: {
