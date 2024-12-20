@@ -9,7 +9,7 @@ export const UserStoreModel = types
   })
   .actions((store) => ({
     setUser(userData: User) {
-      store.user = userData
+      store.user = UserModel.create(userData)
     },
     clearUser() {
       store.user = undefined

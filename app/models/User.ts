@@ -1,12 +1,9 @@
 import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
-import { MediaModel } from "./Media"
 
 export const UserModel = types.model("User").props({
-  id: types.identifierNumber,
+  id: types.identifier,
   roles: types.string,
-  profilePicture: types.maybe(
-    types.union(types.number, types.maybe(types.reference(types.late(() => MediaModel)))),
-  ),
+  profilePictureUrl: types.maybe(types.string),
   email: types.string,
   loginAttempts: types.number,
   updatedAt: types.string,
