@@ -1,0 +1,156 @@
+import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { CompositeScreenProps } from "@react-navigation/native"
+import {
+  createMaterialTopTabNavigator,
+  MaterialTopTabScreenProps,
+} from "@react-navigation/material-top-tabs"
+import { TextStyle, ViewStyle } from "react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Icon } from "../components"
+import type { ThemedStyle } from "@/theme"
+import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
+import { useAppTheme } from "@/utils/useAppTheme"
+import { UpcomingEventsScreen } from "@/screens/events/UpcomingEventsScreen"
+import { PastEventsScreen } from "@/screens/events/PastEventsScreen"
+import { ProfileScreen } from "@/screens/ProfileScreen"
+
+// Define the Event tab's parameter list
+export type EventTabParamList = {
+  UpcomingEvents: undefined
+  PastEvents: undefined
+}
+
+// Define the main tab parameter list
+export type MainTabParamList = {
+  Events: undefined
+  Profile: undefined
+}
+
+/**
+ * Helper for automatically generating navigation prop types for each route.
+ */
+export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, T>,
+  AppStackScreenProps<keyof AppStackParamList>
+>
+
+export type EventTabScreenProps<T extends keyof EventTabParamList> = CompositeScreenProps<
+  MaterialTopTabScreenProps<EventTabParamList, T>,
+  MainTabScreenProps<"Events">
+>
+
+const Tab = createBottomTabNavigator<MainTabParamList>()
+const EventTab = createMaterialTopTabNavigator<EventTabParamList>()
+
+// Events navigator with material top tabs
+function EventsNavigator() {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+  const { top } = useSafeAreaInsets()
+
+  return (
+    <EventTab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: colors.tint,
+        tabBarInactiveTintColor: colors.text,
+        tabBarIndicatorStyle: {
+          backgroundColor: colors.tint,
+          height: 2,
+        },
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          minHeight: 48,
+        },
+        tabBarContentContainerStyle: {
+          minHeight: 48,
+          paddingTop: top,
+        },
+        tabBarLabelStyle: {
+          fontSize: 14,
+          fontWeight: "600",
+          color: colors.text,
+          textTransform: "none",
+        },
+      }}
+    >
+      <EventTab.Screen
+        name="UpcomingEvents"
+        component={UpcomingEventsScreen}
+        options={{
+          tabBarLabel: "Upcoming",
+        }}
+      />
+      <EventTab.Screen
+        name="PastEvents"
+        component={PastEventsScreen}
+        options={{
+          tabBarLabel: "Past",
+        }}
+      />
+    </EventTab.Navigator>
+  )
+}
+
+/**
+ * Main navigator with bottom tabs.
+ */
+export function MainNavigator() {
+  const { bottom } = useSafeAreaInsets()
+  const {
+    themed,
+    theme: { colors },
+  } = useAppTheme()
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: themed([$tabBar, { height: bottom + 70 }]),
+        tabBarActiveTintColor: colors.text,
+        tabBarInactiveTintColor: colors.text,
+        tabBarLabelStyle: themed($tabBarLabel),
+        tabBarItemStyle: themed($tabBarItem),
+      }}
+    >
+      <Tab.Screen
+        name="Events"
+        component={EventsNavigator}
+        options={{
+          tabBarLabel: "Events",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="components" color={focused ? colors.tint : colors.tintInactive} size={30} />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: "Profile",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="community" color={focused ? colors.tint : colors.tintInactive} size={30} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  )
+}
+
+const $tabBar: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+  borderTopColor: colors.transparent,
+})
+
+const $tabBarItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingTop: spacing.md,
+})
+
+const $tabBarLabel: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: 12,
+  fontFamily: typography.primary.medium,
+  lineHeight: 16,
+  color: colors.text,
+})

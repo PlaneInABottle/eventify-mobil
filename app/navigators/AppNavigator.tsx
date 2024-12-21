@@ -10,7 +10,8 @@ import { observer } from "mobx-react-lite"
 import * as Screens from "@/screens"
 import Config from "../config"
 import { useStores } from "../models"
-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
+// import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
+import { MainNavigator, MainTabParamList } from "./MainNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
@@ -32,7 +33,8 @@ export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
   Register: undefined
-  Demo: NavigatorScreenParams<DemoTabParamList>
+  // Demo: NavigatorScreenParams<DemoTabParamList>
+  Main: NavigatorScreenParams<MainTabParamList>
   // 🔥 Your screens go here
   ForgotPassword: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
@@ -70,18 +72,21 @@ const AppStack = observer(function AppStack() {
           backgroundColor: colors.background,
         },
       }}
-      initialRouteName={isAuthenticated ? "Demo" : "Welcome"}
+      initialRouteName={isAuthenticated ? "Main" : "Main"}
     >
       {isAuthenticated ? (
         <>
-          <Stack.Screen name="Demo" component={DemoNavigator} />
+          {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
+          <Stack.Screen name="Main" component={MainNavigator} />
         </>
       ) : (
         <>
-          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+          <Stack.Screen name="Main" component={MainNavigator} />
+
+          {/* <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-          <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />
+          <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} /> */}
         </>
       )}
 

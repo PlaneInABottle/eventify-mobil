@@ -1,11 +1,12 @@
 export * from "./WelcomeScreen"
-
 export * from "./LoginScreen"
 export * from "./RegisterScreen"
+export * from "./ForgotPasswordScreen"
+export * from "./DemoShowroomScreen/DemoShowroomScreen"
 export * from "./DemoCommunityScreen"
 export * from "./DemoDebugScreen"
-export * from "./DemoShowroomScreen/DemoShowroomScreen"
-
+export * from "./DemoPodcastListScreen"
 export * from "./ErrorScreen/ErrorBoundary"
-// export other screens here
-export * from "./ForgotPasswordScreen"
+// Export the new screens
+export * from "./events"
+export * from "./ProfileScreen"

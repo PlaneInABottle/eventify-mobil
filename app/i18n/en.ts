@@ -147,6 +147,18 @@ const en = {
         "No favorites have been added yet. Tap the heart on an episode to add it to your favorites!",
     },
   },
+  upcomingEventsScreen: {
+    title: "Upcoming Events",
+    description: "Discover and join exciting events happening soon",
+  },
+  pastEventsScreen: {
+    title: "Past Events",
+    description: "Browse through events you've attended or missed",
+  },
+  profileScreen: {
+    title: "Profile",
+    description: "Manage your account and preferences",
+  },
 
   ...demoEn,
 }
