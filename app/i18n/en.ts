@@ -37,6 +37,15 @@ const en = {
 
   errors: {
     invalidEmail: "Invalid email address.",
+    timeout: "Request timed out. Please try again.",
+    cannotConnect: "Cannot connect to the server. Please check your internet connection.",
+    server: "Server error occurred. Please try again later.",
+    unauthorized: "Please sign in to continue.",
+    forbidden: "You don't have permission to perform this action.",
+    notFound: "The requested resource was not found.",
+    rejected: "Your request was rejected. Please check your input and try again.",
+    unknown: "An unexpected error occurred. Please try again.",
+    badData: "Invalid data received from the server.",
   },
   loginScreen: {
     logIn: "Welcome Back!",
@@ -48,11 +57,6 @@ const en = {
     passwordFieldPlaceholder: "Enter your password",
     tapToLogIn: "Sign In",
     forgotPasswordText: "Trouble signing in?",
-    errors: {
-      rejected: "Invalid email or password",
-      unauthorized: "Check your email and password and try again.",
-      cannotConnect: "Cannot connect to the server. Please try again later.",
-    },
   },
   registerScreen: {
     signUp: "Create Account",

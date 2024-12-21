@@ -10,12 +10,6 @@ import { TxKeyPath } from "@/i18n"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
-const loginErrorToTx = {
-  rejected: "loginScreen:errors.rejected",
-  unauthorized: "loginScreen:errors.unauthorized",
-  cannotConnect: "loginScreen:errors.cannotConnect",
-} as const
-
 export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
   const authPasswordInput = useRef<TextInput>(null)
 
@@ -86,7 +80,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       <View style={themed($formContainer)}>
         {loginError && (
           <Text
-            tx={loginErrorToTx[loginError as keyof typeof loginErrorToTx] as TxKeyPath}
+            tx={`errors.${loginError.replace("-", "")}` as TxKeyPath}
             size="sm"
             weight="light"
             style={themed($hint)}
