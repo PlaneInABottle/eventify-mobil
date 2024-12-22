@@ -43,6 +43,8 @@ export interface PaginatedResponse<T> {
   totalPages: number
 }
 
+export type PaginationMetadata = Omit<PaginatedResponse<any>, "docs">
+
 export interface LocationType {
   id: string
   name: string

@@ -13,7 +13,7 @@ import type {
   ApiEventsResponse,
   ApiFeedResponse,
   ApiLoginResponse,
-  PaginatedResponse,
+  PaginationMetadata,
 } from "./api.types"
 import type { EpisodeSnapshotIn } from "../../models/Episode"
 import { UserSnapshotIn } from "@/models/User"
@@ -50,6 +50,18 @@ export class Api {
     })
   }
 
+  getDefaultPagination = (page: number, limit: number): PaginationMetadata => ({
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit,
+    nextPage: null,
+    page,
+    pagingCounter: 1,
+    prevPage: null,
+    totalDocs: 0,
+    totalPages: 0,
+  })
+
   async getEvents(
     region: Region,
     page: number = 1,
@@ -58,7 +70,7 @@ export class Api {
     | {
         kind: "ok"
         events: EventSnapshotIn[]
-        pagination: Omit<PaginatedResponse<EventSnapshotIn>, "docs">
+        pagination: PaginationMetadata
       }
     | GeneralApiProblem
   > {
@@ -112,15 +124,7 @@ export class Api {
 
     const { docs, ...pagination } = response.data || {
       docs: [],
-      hasNextPage: false,
-      hasPrevPage: false,
-      limit,
-      nextPage: null,
-      page,
-      pagingCounter: 1,
-      prevPage: null,
-      totalDocs: 0,
-      totalPages: 0,
+      ...this.getDefaultPagination(page, limit),
     }
 
     return { kind: "ok", events: docs, pagination }
