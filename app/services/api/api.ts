@@ -8,10 +8,18 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
-import type { ApiConfig, ApiFeedResponse, ApiLoginResponse } from "./api.types"
+import type {
+  ApiConfig,
+  ApiEventsResponse,
+  ApiFeedResponse,
+  ApiLoginResponse,
+  PaginatedResponse,
+} from "./api.types"
 import type { EpisodeSnapshotIn } from "../../models/Episode"
 import { UserSnapshotIn } from "@/models/User"
-
+import { EventSnapshotIn } from "@/models/Event"
+import { Region } from "react-native-maps"
+import { stringify } from "qs-esm"
 /**
  * Configuring the apisauce instance.
  */
@@ -40,6 +48,82 @@ export class Api {
         Accept: "application/json",
       },
     })
+  }
+
+  async getEvents(
+    region: Region,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<
+    | {
+        kind: "ok"
+        events: EventSnapshotIn[]
+        pagination: Omit<PaginatedResponse<EventSnapshotIn>, "docs">
+      }
+    | GeneralApiProblem
+  > {
+    // Calculate the bounding box corners
+    const latitudeDelta = region.latitudeDelta / 2
+    const longitudeDelta = region.longitudeDelta / 2
+
+    const north = region.latitude + latitudeDelta
+    const south = region.latitude - latitudeDelta
+    const east = region.longitude + longitudeDelta
+    const west = region.longitude - longitudeDelta
+
+    // Create the polygon coordinates array
+    const coordinates = [
+      [west, south],
+      [east, south],
+      [east, north],
+      [west, north],
+      [west, south], // Close the polygon
+    ]
+
+    // Construct the query object
+    const queryObject = {
+      where: {
+        "location.location": {
+          within: {
+            type: "Polygon",
+            coordinates: [coordinates],
+          },
+        },
+      },
+      page,
+      limit,
+    }
+
+    // Convert to query string
+    const queryString = stringify(queryObject, {
+      addQueryPrefix: true,
+      encode: false,
+    })
+
+    // Make the API request
+    const response: ApiResponse<ApiEventsResponse> = await this.apisauce.get(
+      `/events${queryString}`,
+    )
+
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    const { docs, ...pagination } = response.data || {
+      docs: [],
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit,
+      nextPage: null,
+      page,
+      pagingCounter: 1,
+      prevPage: null,
+      totalDocs: 0,
+      totalPages: 0,
+    }
+
+    return { kind: "ok", events: docs, pagination }
   }
 
   async login(

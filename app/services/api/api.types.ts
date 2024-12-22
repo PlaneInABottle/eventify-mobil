@@ -1,5 +1,6 @@
 import { UserSnapshotIn } from "@/models/User"
 import { MediaSnapshotIn } from "@/models/Media"
+import { EventSnapshotIn } from "@/models/Event"
 /**
  * These types indicate the shape of the data you expect to receive from your
  * API endpoint, assuming it's a JSON object like we have.
@@ -28,6 +29,32 @@ export interface ApiLoginResponse {
   token: string
   exp: number
 }
+
+export interface PaginatedResponse<T> {
+  docs: T[]
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  limit: number
+  nextPage: number | null
+  page: number
+  pagingCounter: number
+  prevPage: number | null
+  totalDocs: number
+  totalPages: number
+}
+
+export interface LocationType {
+  id: string
+  name: string
+  address: string
+  location: [number, number]
+  updatedAt: string
+  createdAt: string
+  owner: UserSnapshotIn
+}
+
+export interface ApiEventsResponse extends PaginatedResponse<EventSnapshotIn> {}
+
 export interface ApiFeedResponse {
   status: string
   feed: {
