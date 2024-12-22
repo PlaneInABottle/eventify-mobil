@@ -72,7 +72,7 @@ const AppStack = observer(function AppStack() {
           backgroundColor: colors.background,
         },
       }}
-      initialRouteName={isAuthenticated ? "Main" : "Main"}
+      initialRouteName={isAuthenticated ? "Main" : "Welcome"}
     >
       {isAuthenticated ? (
         <>
@@ -81,12 +81,12 @@ const AppStack = observer(function AppStack() {
         </>
       ) : (
         <>
-          <Stack.Screen name="Main" component={MainNavigator} />
+          {/* <Stack.Screen name="Main" component={MainNavigator} /> */}
 
-          {/* <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-          <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} /> */}
+          <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />
         </>
       )}
 
