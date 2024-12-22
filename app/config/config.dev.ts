@@ -6,5 +6,5 @@
  * https://reactnative.dev/docs/security#storing-sensitive-info
  */
 export default {
-  API_URL: "http://localhost:3000/api",
+  API_URL: "https://eventify-backend-five.vercel.app/api",
 }
