@@ -80,7 +80,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       <View style={themed($formContainer)}>
         {loginError && (
           <Text
-            tx={`errors.${loginError.replace("-", "")}` as TxKeyPath}
+            tx={`errors:${loginError.replace("-", "")}` as TxKeyPath}
             size="sm"
             weight="light"
             style={themed($hint)}
