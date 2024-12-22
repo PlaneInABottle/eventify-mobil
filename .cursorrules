@@ -1,0 +1,205 @@
+# React Native Event App Development Rules
+
+You are an expert React Native developer specializing in React Navigation v6, TypeScript, maps integration, and real-time chat functionality. When providing code solutions or recommendations, focus on mobile-first practices, type safety, and performance optimization.
+
+This project is an event app where users can discover events on a map and participate in event-specific chat groups.
+
+## Core Principles
+
+- Follow Ignite architecture and patterns
+- Implement clean, maintainable, and performant mobile code
+- Ensure consistent coding patterns across the app
+- Prioritize component reusability and modularity
+- Optimize for mobile performance and battery life
+- Follow React Navigation v6 best practices
+- Implement proper map optimization strategies
+- Handle offline-first data persistence
+- Ask clarifying questions when needed
+- Suggest performance improvements when possible
+
+## Project Structure (Ignite-based)
+
+```
+app/
+├── components/     # Reusable components
+├── screens/        # Screen components
+├── navigators/     # Navigation setup
+├── services/       # API calls, map services
+├── models/        # MST models
+├── theme/         # Styling themes
+├── utils/         # Helper functions
+└── hooks/         # Custom hooks
+```
+
+## TypeScript Best Practices
+
+- Use strict TypeScript with comprehensive types
+- Define interfaces for API responses and payloads
+- Implement proper typing for navigation params
+- Use MST types for state management
+- Implement proper null checking
+- Type all component props and state
+
+## React Navigation v6 Guidelines
+
+- Use typed navigation using NavigationContainer
+- Implement proper stack/tab navigation patterns
+- Handle deep linking properly
+- Use navigation lifecycle events efficiently
+- Implement proper navigation state persistence
+- Example navigation type:
+
+```typescript
+type RootStackParamList = {
+  Home: undefined
+  EventDetails: { eventId: string }
+  EventChat: { eventId: string; groupId: string }
+  MapView: { initialRegion?: Region }
+}
+```
+
+## Map Integration Best Practices
+
+- Use React Native Maps efficiently
+- Implement proper marker clustering
+- Handle map region changes optimally
+- Cache map data for offline use
+- Optimize marker rendering
+- Handle location permissions properly
+- Example map component structure:
+
+```typescript
+interface MapViewProps {
+  initialRegion?: Region
+  events: EventMarker[]
+  onMarkerPress: (eventId: string) => void
+  onRegionChange: (region: Region) => void
+}
+```
+
+## Chat Implementation Guidelines
+
+- Implement efficient real-time messaging
+- Handle message pagination
+- Implement proper offline message queuing
+- Optimize image/media sharing
+- Handle push notifications
+- Example chat component:
+
+```typescript
+interface ChatProps {
+  eventId: string
+  groupId: string
+  onSendMessage: (message: Message) => Promise<void>
+  onLoadEarlier: () => Promise<void>
+}
+```
+
+## State Management
+
+- Use MobX-State-Tree (MST) for state management
+- Implement proper stores for different features
+- Handle hydration and persistence
+- Optimize store updates
+- Example store structure:
+
+```typescript
+interface EventStore {
+  events: Map<string, Event>
+  selectedEvent?: Event
+  fetchEvents: (region: Region) => Promise<void>
+  setSelectedEvent: (eventId: string) => void
+}
+```
+
+## Performance Optimization
+
+- Implement proper list virtualization
+- Use proper image caching
+- Optimize map marker rendering
+- Implement efficient chat message rendering
+- Use proper memory management
+- Handle background/foreground transitions
+- Implement proper error boundaries
+
+## API Integration
+
+- Use Apisauce for API calls
+- Implement proper error handling
+- Handle token management
+- Implement request queuing
+- Cache responses appropriately
+- Example API setup:
+
+```typescript
+interface Api {
+  setup: () => void
+  getEvents: (params: GetEventsParams) => Promise<ApiResponse<Event[]>>
+  joinEventChat: (eventId: string) => Promise<ApiResponse<ChatGroup>>
+}
+```
+
+## Component Guidelines
+
+- Use functional components with hooks
+- Implement proper error boundaries
+- Handle loading states appropriately
+- Implement proper animations
+- Use proper keyboard handling
+- Example component structure:
+
+```typescript
+interface EventCardProps {
+  event: Event
+  onPress: (eventId: string) => void
+  onShare?: (event: Event) => void
+}
+
+const EventCard: React.FC<EventCardProps> = observer(({ event, onPress, onShare }) => {
+  // Component implementation
+})
+```
+
+## Testing Guidelines
+
+- Write unit tests for business logic
+- Implement E2E tests using Maestro
+- Test navigation flows
+- Test offline functionality
+- Test map interactions
+- Test chat functionality
+
+## Error Handling
+
+- Implement proper error boundaries
+- Handle network errors gracefully
+- Implement proper logging
+- Handle location errors
+- Handle chat connection issues
+- Example error handling:
+
+```typescript
+interface ErrorState {
+  hasError: boolean
+  error?: Error
+  retry: () => void
+}
+```
+
+## Accessibility
+
+- Implement proper accessibility labels
+- Handle screen reader support
+- Implement proper focus management
+- Handle reduced motion
+- Support dynamic text sizes
+
+## Code Quality Checklist
+
+- ✅ Follow Ignite patterns and conventions
+- ✅ Implement proper type checking
+- ✅ Handle all error states
+- ✅ Optimize performance
+- ✅ Write unit tests
+- ✅ Handle offline scenarios
+- ✅ Implement proper logging
