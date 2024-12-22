@@ -1,7 +1,7 @@
 import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
 
 export const LocationModel = types.model("Location").props({
-  id: types.number,
+  id: types.identifier,
   name: types.string,
   address: types.string,
   location: types.array(types.number),
