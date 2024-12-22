@@ -53,7 +53,7 @@ export class Api {
   async getEvents(
     region: Region,
     page: number = 1,
-    limit: number = 10,
+    limit: number = 100,
   ): Promise<
     | {
         kind: "ok"
