@@ -45,6 +45,7 @@ const EventTab = createMaterialTopTabNavigator<EventTabParamList>()
 // Events navigator with material top tabs
 function EventsNavigator() {
   const {
+    themed,
     theme: { colors },
   } = useAppTheme()
   const { top } = useSafeAreaInsets()
@@ -54,24 +55,9 @@ function EventsNavigator() {
       screenOptions={{
         tabBarActiveTintColor: colors.tint,
         tabBarInactiveTintColor: colors.text,
-        tabBarIndicatorStyle: {
-          backgroundColor: colors.tint,
-          height: 2,
-        },
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          minHeight: 48,
-        },
-        tabBarContentContainerStyle: {
-          minHeight: 48,
-          paddingTop: top,
-        },
-        tabBarLabelStyle: {
-          fontSize: 14,
-          fontWeight: "600",
-          color: colors.text,
-          textTransform: "none",
-        },
+        tabBarIndicatorStyle: themed($tabBarIndicator),
+        tabBarStyle: themed([$tabBarStyle, { paddingTop: top }]),
+        tabBarLabelStyle: themed($tabBarLabel),
       }}
     >
       <EventTab.Screen
@@ -153,4 +139,14 @@ const $tabBarLabel: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontFamily: typography.primary.medium,
   lineHeight: 16,
   color: colors.text,
+})
+
+const $tabBarStyle: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+  minHeight: 48,
+})
+
+const $tabBarIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.tint,
+  height: 2,
 })
