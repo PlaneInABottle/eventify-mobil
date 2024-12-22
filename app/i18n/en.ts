@@ -9,6 +9,7 @@ const en = {
     login: "Log In",
     register: "Register",
     forgotPassword: "Forgot Password?",
+    searching: "Searching...",
   },
   welcomeScreen: {
     welcome: "Welcome to Eventify",
@@ -158,6 +159,11 @@ const en = {
   profileScreen: {
     title: "Profile",
     description: "Manage your account and preferences",
+  },
+  upcomingEvents: {
+    title: "Upcoming Events",
+    description: "Discover events happening around you",
+    searchThisArea: "Search This Area",
   },
 
   ...demoEn,
