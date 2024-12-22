@@ -61,6 +61,7 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
           preset="filled"
           tx={isLoading ? "common:searching" : "upcomingEvents:searchThisArea"}
           style={themed($searchButton)}
+          disabledStyle={themed($disabledSearchButton)}
           onPress={handleSearchThisArea}
           disabled={isLoading}
           RightAccessory={isLoading ? LoadingIndicator : undefined}
@@ -74,7 +75,7 @@ const LoadingIndicator = (props: ButtonAccessoryProps) => {
   const {
     theme: { colors },
   } = useAppTheme()
-  return <ActivityIndicator size="small" color={colors.palette.neutral100} style={props.style} />
+  return <ActivityIndicator size="small" color={colors.palette.neutral800} style={props.style} />
 }
 
 const $screenContentContainer: ViewStyle = {
@@ -85,9 +86,14 @@ const $mapView: ViewStyle = {
   ...StyleSheet.absoluteFillObject,
 }
 
-const $searchButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $searchButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   position: "absolute",
   top: spacing.lg,
   alignSelf: "center",
   minWidth: 200,
+})
+
+const $disabledSearchButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral400,
+  opacity: 0.7,
 })
