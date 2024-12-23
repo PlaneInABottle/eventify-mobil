@@ -165,6 +165,33 @@ const en = {
     description: "Discover events happening around you",
     searchThisArea: "Search This Area",
   },
+  eventsListScreen: {
+    favoriteButton: "Favorite",
+    unfavoriteButton: "Unfavorite",
+    joinChat: "Join Chat",
+    quitChat: "Quit Chat",
+    title: "Events",
+    onlyFavorites: "Only Show Favorites",
+    noEventsEmptyState: {
+      heading: "No Events Found",
+      content:
+        "There are currently no events in this area. Try adjusting your search or exploring nearby regions.",
+    },
+    noFavoritesEmptyState: {
+      heading: "No Favorite Events",
+      content:
+        "You haven't added any events to your favorites yet. Tap the heart icon on an event to save it here!",
+    },
+    accessibility: {
+      cardHint: "Double tap to view event details. Double tap and hold to {{action}} this event.",
+      favoriteAction: "Toggle Favorite",
+      favoriteIcon: "Event not favorited",
+      unfavoriteIcon: "Event favorited",
+      publishLabel: "Published {{date}}",
+      timePublishedLabel: "Time: {{time}}",
+      switch: "Switch on to only show favorites",
+    },
+  },
 
   ...demoEn,
 }
