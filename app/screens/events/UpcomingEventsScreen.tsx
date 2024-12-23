@@ -16,7 +16,7 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
     const {
       eventStore: { events, fetchEventsInBounds, isLoading },
     } = useStores()
-    const { theme, themed } = useAppTheme()
+    const { themed } = useAppTheme()
 
     const regionRef = useRef<Region | null>(null)
 
@@ -30,7 +30,7 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
       <Screen
         preset="fixed"
         contentContainerStyle={$screenContentContainer}
-        safeAreaEdges={["top", "bottom"]}
+        safeAreaEdges={["bottom"]}
       >
         <MapView
           style={$mapView}
@@ -52,7 +52,7 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
                 longitude: event.location.location[0],
               }}
               title={event.name}
-              description={event.description}
+              description={event.description ?? undefined}
             />
           ))}
         </MapView>
