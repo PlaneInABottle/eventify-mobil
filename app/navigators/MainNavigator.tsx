@@ -56,7 +56,7 @@ function EventsNavigator() {
         tabBarActiveTintColor: colors.tint,
         tabBarInactiveTintColor: colors.text,
         tabBarIndicatorStyle: themed($tabBarIndicator),
-        tabBarStyle: themed([$tabBarStyle, { paddingTop: top }]),
+        tabBarStyle: themed([$tabBarStyle, { paddingTop: top + 20 }]),
         tabBarLabelStyle: themed($tabBarLabel),
       }}
     >
