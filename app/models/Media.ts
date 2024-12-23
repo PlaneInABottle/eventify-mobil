@@ -3,13 +3,9 @@ import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
 export const MediaModel = types.model("Media").props({
   id: types.identifier,
   alt: types.maybe(types.string),
-  uploadedBy: types.union(
-    types.number,
-    types.maybe(types.reference(types.late(() => require("./User").UserModel))),
-  ),
   prefix: types.string,
   url: types.string,
-  thumbnailURL: types.maybe(types.string),
+  thumbnailURL: types.maybeNull(types.string),
   filename: types.string,
   mimeType: types.string,
   filesize: types.number,
