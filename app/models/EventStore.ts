@@ -4,16 +4,25 @@ import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
 import { Region } from "react-native-maps"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 
+// TODO: FIND A WAY TO FIX BUG ABOUT FAVORITES
 export const EventStoreModel = types
   .model("EventStore")
   .props({
     events: types.array(EventModel),
-    selectedEvent: types.maybe(types.reference(EventModel)),
+    favorites: types.array(types.safeReference(EventModel)),
+    favoritesOnly: false,
+    joinedChats: types.array(types.safeReference(EventModel)),
+    selectedEvent: types.maybe(types.safeReference(EventModel)),
   })
   .volatile(() => ({
     isLoading: false,
   }))
   .actions(withSetPropAction)
+  .views((store) => ({
+    get eventsForList() {
+      return store.favoritesOnly ? store.favorites : store.events
+    },
+  }))
   .actions((store) => ({
     fetchEventsInBounds: flow(function* (bounds: Region) {
       store.isLoading = true
@@ -34,6 +43,42 @@ export const EventStoreModel = types
     }),
     setSelectedEvent(event: Event) {
       store.selectedEvent = event
+    },
+  }))
+  .actions((store) => ({
+    addFavorite(event: Event) {
+      store.favorites.push(event)
+    },
+    removeFavorite(event: Event) {
+      store.favorites.remove(event)
+    },
+    hasFavorite(event: Event) {
+      return store.favorites.includes(event)
+    },
+    joinChat(event: Event) {
+      store.joinedChats.push(event)
+    },
+    quitChat(event: Event) {
+      store.joinedChats.remove(event)
+    },
+    hasJoinedChat(event: Event) {
+      return store.joinedChats.includes(event)
+    },
+  }))
+  .actions((store) => ({
+    toggleFavorite(event: Event) {
+      if (store.hasFavorite(event)) {
+        store.removeFavorite(event)
+      } else {
+        store.addFavorite(event)
+      }
+    },
+    toggleChat(event: Event) {
+      if (store.hasJoinedChat(event)) {
+        store.quitChat(event)
+      } else {
+        store.joinChat(event)
+      }
     },
   }))
 
