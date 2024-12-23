@@ -114,7 +114,7 @@ export class Api {
 
     // Make the API request
     const response: ApiResponse<ApiEventsResponse> = await this.apisauce.get(
-      `/events${queryString}`,
+      `/api/events${queryString}`,
     )
 
     if (!response.ok) {
@@ -142,7 +142,7 @@ export class Api {
       }
     | GeneralApiProblem
   > {
-    const response: ApiResponse<ApiLoginResponse> = await this.apisauce.post("/users/login", {
+    const response: ApiResponse<ApiLoginResponse> = await this.apisauce.post("/api/users/login", {
       email,
       password,
     })
@@ -178,7 +178,7 @@ export class Api {
   async getEpisodes(): Promise<{ kind: "ok"; episodes: EpisodeSnapshotIn[] } | GeneralApiProblem> {
     // make the api call
     const response: ApiResponse<ApiFeedResponse> = await this.apisauce.get(
-      `api.json?rss_url=https%3A%2F%2Ffeeds.simplecast.com%2FhEI_f9Dx`,
+      `https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.simplecast.com%2FhEI_f9Dx`,
     )
 
     // the typical ways to die when calling an api
