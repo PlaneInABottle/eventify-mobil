@@ -11,13 +11,13 @@ import type { ThemedStyle } from "@/theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { UpcomingEventsScreen } from "@/screens/events/UpcomingEventsScreen"
-import { PastEventsScreen } from "@/screens/events/PastEventsScreen"
+import { EventsListScreen } from "@/screens/events/EventsListScreen"
 import { ProfileScreen } from "@/screens/ProfileScreen"
 
 // Define the Event tab's parameter list
 export type EventTabParamList = {
   UpcomingEvents: undefined
-  PastEvents: undefined
+  EventsList: undefined
 }
 
 // Define the main tab parameter list
@@ -68,8 +68,8 @@ function EventsNavigator() {
         }}
       />
       <EventTab.Screen
-        name="PastEvents"
-        component={PastEventsScreen}
+        name="EventsList"
+        component={EventsListScreen}
         options={{
           tabBarLabel: "Past",
         }}
