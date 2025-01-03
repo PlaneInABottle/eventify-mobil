@@ -5,7 +5,7 @@ export const UserModel = types.model("User").props({
   name: types.maybe(types.string),
   avatarUrl: types.maybe(types.string),
   email: types.string,
-  bio: types.maybe(types.string),
+  about: types.maybe(types.string),
   age: types.maybe(types.number),
   updatedAt: types.maybe(types.string),
   createdAt: types.string,
