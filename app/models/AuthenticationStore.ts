@@ -158,7 +158,6 @@ export const AuthenticationStoreModel = types
             case "TOKEN_REFRESHED":
               if (session?.access_token) {
                 store.setAuthToken(session.access_token)
-                store.distributeAuthToken(session.access_token)
               }
               break
 
