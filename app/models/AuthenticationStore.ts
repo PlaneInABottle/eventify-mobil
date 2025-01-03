@@ -1,7 +1,8 @@
 import { api } from "@/services/api"
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree"
 import { getRootStore } from "./helpers/getRootStore"
-import { toCamelCase } from "@/utils/toCamelCase"
+import { supabase } from "@/services/auth/supabase"
+import { AuthError, QueryError } from "@supabase/supabase-js"
 
 export const AuthenticationStoreModel = types
   .model("AuthenticationStore")
@@ -26,6 +27,32 @@ export const AuthenticationStoreModel = types
     },
   }))
   .actions((store) => ({
+    fetchProfile: flow(function* (userId: string) {
+      try {
+        const {
+          data: profile,
+          error,
+        }: {
+          data: any
+          error: QueryError
+        } = yield supabase.from("profiles").select("*").eq("id", userId).single()
+
+        if (error) {
+          store.error = error.message
+          return false
+        }
+
+        // Update the user store with profile data
+        getRootStore(store).userStore.setUser(profile)
+        return true
+      } catch (error: any) {
+        // Carefull about types
+        store.error = error.message ? error.message : "There was an error"
+        return false
+      }
+    }),
+  }))
+  .actions((store) => ({
     setAuthToken(value?: string) {
       store.authToken = value
     },
@@ -48,17 +75,59 @@ export const AuthenticationStoreModel = types
     },
   }))
   .actions((store) => ({
-    login: flow(function* (email: string, password: string) {
-      const response = yield api.login(email, password)
-      if (response.kind === "ok") {
-        store.setAuthToken(response.token)
-        store.setAuthEmail(response.user.email)
-        getRootStore(store).userStore.setUser(response.user)
-        store.distributeAuthToken(response.token)
-        store.error = null
-      } else {
-        store.error = toCamelCase(response.kind)
+    handleSuccessfulAuth: flow(function* (session, userId) {
+      if (session?.access_token) {
+        store.setAuthToken(session.access_token)
+        // store.distributeAuthToken(session.access_token) // Do we need it ? Or can we handle everything with supabase client ?
+        store.setAuthEmail(session.user?.email ?? "")
+        // Fetch profile after setting auth token
+        yield store.fetchProfile(userId)
       }
+    }),
+  }))
+  .actions((store) => ({
+    login: flow(function* (email: string, password: string) {
+      const { data, error }: { data: any; error: AuthError } =
+        yield supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+      if (error) {
+        store.error = error.message
+        return false
+      }
+
+      if (data.session) {
+        yield store.handleSuccessfulAuth(data.session, data.user?.id)
+        return true
+      }
+
+      return false
+    }),
+
+    register: flow(function* (email: string, password: string, name: string) {
+      const { data, error }: { data: any; error: AuthError } = yield supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      })
+
+      if (error) {
+        store.error = error.message
+        return false
+      }
+
+      if (data.session) {
+        yield store.handleSuccessfulAuth(data.session, data.user?.id)
+        return true
+      }
+
+      return false
     }),
   }))
 
