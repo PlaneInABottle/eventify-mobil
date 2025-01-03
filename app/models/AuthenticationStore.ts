@@ -65,13 +65,19 @@ export const AuthenticationStoreModel: IAnyModelType = types
         return false
       }
 
+      // First fetch profile
+      const profileSuccess = yield getRootStore(store).userStore.fetchProfile(userId)
+      if (!profileSuccess) {
+        store.setError("Failed to load user profile")
+        return false
+      }
+
+      // Then set auth state
       store.setAuthToken(session.access_token)
       store.setAuthEmail(session.user?.email ?? "")
       store.distributeAuthToken(session.access_token)
 
-      // Use UserStore's fetchProfile
-      const profileSuccess: boolean = yield getRootStore(store).userStore.fetchProfile(userId)
-      return profileSuccess
+      return true
     }),
   }))
   .actions((store) => ({
