@@ -16,11 +16,12 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
 
   const [authPassword, setAuthPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [name, setName] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isConfirmPasswordHidden, setIsConfirmPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const {
-    authenticationStore: { authEmail, setAuthEmail, validationError },
+    authenticationStore: { authEmail, setAuthEmail, register, validationError },
   } = useStores()
 
   const {
@@ -35,14 +36,17 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
 
     if (validationError) return
     if (authPassword !== confirmPassword) return
+    if (!name.trim()) return
 
-    // TODO: Implement registration logic
+    register(authEmail, authPassword, name)
+
     console.log("Register with:", { email: authEmail, password: authPassword })
 
     setIsSubmitted(false)
     setAuthPassword("")
     setConfirmPassword("")
     setAuthEmail("")
+    setName("")
   }
   //   Consider implementing header
   //   useHeader(
@@ -107,6 +111,20 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
       </View>
 
       <View style={themed($formContainer)}>
+        <TextField
+          value={name}
+          onChangeText={setName}
+          containerStyle={themed($textField)}
+          autoCapitalize="words"
+          autoComplete="name"
+          autoCorrect={false}
+          labelTx="registerScreen:nameFieldLabel"
+          placeholderTx="registerScreen:nameFieldPlaceholder"
+          helper={isSubmitted && !name.trim() ? "registerScreen:nameRequired" : undefined}
+          status={isSubmitted && !name.trim() ? "error" : undefined}
+          onSubmitEditing={() => authPasswordInput.current?.focus()}
+        />
+
         <TextField
           value={authEmail}
           onChangeText={setAuthEmail}
