@@ -28,12 +28,18 @@ export const AuthenticationStoreModel = types
     },
   }))
   .actions((store) => ({
+    setLoading(value: boolean) {
+      store.isLoading = value
+    },
+  }))
+  .actions((store) => ({
     fetchProfile: flow(function* (userId: string) {
       if (!userId) {
         store.error = "User ID is required"
         return false
       }
 
+      store.setLoading(true)
       try {
         const { data: profile, error } = yield supabase
           .from("profiles")
@@ -56,6 +62,8 @@ export const AuthenticationStoreModel = types
       } catch (error) {
         store.error = error instanceof Error ? error.message : "An unexpected error occurred"
         return false
+      } finally {
+        store.setLoading(false)
       }
     }),
   }))
@@ -96,47 +104,57 @@ export const AuthenticationStoreModel = types
   }))
   .actions((store) => ({
     login: flow(function* (email: string, password: string) {
-      const { data, error }: { data: any; error: AuthError } =
-        yield supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
+      store.setLoading(true)
+      try {
+        const { data, error }: { data: any; error: AuthError } =
+          yield supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
 
-      if (error) {
-        store.error = error.message
+        if (error) {
+          store.error = error.message
+          return false
+        }
+
+        if (data.session) {
+          yield store.handleSuccessfulAuth(data.session, data.user?.id)
+          return true
+        }
+
         return false
+      } finally {
+        store.setLoading(false)
       }
-
-      if (data.session) {
-        yield store.handleSuccessfulAuth(data.session, data.user?.id)
-        return true
-      }
-
-      return false
     }),
 
     register: flow(function* (email: string, password: string, name: string) {
-      const { data, error }: { data: any; error: AuthError } = yield supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
+      store.setLoading(true)
+      try {
+        const { data, error }: { data: any; error: AuthError } = yield supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+            },
           },
-        },
-      })
+        })
 
-      if (error) {
-        store.error = error.message
+        if (error) {
+          store.error = error.message
+          return false
+        }
+
+        if (data.session) {
+          yield store.handleSuccessfulAuth(data.session, data.user?.id)
+          return true
+        }
+
         return false
+      } finally {
+        store.setLoading(false)
       }
-
-      if (data.session) {
-        yield store.handleSuccessfulAuth(data.session, data.user?.id)
-        return true
-      }
-
-      return false
     }),
     setupAuthListener() {
       const {
