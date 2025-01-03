@@ -2,10 +2,11 @@ import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
 
 export const UserModel = types.model("User").props({
   id: types.identifier,
-  roles: types.string,
-  profilePictureUrl: types.maybe(types.string),
+  name: types.maybe(types.string),
+  avatarUrl: types.maybe(types.string),
   email: types.string,
-  loginAttempts: types.number,
+  bio: types.maybe(types.string),
+  age: types.maybe(types.number),
   updatedAt: types.string,
   createdAt: types.string,
 })
