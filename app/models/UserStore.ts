@@ -9,17 +9,29 @@ export const UserStoreModel = types
   })
   .volatile(() => ({
     error: undefined as string | undefined,
+    isLoading: false,
   }))
   .actions((store) => ({
     setUser(userData: User) {
-      store.user = UserModel.create(userData)
+      try {
+        store.user = UserModel.create(userData)
+        store.error = undefined
+      } catch (error) {
+        store.error = error instanceof Error ? error.message : "Invalid user data format"
+        return false
+      }
+      return true
     },
     clearUser() {
       store.user = undefined
       store.error = undefined
+      store.isLoading = false
     },
     setError(value: string | undefined) {
       store.error = value
+    },
+    setLoading(value: boolean) {
+      store.isLoading = value
     },
   }))
   .actions((store) => ({
@@ -29,6 +41,7 @@ export const UserStoreModel = types
         return false
       }
 
+      store.setLoading(true)
       try {
         const { data: profile, error } = yield supabase
           .from("profiles")
@@ -46,20 +59,26 @@ export const UserStoreModel = types
           return false
         }
 
-        store.setUser(profile)
-        store.setError(undefined)
-        return true
+        return store.setUser(profile)
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
+      } finally {
+        store.setLoading(false)
       }
     }),
     updateProfile: flow(function* (updates: Partial<User>) {
+      if (!store.user?.id) {
+        store.setError("No user logged in")
+        return false
+      }
+
+      store.setLoading(true)
       try {
         const { data: updatedProfile, error } = yield supabase
           .from("profiles")
           .update(updates)
-          .eq("id", store.user?.id)
+          .eq("id", store.user.id)
           .single()
 
         if (error) {
@@ -72,12 +91,12 @@ export const UserStoreModel = types
           return false
         }
 
-        store.setUser(updatedProfile)
-        store.setError(undefined)
-        return true
+        return store.setUser(updatedProfile)
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
+      } finally {
+        store.setLoading(false)
       }
     }),
   }))
