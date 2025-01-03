@@ -6,7 +6,7 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-// import { useHeader } from "@/utils/useHeader"
+import { TxKeyPath } from "@/i18n"
 
 interface RegisterScreenProps extends AppStackScreenProps<"Register"> {}
 
@@ -21,7 +21,14 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
   const [isConfirmPasswordHidden, setIsConfirmPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const {
-    authenticationStore: { authEmail, setAuthEmail, register, validationError },
+    authenticationStore: {
+      authEmail,
+      setAuthEmail,
+      register,
+      validationError,
+      error: registerError,
+      isLoading,
+    },
   } = useStores()
 
   const {
@@ -31,33 +38,23 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
 
   const error = isSubmitted ? validationError : ""
 
-  function handleRegister() {
+  async function handleRegister() {
     setIsSubmitted(true)
 
     if (validationError) return
     if (authPassword !== confirmPassword) return
     if (!name.trim()) return
 
-    register(authEmail, authPassword, name)
-
-    console.log("Register with:", { email: authEmail, password: authPassword })
-
-    setIsSubmitted(false)
-    setAuthPassword("")
-    setConfirmPassword("")
-    setAuthEmail("")
-    setName("")
+    const success = await register(authEmail, authPassword, name)
+    if (success) {
+      setIsSubmitted(false)
+      setAuthPassword("")
+      setConfirmPassword("")
+      setAuthEmail("")
+      setName("")
+    }
   }
-  //   Consider implementing header
-  //   useHeader(
-  //     {
-  //       leftTx: "common:back",
-  //       onLeftPress: () => {
-  //         console.log("Logout")
-  //       },
-  //     },
-  //     [],
-  //   )
+
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
     () =>
       function PasswordRightAccessory(props: TextFieldAccessoryProps) {
@@ -111,6 +108,15 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
       </View>
 
       <View style={themed($formContainer)}>
+        {registerError && (
+          <Text
+            tx={`errors:${registerError.replace("-", "")}` as TxKeyPath}
+            size="sm"
+            weight="light"
+            style={themed($hint)}
+          />
+        )}
+
         <TextField
           value={name}
           onChangeText={setName}
@@ -123,6 +129,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           helper={isSubmitted && !name.trim() ? "registerScreen:nameRequired" : undefined}
           status={isSubmitted && !name.trim() ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
+          readOnly={isLoading}
         />
 
         <TextField
@@ -138,6 +145,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           helper={error}
           status={error ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
+          readOnly={isLoading}
         />
 
         <TextField
@@ -153,6 +161,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           placeholderTx="registerScreen:passwordFieldPlaceholder"
           onSubmitEditing={() => confirmPasswordInput.current?.focus()}
           RightAccessory={PasswordRightAccessory}
+          readOnly={isLoading}
         />
 
         <TextField
@@ -174,14 +183,16 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
               ? "Passwords do not match"
               : undefined
           }
+          readOnly={isLoading}
         />
 
         <Button
           testID="register-button"
-          tx="registerScreen:tapToSignUp"
+          tx={isLoading ? "common:loading" : "registerScreen:tapToSignUp"}
           style={themed($tapButton)}
           preset="reversed"
           onPress={handleRegister}
+          disabled={isLoading}
         />
       </View>
     </Screen>
@@ -215,4 +226,9 @@ const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $tapButton: ThemedStyle<ViewStyle> = () => ({
   minWidth: "100%",
+})
+
+const $hint: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.error,
+  marginBottom: spacing.md,
 })
