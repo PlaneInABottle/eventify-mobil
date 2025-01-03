@@ -18,7 +18,14 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const {
-    authenticationStore: { authEmail, setAuthEmail, login, validationError, error: loginError },
+    authenticationStore: {
+      authEmail,
+      setAuthEmail,
+      login,
+      validationError,
+      error: loginError,
+      isLoading,
+    },
   } = useStores()
 
   const {
@@ -28,15 +35,17 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 
   const error = isSubmitted ? validationError : ""
 
-  function handleLogin() {
+  async function handleLogin() {
     setIsSubmitted(true)
 
     if (validationError) return
 
-    login(authEmail, authPassword)
-    setIsSubmitted(false)
-    setAuthPassword("")
-    setAuthEmail("")
+    const success = await login(authEmail, authPassword)
+    if (success) {
+      setIsSubmitted(false)
+      setAuthPassword("")
+      setAuthEmail("")
+    }
   }
 
   function handleForgotPassword() {
@@ -100,6 +109,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
           helper={error}
           status={error ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
+          readOnly={isLoading}
         />
 
         <TextField
@@ -115,6 +125,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
           placeholderTx="loginScreen:passwordFieldPlaceholder"
           onSubmitEditing={handleLogin}
           RightAccessory={PasswordRightAccessory}
+          readOnly={isLoading}
         />
 
         <Pressable
@@ -123,21 +134,23 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
             themed($forgotPasswordContainer),
             pressed && themed($forgotPasswordPressed),
           ]}
+          disabled={isLoading}
         >
           <Text
             tx="loginScreen:forgotPasswordText"
             size="sm"
             weight="medium"
-            style={themed($forgotPasswordText)}
+            style={[themed($forgotPasswordText), isLoading && themed($disabledText)]}
           />
         </Pressable>
 
         <Button
           testID="login-button"
-          tx="loginScreen:tapToLogIn"
+          tx={isLoading ? "common:loading" : "loginScreen:tapToLogIn"}
           style={themed($tapButton)}
           preset="reversed"
           onPress={handleLogin}
+          disabled={isLoading}
         />
       </View>
     </Screen>
@@ -189,4 +202,8 @@ const $forgotPasswordText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $tapButton: ThemedStyle<ViewStyle> = () => ({
   minWidth: "100%",
+})
+
+const $disabledText: ThemedStyle<TextStyle> = () => ({
+  opacity: 0.5,
 })
