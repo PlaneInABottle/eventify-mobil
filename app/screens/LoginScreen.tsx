@@ -179,7 +179,7 @@ const $forgotPasswordContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.xl,
 })
 
-const $forgotPasswordPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $forgotPasswordPressed: ThemedStyle<ViewStyle> = () => ({
   opacity: 0.7,
 })
 
