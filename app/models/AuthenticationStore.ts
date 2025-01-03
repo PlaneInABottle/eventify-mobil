@@ -2,7 +2,7 @@ import { api } from "@/services/api"
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree"
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
-import { AuthError, QueryError } from "@supabase/supabase-js"
+import { AuthChangeEvent, AuthError, Session } from "@supabase/supabase-js"
 
 export const AuthenticationStoreModel = types
   .model("AuthenticationStore")
@@ -13,6 +13,7 @@ export const AuthenticationStoreModel = types
   .volatile(() => ({
     isLoading: false,
     error: null as string | null,
+    authSubscription: null as any, // or proper Supabase subscription type
   }))
   .views((store) => ({
     get isAuthenticated() {
@@ -28,26 +29,32 @@ export const AuthenticationStoreModel = types
   }))
   .actions((store) => ({
     fetchProfile: flow(function* (userId: string) {
+      if (!userId) {
+        store.error = "User ID is required"
+        return false
+      }
+
       try {
-        const {
-          data: profile,
-          error,
-        }: {
-          data: any
-          error: QueryError
-        } = yield supabase.from("profiles").select("*").eq("id", userId).single()
+        const { data: profile, error } = yield supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single()
 
         if (error) {
           store.error = error.message
           return false
         }
 
-        // Update the user store with profile data
+        if (!profile) {
+          store.error = "Profile not found"
+          return false
+        }
+
         getRootStore(store).userStore.setUser(profile)
         return true
-      } catch (error: any) {
-        // Carefull about types
-        store.error = error.message ? error.message : "There was an error"
+      } catch (error) {
+        store.error = error instanceof Error ? error.message : "An unexpected error occurred"
         return false
       }
     }),
@@ -75,14 +82,16 @@ export const AuthenticationStoreModel = types
     },
   }))
   .actions((store) => ({
-    handleSuccessfulAuth: flow(function* (session, userId) {
-      if (session?.access_token) {
-        store.setAuthToken(session.access_token)
-        // store.distributeAuthToken(session.access_token) // Do we need it ? Or can we handle everything with supabase client ?
-        store.setAuthEmail(session.user?.email ?? "")
-        // Fetch profile after setting auth token
-        yield store.fetchProfile(userId)
+    handleSuccessfulAuth: flow(function* (session: Session, userId: string) {
+      if (!session?.access_token || !userId) {
+        store.error = "Invalid session data"
+        return false
       }
+
+      store.setAuthToken(session.access_token)
+      store.setAuthEmail(session.user?.email ?? "")
+      const profileSuccess = yield store.fetchProfile(userId)
+      return profileSuccess
     }),
   }))
   .actions((store) => ({
@@ -129,7 +138,52 @@ export const AuthenticationStoreModel = types
 
       return false
     }),
-  }))
+    setupAuthListener() {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(
+        async (event: AuthChangeEvent, session: Session | null) => {
+          switch (event) {
+            case "SIGNED_IN":
+              // Only handle automatic sign-ins (not from login/register)
+              if (session?.access_token && !store.authToken) {
+                await store.handleSuccessfulAuth(session, session.user?.id)
+              }
+              break
 
+            case "SIGNED_OUT":
+              store.logout()
+              break
+
+            case "TOKEN_REFRESHED":
+              if (session?.access_token) {
+                store.setAuthToken(session.access_token)
+                store.distributeAuthToken(session.access_token)
+              }
+              break
+
+            case "USER_UPDATED":
+              if (session?.user?.id) {
+                await store.fetchProfile(session.user.id)
+              }
+              break
+          }
+        },
+      )
+
+      store.authSubscription = subscription
+    },
+  }))
+  .actions((store) => ({
+    afterCreate() {
+      store.setupAuthListener()
+    },
+    beforeDestroy() {
+      // Properly remove the listener using the stored subscription
+      if (store.authSubscription) {
+        store.authSubscription.unsubscribe()
+      }
+    },
+  }))
 export interface AuthenticationStore extends Instance<typeof AuthenticationStoreModel> {}
 export interface AuthenticationStoreSnapshot extends SnapshotOut<typeof AuthenticationStoreModel> {}
