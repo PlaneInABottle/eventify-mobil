@@ -62,6 +62,9 @@ const en = {
   registerScreen: {
     signUp: "Create Account",
     createAccount: "Join us and start discovering amazing events near you.",
+    nameFieldLabel: "Display Name",
+    nameFieldPlaceholder: "Enter your display name",
+    nameRequired: "Display name is required",
     emailFieldLabel: "Email",
     passwordFieldLabel: "Password",
     confirmPasswordFieldLabel: "Confirm Password",
