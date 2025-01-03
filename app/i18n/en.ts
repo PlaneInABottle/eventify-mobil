@@ -10,6 +10,7 @@ const en = {
     register: "Register",
     forgotPassword: "Forgot Password?",
     searching: "Searching...",
+    loading: "Loading...",
   },
   welcomeScreen: {
     welcome: "Welcome to Eventify",
