@@ -1,49 +1,34 @@
-import { Instance, SnapshotOut, types, SnapshotIn } from "mobx-state-tree"
-import { LocationModel } from "./Location"
-import { MediaModel } from "./Media"
-import { UserModel } from "./User"
-import { withSetPropAction } from "./helpers/withSetPropAction"
-import { formatDate } from "@/utils/formatDate"
-import { translate } from "@/i18n"
+import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 
 export const EventModel = types
   .model("Event")
   .props({
     id: types.identifier,
-    name: types.string,
-    location: LocationModel,
-    description: types.maybeNull(types.string),
-    date: types.string,
-    organizer: types.union(types.string, types.maybe(UserModel)),
-    media: types.array(MediaModel),
-    hasChat: types.boolean,
-    updatedAt: types.string,
-    createdAt: types.string,
+    title: types.string,
+    description: types.maybe(types.string),
+    start_time: types.Date,
+    end_time: types.maybe(types.Date),
+    organizer_id: types.string,
+    created_at: types.Date,
+    updated_at: types.maybe(types.Date),
+    lat: types.float,
+    long: types.float,
+    image_urls: types.array(types.string),
   })
-  .actions(withSetPropAction)
   .views((event) => ({
-    get imageUrls() {
-      return event.media
-
-      // return event.media.map((media) => `${Config.API_URL}${media.url}`)
+    get coordinates(): [number, number] {
+      return [event.lat, event.long]
     },
-    get datePublished() {
-      const formatted = formatDate(event.date, "MMM dd, yyyy")
-      return {
-        textLabel: formatted,
-        accessibilityLabel: translate("eventsListScreen:accessibility.publishLabel", {
-          date: formatted,
-        }),
-      }
+    get formattedAddress(): string | undefined {
+      return `${event.lat}, ${event.long}`
     },
-    get timePublished() {
-      const formatted = formatDate(event.date, "hh:mm a")
-      return {
-        textLabel: formatted,
-        accessibilityLabel: translate("eventsListScreen:accessibility.timePublishedLabel", {
-          time: formatted,
-        }),
-      }
+    get isOngoing(): boolean {
+      const now = new Date()
+      return event.start_time <= now && (!event.end_time || now <= event.end_time)
+    },
+    get hasEnded(): boolean {
+      if (!event.end_time) return false
+      return event.end_time < new Date()
     },
   }))
 
