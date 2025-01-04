@@ -110,7 +110,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
       <View style={themed($formContainer)}>
         {registerError && (
           <Text
-            tx={`errors:${registerError.replace("-", "")}` as TxKeyPath}
+            tx={`${registerError.replace("-", "")}` as TxKeyPath}
             size="sm"
             weight="light"
             style={themed($hint)}
