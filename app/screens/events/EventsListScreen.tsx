@@ -8,7 +8,6 @@ import {
   ImageStyle,
   StyleSheet,
   ActivityIndicator,
-  ImageSourcePropType,
 } from "react-native"
 import {
   EmptyState,
@@ -18,7 +17,6 @@ import {
   Switch,
   Screen,
   Text,
-  AutoImage,
   Button,
   ButtonAccessoryProps,
 } from "@/components"
@@ -37,7 +35,6 @@ import { isRTL, translate } from "@/i18n"
 import { $styles, ThemedStyle } from "@/theme"
 import { ContentStyle } from "@shopify/flash-list"
 import { useStores } from "@/models"
-import Config from "@/config"
 
 const ICON_SIZE = 14
 
@@ -54,7 +51,7 @@ export const EventsListScreen: FC<EventsListScreenProps> = observer(
           contentContainerStyle={themed([$styles.container, $listContentContainer])}
           data={eventStore.eventsForList.slice() as Event[]}
           extraData={
-            eventStore.joinedChats.length + eventStore.favorites.length + eventStore.events.length
+            eventStore.joinedChats.length + eventStore.favorites.length + eventStore.events.size
           }
           estimatedItemSize={177}
           ListEmptyComponent={
@@ -135,13 +132,6 @@ const EventCard = observer(function EventCard({
   const liked = useSharedValue(isFavorite ? 1 : 0)
   const chatJoined = useSharedValue(isChatJoined ? 1 : 0)
 
-  const imageSource = useMemo<ImageSourcePropType | null>(() => {
-    // const imageUrl = event.imageUrls[0]
-    const images = event.media
-    console.log(images)
-    return images.length > 0 ? { uri: `${Config.API_URL}${images[0].url}`, ...images[0] } : null
-  }, [event.media])
-
   // Grey heart
   const animatedLikeButtonStyles = useAnimatedStyle(() => {
     return {
@@ -196,13 +186,13 @@ const EventCard = observer(function EventCard({
     () =>
       Platform.select<AccessibilityProps>({
         ios: {
-          accessibilityLabel: event.name,
+          accessibilityLabel: event.title,
           accessibilityHint: translate("eventsListScreen:accessibility.cardHint", {
             action: isFavorite ? "unfavorite" : "favorite",
           }),
         },
         android: {
-          accessibilityLabel: event.name,
+          accessibilityLabel: event.title,
           accessibilityActions: [
             {
               name: "longpress",
@@ -216,11 +206,11 @@ const EventCard = observer(function EventCard({
           },
         },
       }),
-    [event.name, isFavorite, handlePressFavorite],
+    [event.title, isFavorite, handlePressFavorite],
   )
 
   const handlePressCard = () => {
-    console.log("handlePressCard", event.name)
+    console.log("handlePressCard", event.title)
   }
 
   const ButtonLeftAccessory: ComponentType<ButtonAccessoryProps> = useMemo(
@@ -301,26 +291,26 @@ const EventCard = observer(function EventCard({
           <Text
             style={themed($metadataText)}
             size="xxs"
-            accessibilityLabel={event.datePublished.accessibilityLabel}
+            accessibilityLabel={event.dateFormatted.accessibilityLabel}
           >
-            {event.datePublished.textLabel}
+            {event.dateFormatted.textLabel}
           </Text>
           <Text
             style={themed($metadataText)}
             size="xxs"
-            accessibilityLabel={event.timePublished.accessibilityLabel}
+            accessibilityLabel={event.timeFormatted.accessibilityLabel}
           >
-            {event.timePublished.textLabel}
+            {event.timeFormatted.textLabel}
           </Text>
         </View>
       }
-      content={event.name}
+      content={event.title}
       {...accessibilityHintProps}
-      RightComponent={
-        imageSource ? (
-          <AutoImage source={imageSource} style={themed($itemThumbnail)} maxWidth={80} />
-        ) : undefined
-      }
+      // RightComponent={
+      //   imageSource ? (
+      //     <AutoImage source={imageSource} style={themed($itemThumbnail)} maxWidth={80} />
+      //   ) : undefined
+      // }
       FooterComponent={
         <View style={$styles.row}>
           <Button
@@ -336,7 +326,7 @@ const EventCard = observer(function EventCard({
           >
             <Text
               size="xxs"
-              accessibilityLabel={event.timePublished.accessibilityLabel}
+              accessibilityLabel={event.timeFormatted.accessibilityLabel}
               weight="medium"
               text={
                 isFavorite
@@ -345,28 +335,30 @@ const EventCard = observer(function EventCard({
               }
             />
           </Button>
-          <Button
-            onPress={handlePressChat}
-            onLongPress={handlePressChat}
-            style={themed([$favoriteButton, isChatJoined && $unFavoriteButton])}
-            accessibilityLabel={
-              isChatJoined
-                ? translate("eventsListScreen:quitChat")
-                : translate("eventsListScreen:joinChat")
-            }
-            LeftAccessory={ChatButtonLeftAccessory}
-          >
-            <Text
-              size="xxs"
-              accessibilityLabel={event.timePublished.accessibilityLabel}
-              weight="medium"
-              text={
+          {event.hasChat && (
+            <Button
+              onPress={handlePressChat}
+              onLongPress={handlePressChat}
+              style={themed([$favoriteButton, isChatJoined && $unFavoriteButton])}
+              accessibilityLabel={
                 isChatJoined
                   ? translate("eventsListScreen:quitChat")
                   : translate("eventsListScreen:joinChat")
               }
-            />
-          </Button>
+              LeftAccessory={ChatButtonLeftAccessory}
+            >
+              <Text
+                size="xxs"
+                accessibilityLabel={event.timeFormatted.accessibilityLabel}
+                weight="medium"
+                text={
+                  isChatJoined
+                    ? translate("eventsListScreen:quitChat")
+                    : translate("eventsListScreen:joinChat")
+                }
+              />
+            </Button>
+          )}
         </View>
       }
     />
@@ -390,11 +382,11 @@ const $item: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
 })
 
-const $itemThumbnail: ThemedStyle<ImageStyle> = ({ spacing }) => ({
-  marginTop: spacing.sm,
-  borderRadius: 50,
-  alignSelf: "flex-start",
-})
+// const $itemThumbnail: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+//   marginTop: spacing.sm,
+//   borderRadius: 50,
+//   alignSelf: "flex-start",
+// })
 
 const $toggle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.md,
