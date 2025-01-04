@@ -122,7 +122,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
           password,
           options: {
             data: {
-              name,
+              display_name: name,
             },
           },
         })
