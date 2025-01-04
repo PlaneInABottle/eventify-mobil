@@ -11,6 +11,11 @@ export const UserStoreModel = types
     error: undefined as string | undefined,
     isLoading: false,
   }))
+  .views((store) => ({
+    get userId() {
+      return store.user?.id
+    },
+  }))
   .actions((store) => ({
     setUser(userData: any) {
       try {
