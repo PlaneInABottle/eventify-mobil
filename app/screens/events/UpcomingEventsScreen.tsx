@@ -14,7 +14,7 @@ interface UpcomingEventsScreenProps extends EventTabScreenProps<"UpcomingEvents"
 export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
   function UpcomingEventsScreen(_props) {
     const {
-      eventStore: { events, fetchEventsInBounds, isLoading },
+      eventStore: { eventsInBounds, fetchEventsInBounds, isLoading },
     } = useStores()
     const { themed } = useAppTheme()
 
@@ -44,17 +44,20 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
             longitudeDelta: 0.0421,
           }}
         >
-          {events.map((event) => (
-            <Marker
-              key={event.id}
-              coordinate={{
-                latitude: event.location.location[1],
-                longitude: event.location.location[0],
-              }}
-              title={event.name}
-              description={event.description ?? undefined}
-            />
-          ))}
+          {eventsInBounds.map(
+            (event) =>
+              event && (
+                <Marker
+                  key={event.id}
+                  coordinate={{
+                    latitude: event.lat,
+                    longitude: event.long,
+                  }}
+                  title={event.title}
+                  description={event.description ?? undefined}
+                />
+              ),
+          )}
         </MapView>
 
         <Button
@@ -86,7 +89,7 @@ const $mapView: ViewStyle = {
   ...StyleSheet.absoluteFillObject,
 }
 
-const $searchButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $searchButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
   top: spacing.lg,
   alignSelf: "center",
