@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC, useEffect, useState } from "react"
 import { ViewStyle, View, TextStyle, Image, TouchableOpacity, ImageStyle } from "react-native"
 import { Screen, Text, Icon } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -13,10 +13,20 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
   const { themed } = useAppTheme()
   const { userStore } = useStores()
   const user = userStore.user
+  const [avatarUrl, setAvatarUrl] = useState<string>("https://placehold.co/400")
 
-  const handleEditProfilePicture = () => {
-    // TODO: Implement profile picture editing
-  }
+  useEffect(() => {
+    if (user?.avatar_url) {
+      const loadAvatarUrl = async () => {
+        const url = await userStore.getPublicUrl()
+        setAvatarUrl(url)
+      }
+      loadAvatarUrl()
+    } else {
+      setAvatarUrl("https://placehold.co/400")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userStore.user?.avatar_url])
 
   const handleEditPersonalInfo = () => {
     // TODO: Implement personal info editing
@@ -33,22 +43,20 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         <View style={themed($headerContainer)}>
           {/* Profile Picture Section */}
           <View style={themed($profilePictureContainer)}>
-            <Image
-              source={
-                user?.avatarUrl
-                  ? { uri: user.avatarUrl }
-                  : {
-                      uri: "https://images.pexels.com/photos/9072375/pexels-photo-9072375.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-                    }
-              }
-              style={$profilePicture}
-              accessible={true}
-              accessibilityLabel="Profile picture"
-              accessibilityRole="image"
-            />
+            {avatarUrl ? (
+              <Image
+                source={{ uri: avatarUrl }}
+                style={$profilePicture}
+                accessible={true}
+                accessibilityLabel="Profile picture"
+                accessibilityRole="image"
+              />
+            ) : (
+              <View style={[$profilePicture, themed($placeholderImage)]} />
+            )}
             <TouchableOpacity
               style={themed($editPictureButton)}
-              onPress={handleEditProfilePicture}
+              onPress={userStore.uploadAvatar}
               accessible={true}
               accessibilityLabel="Edit profile picture"
               accessibilityRole="button"
@@ -61,7 +69,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           <View style={themed($userInfoContainer)}>
             <Text
               preset="heading"
-              text={user?.name || "Add Your Name"}
+              text={user?.display_name || "Add Your Name"}
               style={themed($nameText)}
               accessibilityRole="header"
             />
@@ -119,9 +127,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               <View style={themed($infoTextContainer)}>
                 <Text preset="formLabel" text="Bio" style={themed($infoLabel)} />
                 <Text
-                  text={user?.bio || "Add a short bio"}
+                  text={user?.about || "Add a short bio"}
                   style={themed($infoValue)}
-                  accessibilityLabel={`Bio: ${user?.bio || "not set"}`}
+                  accessibilityLabel={`Bio: ${user?.about || "not set"}`}
                 />
               </View>
             </View>
@@ -232,4 +240,7 @@ const $infoLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $infoValue: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xxs,
+})
+const $placeholderImage: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral300,
 })
