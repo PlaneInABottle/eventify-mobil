@@ -7,8 +7,6 @@ export const UserModel = types.model("User").props({
   email: types.string,
   about: types.maybeNull(types.string),
   age: types.maybeNull(types.number),
-  updated_at: types.maybeNull(types.string),
-  created_at: types.string,
 })
 
 export interface User extends Instance<typeof UserModel> {}
