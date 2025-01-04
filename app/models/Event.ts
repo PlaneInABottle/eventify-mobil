@@ -14,6 +14,7 @@ export const EventModel = types
     lat: types.float,
     long: types.float,
     image_urls: types.array(types.string),
+    event_chat_id: types.maybe(types.string),
   })
   .views((event) => ({
     get coordinates(): [number, number] {
