@@ -77,8 +77,8 @@ export const EventStoreModel = types
           store.setError("No events data received")
           return
         }
-        store.eventsInBounds.forEach((event) => {
-          if (event && !store.favorites.includes(event) && !store.joinedChats.includes(event)) {
+        store.events.forEach((event) => {
+          if (!store.favorites.includes(event) && !store.joinedChats.includes(event)) {
             store.events.delete(event.id)
           }
         })
@@ -191,25 +191,6 @@ export const EventStoreModel = types
       } else {
         store.joinChat(event)
       }
-    },
-    cleanup() {
-      // Remove events that are not in any relevant collections
-      store.events.forEach((event) => {
-        if (
-          !store.favorites.includes(event) &&
-          !store.joinedChats.includes(event) &&
-          !store.eventsInBounds.includes(event)
-        ) {
-          store.events.delete(event.id)
-        }
-      })
-    },
-  }))
-
-  .actions((store) => ({
-    afterCreate() {
-      // Initial cleanup when store is created
-      store.cleanup()
     },
   }))
 
