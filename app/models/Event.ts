@@ -1,20 +1,20 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { formatDate } from "../utils/formatDate"
+import { translate } from "@/i18n"
 
 export const EventModel = types
   .model("Event")
   .props({
     id: types.identifier,
     title: types.string,
-    description: types.maybe(types.string),
-    start_time: types.Date,
-    end_time: types.maybe(types.Date),
+    description: types.maybeNull(types.string),
+    start_time: types.string,
+    end_time: types.maybeNull(types.string),
     organizer_id: types.string,
-    created_at: types.Date,
-    updated_at: types.maybe(types.Date),
     lat: types.float,
     long: types.float,
-    image_urls: types.array(types.string),
-    event_chat_id: types.maybe(types.string),
+    image_url: types.maybeNull(types.string),
+    event_chat_id: types.maybeNull(types.string),
   })
   .views((event) => ({
     get coordinates(): [number, number] {
@@ -23,13 +23,35 @@ export const EventModel = types
     get formattedAddress(): string | undefined {
       return `${event.lat}, ${event.long}`
     },
+    get hasChat(): boolean {
+      return !!event.event_chat_id
+    },
     get isOngoing(): boolean {
-      const now = new Date()
+      const now = new Date().toISOString()
       return event.start_time <= now && (!event.end_time || now <= event.end_time)
     },
     get hasEnded(): boolean {
       if (!event.end_time) return false
-      return event.end_time < new Date()
+      const now = new Date().toISOString()
+      return event.end_time < now
+    },
+    get dateFormatted() {
+      const formatted = formatDate(event.start_time, "MMM dd, yyyy")
+      return {
+        textLabel: formatted,
+        accessibilityLabel: translate("eventsListScreen:accessibility.publishLabel", {
+          date: formatted,
+        }),
+      }
+    },
+    get timeFormatted() {
+      const formatted = formatDate(event.start_time, "hh:mm a")
+      return {
+        textLabel: formatted,
+        accessibilityLabel: translate("eventsListScreen:accessibility.timePublishedLabel", {
+          time: formatted,
+        }),
+      }
     },
   }))
 
