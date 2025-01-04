@@ -1,7 +1,8 @@
 import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
 import { User, UserModel } from "./User"
 import { supabase } from "@/services/auth/supabase"
-
+import * as ImagePicker from "expo-image-picker"
+import { withSetPropAction } from "./helpers/withSetPropAction"
 export const UserStoreModel = types
   .model("UserStore")
   .props({
@@ -10,23 +11,15 @@ export const UserStoreModel = types
   .volatile(() => ({
     error: undefined as string | undefined,
     isLoading: false,
+    isUploading: false,
   }))
   .views((store) => ({
     get userId() {
       return store.user?.id
     },
   }))
+  .actions(withSetPropAction)
   .actions((store) => ({
-    setUser(userData: any) {
-      try {
-        store.user = UserModel.create(userData)
-        store.error = undefined
-        return true
-      } catch (error) {
-        store.error = error instanceof Error ? error.message : "Invalid user data format"
-        return false
-      }
-    },
     clearUser() {
       store.user = undefined
       store.error = undefined
@@ -37,6 +30,9 @@ export const UserStoreModel = types
     },
     setLoading(value: boolean) {
       store.isLoading = value
+    },
+    setUploading(value: boolean) {
+      store.isUploading = value
     },
   }))
   .actions((store) => ({
@@ -64,7 +60,7 @@ export const UserStoreModel = types
           return false
         }
 
-        return store.setUser(profile)
+        return store.setProp("user", profile)
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
@@ -80,28 +76,79 @@ export const UserStoreModel = types
 
       store.setLoading(true)
       try {
-        const { data: updatedProfile, error } = yield supabase
-          .from("profiles")
-          .update(updates)
-          .eq("id", store.user.id)
-          .single()
+        const { error } = yield supabase.from("profiles").update(updates).eq("id", store.user.id)
 
         if (error) {
-          store.setError(error.message)
-          return false
+          throw error
         }
 
-        if (!updatedProfile) {
-          store.setError("Failed to update profile")
-          return false
-        }
-
-        return store.setUser(updatedProfile)
+        return store.setProp("user", { ...store.user, ...updates })
       } catch (error) {
+        console.log("Error", error)
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
       } finally {
         store.setLoading(false)
+      }
+    }),
+  }))
+  .actions((store) => ({
+    uploadAvatar: flow(function* () {
+      if (!store.user?.id) {
+        store.setError("No user logged in")
+        return false
+      }
+
+      store.setUploading(true)
+      try {
+        const result = yield ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ["images"], // Restrict to only images
+          allowsMultipleSelection: false, // Can only select one image
+          allowsEditing: true, // Allows the user to crop / rotate their photo before uploading it
+          quality: 1,
+          exif: false, // We don't want nor need that data.
+        })
+
+        if (result.canceled || !result.assets || result.assets.length === 0) {
+          console.log("User cancelled image picker.")
+          return false
+        }
+
+        const image = result.assets[0]
+        const fileExt = image.uri?.split(".").pop()?.toLowerCase() ?? "jpeg"
+        const path = `${store.user.id}/${Date.now()}.${fileExt}`
+        const arraybuffer = yield fetch(image.uri).then((res) => res.arrayBuffer())
+        const { data, error: uploadError } = yield supabase.storage
+          .from("avatars")
+          .upload(path, arraybuffer, {
+            contentType: image.mimeType ?? "image/jpeg",
+            upsert: true,
+          })
+
+        if (uploadError) {
+          throw uploadError
+        }
+        yield store.updateProfile({ avatar_url: data.path })
+        return true
+      } catch (error) {
+        console.log("Error", error)
+        store.setError(error instanceof Error ? error.message : "Failed to upload avatar")
+        return false
+      } finally {
+        store.setUploading(false)
+      }
+    }),
+    getPublicUrl: flow(function* () {
+      try {
+        if (!store.user?.avatar_url) return
+
+        const { data } = yield Promise.resolve(
+          supabase.storage.from("avatars").getPublicUrl(store.user.avatar_url),
+        )
+        return data.publicUrl
+      } catch (error) {
+        store.setError(error instanceof Error ? error.message : "Failed to download avatar")
+        return null
       }
     }),
   }))
