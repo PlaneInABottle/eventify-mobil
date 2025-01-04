@@ -51,17 +51,17 @@ export const UserStoreModel = types
           .single()
 
         if (error) {
-          store.setError(error.message)
-          return false
+          throw error
         }
 
         if (!profile) {
-          store.setError("Profile not found")
-          return false
+          throw new Error("Profile not found")
         }
 
-        return store.setProp("user", profile)
+        store.setProp("user", profile)
+        return true
       } catch (error) {
+        console.log(error)
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
       } finally {
@@ -82,7 +82,8 @@ export const UserStoreModel = types
           throw error
         }
 
-        return store.setProp("user", { ...store.user, ...updates })
+        store.setProp("user", { ...store.user, ...updates })
+        return true
       } catch (error) {
         console.log("Error", error)
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
