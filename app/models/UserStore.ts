@@ -19,21 +19,13 @@ export const UserStoreModel = types
   .actions((store) => ({
     setUser(userData: any) {
       try {
-        const processedUser = {
-          ...userData,
-          avatarUrl: userData.avatar_url,
-          about: userData.about,
-          age: userData.age,
-          updatedAt: userData.updated_at,
-          createdAt: userData.created_at,
-        }
-        store.user = UserModel.create(processedUser)
+        store.user = UserModel.create(userData)
         store.error = undefined
+        return true
       } catch (error) {
         store.error = error instanceof Error ? error.message : "Invalid user data format"
         return false
       }
-      return true
     },
     clearUser() {
       store.user = undefined
