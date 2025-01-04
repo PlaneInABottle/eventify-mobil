@@ -1,11 +1,19 @@
 import { FC, useEffect, useState } from "react"
-import { ViewStyle, View, TextStyle, Image, TouchableOpacity, ImageStyle } from "react-native"
+import {
+  ViewStyle,
+  View,
+  TextStyle,
+  Image,
+  TouchableOpacity,
+  ImageStyle,
+  ActivityIndicator,
+} from "react-native"
 import { Screen, Text, Icon } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
-import { ThemedStyle } from "@/theme"
+import { colors, ThemedStyle } from "@/theme"
 
 interface ProfileScreenProps extends MainTabScreenProps<"Profile"> {}
 
@@ -13,7 +21,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
   const { themed } = useAppTheme()
   const { userStore } = useStores()
   const user = userStore.user
-  const [avatarUrl, setAvatarUrl] = useState<string>("https://placehold.co/400")
+  const [avatarUrl, setAvatarUrl] = useState<string>(
+    "https://imageplaceholder.net/400x400/eeeeee/131313?text=Eventify",
+  )
 
   useEffect(() => {
     if (user?.avatar_url) {
@@ -23,7 +33,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
       }
       loadAvatarUrl()
     } else {
-      setAvatarUrl("https://placehold.co/400")
+      setAvatarUrl("https://imageplaceholder.net/400x400/eeeeee/131313?text=Eventify")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userStore.user?.avatar_url])
@@ -44,13 +54,22 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           {/* Profile Picture Section */}
           <View style={themed($profilePictureContainer)}>
             {avatarUrl ? (
-              <Image
-                source={{ uri: avatarUrl }}
-                style={$profilePicture}
-                accessible={true}
-                accessibilityLabel="Profile picture"
-                accessibilityRole="image"
-              />
+              <>
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={$profilePicture}
+                  accessible={true}
+                  accessibilityLabel="Profile picture"
+                  accessibilityRole="image"
+                />
+                {userStore.isLoading && (
+                  <ActivityIndicator
+                    size="large"
+                    color={colors.palette.primary500}
+                    style={themed($profileImageActivityIndicator)}
+                  />
+                )}
+              </>
             ) : (
               <View style={[$profilePicture, themed($placeholderImage)]} />
             )}
@@ -60,6 +79,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               accessible={true}
               accessibilityLabel="Edit profile picture"
               accessibilityRole="button"
+              disabled={userStore.isLoading}
             >
               <Icon icon="components" size={20} />
             </TouchableOpacity>
@@ -243,4 +263,14 @@ const $infoValue: ThemedStyle<TextStyle> = ({ spacing }) => ({
 })
 const $placeholderImage: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral300,
+})
+
+const $profileImageActivityIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: colors.palette.neutral300,
+  borderRadius: 60,
 })
