@@ -17,6 +17,7 @@ export const EventStoreModel = types
   })
   .volatile(() => ({
     isLoading: false,
+    isSearching: false,
     error: undefined as string | undefined,
   }))
   .actions(withSetPropAction)
@@ -47,8 +48,8 @@ export const EventStoreModel = types
   }))
   .actions((store) => ({
     fetchEventsInBounds: flow(function* (bounds: Region) {
-      store.isLoading = true
       store.setError(undefined)
+      store.isSearching = true
       try {
         // Calculate the bounding box corners
         const latitudeDelta = bounds.latitudeDelta / 2
@@ -92,7 +93,7 @@ export const EventStoreModel = types
         console.error("Error fetching events:", error)
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
       } finally {
-        store.isLoading = false
+        store.isSearching = false
       }
     }),
     setSelectedEvent(event: Event) {
