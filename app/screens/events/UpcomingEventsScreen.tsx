@@ -155,9 +155,7 @@ const MarkerField = observer(
 
             {event.hasChat && (
               <Button
-                preset="filled"
                 text={isLoading ? "Loading..." : hasJoinedChat(event) ? "Leave Chat" : "Join Chat"}
-                style={$joinChatButton}
                 onPress={() => {
                   toggleChat(event)
                 }}
@@ -258,8 +256,6 @@ const $organizerText: TextStyle = {
   fontSize: 16,
   color: colors.palette.neutral600,
 }
-
-const $joinChatButton: ViewStyle = {}
 
 const $image: ThemedStyle<ImageStyle> = ({ spacing }) => ({
   width: "100%",
