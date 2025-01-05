@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC, useCallback } from "react"
 import {
   ViewStyle,
   View,
@@ -7,32 +7,44 @@ import {
   TouchableOpacity,
   ImageStyle,
   ActivityIndicator,
+  LayoutAnimation,
 } from "react-native"
-import { Screen, Text, Icon } from "@/components"
+import { Screen, Text, Icon, Button } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
-import { colors, ThemedStyle } from "@/theme"
+import { $styles, colors, ThemedStyle } from "@/theme"
+import { navigate } from "@/navigators/navigationUtilities"
 
 interface ProfileScreenProps extends MainTabScreenProps<"Profile"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileScreen(_props) {
-  const { themed } = useAppTheme()
+  const { setThemeContextOverride, themeContext, themed } = useAppTheme()
   const { userStore } = useStores()
   const user = userStore.user
 
   const handleEditPersonalInfo = () => {
-    // TODO: Implement personal info editing
+    navigate("EditProfile")
   }
 
+  const toggleTheme = useCallback(() => {
+    // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut) // Animate the transition
+    LayoutAnimation.configureNext({
+      duration: 300,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+      },
+      update: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+      },
+    })
+    setThemeContextOverride(themeContext === "dark" ? "light" : "dark")
+  }, [themeContext, setThemeContextOverride])
   return (
-    <Screen
-      preset="scroll"
-      contentContainerStyle={themed($screenContentContainer)}
-      safeAreaEdges={["top"]}
-    >
-      <View style={themed($container)}>
+    <Screen preset="scroll" contentContainerStyle={$styles.container} safeAreaEdges={["top"]}>
+      <>
         {/* Profile Header */}
         <View style={themed($headerContainer)}>
           {/* Profile Picture Section */}
@@ -141,19 +153,12 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
             </View>
           </View>
         </View>
-      </View>
+        <View style={themed($itemsContainer)}>
+          <Button onPress={toggleTheme} text={`Toggle Theme: ${themeContext}`} />
+        </View>
+      </>
     </Screen>
   )
-})
-
-const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flex: 1,
-  paddingVertical: spacing.xxl,
-})
-
-const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flex: 1,
-  paddingHorizontal: spacing.lg,
 })
 
 const $headerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -162,7 +167,6 @@ const $headerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $profilePictureContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  position: "relative",
   marginBottom: spacing.lg,
 })
 
@@ -188,6 +192,9 @@ const $editPictureButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 
 const $userInfoContainer: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
+})
+const $itemsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginVertical: spacing.xl,
 })
 
 const $nameText: ThemedStyle<TextStyle> = ({ spacing }) => ({
@@ -259,4 +266,5 @@ const $profileImageActivityIndicator: ThemedStyle<ViewStyle> = ({ colors }) => (
   bottom: 0,
   backgroundColor: colors.palette.neutral300,
   borderRadius: 60,
+  zIndex: 10,
 })
