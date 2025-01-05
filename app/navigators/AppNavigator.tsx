@@ -15,6 +15,7 @@ import { MainNavigator, MainTabParamList } from "./MainNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -37,6 +38,7 @@ export type AppStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>
   // 🔥 Your screens go here
   ForgotPassword: undefined
+  EditProfile: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -78,6 +80,7 @@ const AppStack = observer(function AppStack() {
         <>
           {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
           <Stack.Screen name="Main" component={MainNavigator} />
+          <Stack.Screen name="EditProfile" component={Screens.EditProfileScreen} />
         </>
       ) : (
         <>
@@ -107,9 +110,11 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
 
   return (
     <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-      <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
-        <AppStack />
-      </NavigationContainer>
+      <BottomSheetModalProvider>
+        <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
+          <AppStack />
+        </NavigationContainer>
+      </BottomSheetModalProvider>
     </ThemeProvider>
   )
 })

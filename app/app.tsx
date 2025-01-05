@@ -31,7 +31,6 @@ import { customFontsToLoad } from "./theme"
 import Config from "./config"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { loadDateFnsLocale } from "./utils/formatDate"
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
@@ -119,13 +118,11 @@ function App(props: AppProps) {
       <ErrorBoundary catchErrors={Config.catchErrors}>
         <KeyboardProvider>
           <GestureHandlerRootView>
-            <BottomSheetModalProvider>
-              <AppNavigator
-                linking={linking}
-                initialState={initialNavigationState}
-                onStateChange={onNavigationStateChange}
-              />
-            </BottomSheetModalProvider>
+            <AppNavigator
+              linking={linking}
+              initialState={initialNavigationState}
+              onStateChange={onNavigationStateChange}
+            />
           </GestureHandlerRootView>
         </KeyboardProvider>
       </ErrorBoundary>
