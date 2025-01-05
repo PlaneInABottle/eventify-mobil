@@ -139,19 +139,6 @@ export const UserStoreModel = types
         store.setUploading(false)
       }
     }),
-    getPublicUrl: flow(function* () {
-      try {
-        if (!store.user?.avatar_url) return
-
-        const { data } = yield Promise.resolve(
-          supabase.storage.from("avatars").getPublicUrl(store.user.avatar_url),
-        )
-        return data.publicUrl
-      } catch (error) {
-        store.setError(error instanceof Error ? error.message : "Failed to download avatar")
-        return null
-      }
-    }),
   }))
 
 export interface UserStore extends Instance<typeof UserStoreModel> {}

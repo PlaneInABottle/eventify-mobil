@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react"
+import { FC } from "react"
 import {
   ViewStyle,
   View,
@@ -21,22 +21,6 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
   const { themed } = useAppTheme()
   const { userStore } = useStores()
   const user = userStore.user
-  const [avatarUrl, setAvatarUrl] = useState<string>(
-    "https://imageplaceholder.net/400x400/eeeeee/131313?text=Eventify",
-  )
-
-  useEffect(() => {
-    if (user?.avatar_url) {
-      const loadAvatarUrl = async () => {
-        const url = await userStore.getPublicUrl()
-        setAvatarUrl(url)
-      }
-      loadAvatarUrl()
-    } else {
-      setAvatarUrl("https://imageplaceholder.net/400x400/eeeeee/131313?text=Eventify")
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userStore.user?.avatar_url])
 
   const handleEditPersonalInfo = () => {
     // TODO: Implement personal info editing
@@ -53,10 +37,12 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         <View style={themed($headerContainer)}>
           {/* Profile Picture Section */}
           <View style={themed($profilePictureContainer)}>
-            {avatarUrl ? (
+            {user?.avatar_url ? (
               <>
                 <Image
-                  source={{ uri: avatarUrl }}
+                  source={{
+                    uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${user?.avatar_url}`,
+                  }}
                   style={$profilePicture}
                   accessible={true}
                   accessibilityLabel="Profile picture"
