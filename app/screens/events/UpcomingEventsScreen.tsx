@@ -1,4 +1,4 @@
-import { FC, forwardRef, useImperativeHandle, useRef } from "react"
+import { FC, forwardRef, useCallback, useImperativeHandle, useRef } from "react"
 import { ViewStyle, StyleSheet, ActivityIndicator, ImageStyle, View, TextStyle } from "react-native"
 import { AutoImage, Button, Icon, Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -13,18 +13,11 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@g
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 interface UpcomingEventsScreenProps extends EventTabScreenProps<"UpcomingEvents"> {}
-
+// TODO: Custom icons, and organizer name instead of id.
 export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
   function UpcomingEventsScreen(_props) {
     const {
-      eventStore: {
-        eventsInBounds,
-        fetchEventsInBounds,
-        isSearching,
-        isLoading,
-        toggleChat,
-        hasJoinedChat,
-      },
+      eventStore: { eventsInBounds, fetchEventsInBounds, isSearching },
     } = useStores()
     const { themed } = useAppTheme()
 
@@ -64,9 +57,6 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
                     latitude: event.lat,
                     longitude: event.long,
                   }}
-                  onChatToggle={() => toggleChat(event)}
-                  isChatJoined={hasJoinedChat(event)}
-                  isLoading={isLoading}
                 />
               ),
           )}
@@ -76,7 +66,7 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
           preset="filled"
           tx={isSearching ? "common:searching" : "upcomingEvents:searchThisArea"}
           style={themed($searchButton)}
-          disabledStyle={themed($disabledSearchButton)}
+          disabledStyle={themed($disabledButton)}
           onPress={handleSearchThisArea}
           disabled={isSearching}
           RightAccessory={isSearching ? LoadingIndicator : undefined}
@@ -88,9 +78,6 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
 
 interface MarkerFieldProps extends Omit<MapMarkerProps, "ref"> {
   event: Event
-  onChatToggle: () => void
-  isChatJoined: boolean
-  isLoading: boolean
 }
 
 export interface MarkerFieldRef {
@@ -100,20 +87,23 @@ export interface MarkerFieldRef {
 
 const MarkerField = observer(
   forwardRef(function MarkerField(props: MarkerFieldProps, ref: React.Ref<MarkerFieldRef>) {
-    const { event, onChatToggle, isChatJoined, isLoading, ...MapMarkerProps } = props
+    const { event, ...MapMarkerProps } = props
     const sheet = useRef<BottomSheetModal>(null)
     const { themed } = useAppTheme()
+    const {
+      eventStore: { toggleChat, hasJoinedChat, isLoading },
+    } = useStores()
     const { bottom } = useSafeAreaInsets()
 
     useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }))
 
-    function presentOptions() {
+    const presentOptions = useCallback(() => {
       sheet.current?.present()
-    }
+    }, [])
 
-    function dismissOptions() {
+    const dismissOptions = useCallback(() => {
       sheet.current?.dismiss()
-    }
+    }, [])
 
     return (
       <>
@@ -166,10 +156,14 @@ const MarkerField = observer(
             {event.hasChat && (
               <Button
                 preset="filled"
-                text={isLoading ? "Loading..." : isChatJoined ? "Leave Chat" : "Join Chat"}
+                text={isLoading ? "Loading..." : hasJoinedChat(event) ? "Leave Chat" : "Join Chat"}
                 style={$joinChatButton}
-                onPress={onChatToggle}
+                onPress={() => {
+                  toggleChat(event)
+                }}
                 disabled={isLoading}
+                disabledStyle={themed($disabledButton)}
+                RightAccessory={isLoading ? LoadingIndicator : undefined}
               />
             )}
           </BottomSheetScrollView>
@@ -201,7 +195,7 @@ const $searchButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   minWidth: 200,
 })
 
-const $disabledSearchButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $disabledButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral400,
   opacity: 0.7,
 })
