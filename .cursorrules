@@ -16,6 +16,7 @@ This project is an event app where users can discover events on a map and partic
 - Handle offline-first data persistence
 - Ask clarifying questions when needed
 - Suggest performance improvements when possible
+- Make the commit messages short and concise
 
 ## Project Structure (Ignite-based)
 
