@@ -13,6 +13,7 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { UpcomingEventsScreen } from "@/screens/events/UpcomingEventsScreen"
 import { EventsListScreen } from "@/screens/events/EventsListScreen"
 import { ProfileScreen } from "@/screens/ProfileScreen"
+import { ChatListScreen } from "@/screens/chat/ChatListScreen"
 
 // Define the Event tab's parameter list
 export type EventTabParamList = {
@@ -24,6 +25,7 @@ export type EventTabParamList = {
 export type MainTabParamList = {
   Events: undefined
   Profile: undefined
+  ChatList: undefined
 }
 
 /**
@@ -107,6 +109,16 @@ export function MainNavigator() {
           tabBarLabel: "Events",
           tabBarIcon: ({ focused }) => (
             <Icon icon="components" color={focused ? colors.tint : colors.tintInactive} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ChatList"
+        component={ChatListScreen}
+        options={{
+          tabBarLabel: "Chats",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="bell" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
         }}
       />
