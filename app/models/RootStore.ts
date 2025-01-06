@@ -3,6 +3,7 @@ import { AuthenticationStoreModel } from "./AuthenticationStore"
 import { EpisodeStoreModel } from "./EpisodeStore"
 import { UserStoreModel } from "./UserStore"
 import { EventStoreModel } from "./EventStore"
+import { ChatStoreModel } from "./ChatStore"
 
 /**
  * A RootStore model.
@@ -12,6 +13,7 @@ export const RootStoreModel = types.model("RootStore").props({
   userStore: types.optional(UserStoreModel, {}),
   episodeStore: types.optional(EpisodeStoreModel, {}),
   eventStore: types.optional(EventStoreModel, {}),
+  chatStore: types.optional(ChatStoreModel, {}),
 })
 
 /**
