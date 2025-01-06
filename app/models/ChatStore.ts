@@ -1,3 +1,86 @@
+import { flow, SnapshotOut, SnapshotIn, Instance, types } from "mobx-state-tree"
+import { getRootStore } from "./helpers/getRootStore"
+import { supabase } from "@/services/auth/supabase"
+import { withSetPropAction } from "./helpers/withSetPropAction"
+
+const ChatMessageModel = types.model("ChatMessage").props({
+  id: types.identifier,
+  event_chat_id: types.string,
+  sender_id: types.string,
+  content: types.string,
+  created_at: types.string,
+})
+
+export interface Chat extends Instance<typeof ChatModel> {}
+const ChatModel = types.model("Chat").props({
+  id: types.identifier,
+  event_id: types.string,
+
+  messages: types.array(ChatMessageModel),
+})
+
+export const ChatStoreModel = types
+  .model("ChatStore")
+  .props({
+    chats: types.map(ChatModel),
+  })
+  .actions(withSetPropAction)
+  .actions((store) => ({
+    hasJoinedChat(eventChatId: string) {
+      return store.chats.has(eventChatId)
+    },
+  }))
+  .actions((store) => ({
+    fetchUserChats: flow(function* (): Generator<any, void, any> {
+      try {
+        const userId = getRootStore(store).userStore.userId
+        const { data: chats, error } = yield supabase
+          .from("event_chats")
+          .select("*, event_chats_participants!inner()")
+          .eq("event_chats_participants.user_id", userId)
+        if (error) throw error
+        chats.forEach((chat: Chat) => {
+          store.chats.put(chat)
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }),
+  }))
+  .actions((store) => ({
+    joinChat: flow(function* (eventChatId: string): Generator<any, void, any> {
+      try {
+        if (store.hasJoinedChat(eventChatId)) return
+        const { data, error } = yield supabase
+          .from("event_chats_participants")
+          .insert({
+            event_chat_id: eventChatId,
+            user_id: getRootStore(store).userStore.userId,
+          })
+          .select()
+          .single()
+        if (error) throw error
+        console.log("joined chat", data)
+        // store.chats.put(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }),
+    quitChat: flow(function* (eventChatId: string): Generator<any, void, any> {
+      try {
+        if (!store.hasJoinedChat(eventChatId)) return
+        const { data, error } = yield supabase
+          .from("event_chats_participants")
+          .delete()
+          .eq("event_chat_id", eventChatId)
+          .eq("user_id", getRootStore(store).userStore.userId)
+        if (error) throw error
+        console.log("quit chat", data)
+      } catch (error) {
+        console.error(error)
+      }
+    }),
+  }))
 // import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
 // import { EventChatModel } from "./EventChat"
 // import { ChatMessageModel } from "./ChatMessage"
@@ -122,6 +205,6 @@
 // //     }),
 // //   }))
 
-// export interface ChatStore extends Instance<typeof ChatStoreModel> {}
-// export interface ChatStoreSnapshotOut extends SnapshotOut<typeof ChatStoreModel> {}
-// export interface ChatStoreSnapshotIn extends SnapshotIn<typeof ChatStoreModel> {}
+export interface ChatStore extends Instance<typeof ChatStoreModel> {}
+export interface ChatStoreSnapshotOut extends SnapshotOut<typeof ChatStoreModel> {}
+export interface ChatStoreSnapshotIn extends SnapshotIn<typeof ChatStoreModel> {}
