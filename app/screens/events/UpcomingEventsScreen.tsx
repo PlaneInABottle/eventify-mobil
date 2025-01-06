@@ -116,6 +116,7 @@ const MarkerField = observer(
           backgroundStyle={themed($bottomSheetBackground)}
           snapPoints={["70%"]}
           stackBehavior="replace"
+          handleIndicatorStyle={themed($handleIndicator)}
           enableDismissOnClose
           backdropComponent={(props) => (
             <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
@@ -196,6 +197,10 @@ const LoadingIndicator = (props: ButtonAccessoryProps) => {
 const $screenContentContainer: ViewStyle = {
   flex: 1,
 }
+
+const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral800,
+})
 
 const $bottomSheetBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background,
