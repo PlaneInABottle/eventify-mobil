@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   LayoutAnimation,
 } from "react-native"
-import { Screen, Text, Icon, Button } from "@/components"
+import { Screen, Text, Icon, Button, Card } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useStores } from "@/models"
@@ -94,65 +94,67 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           </View>
         </View>
 
-        {/* Personal Information Section */}
-        <View style={themed($sectionContainer)}>
-          <View style={themed($sectionHeader)}>
-            <Text preset="subheading" text="Personal Information" accessibilityRole="header" />
-            <TouchableOpacity
-              onPress={handleEditPersonalInfo}
-              accessible={true}
-              accessibilityLabel="Edit personal information"
-              accessibilityRole="button"
-            >
-              <Icon icon="components" size={20} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Info Items */}
-          <View style={themed($infoContainer)}>
-            <View style={themed($infoItem)} accessible={true}>
-              <View style={themed($iconContainer)}>
-                <Icon icon="lock" size={20} containerStyle={themed($iconWrapper)} />
+        <Card
+          style={themed($item)}
+          HeadingComponent={
+            <View style={themed($sectionHeader)}>
+              <Text preset="subheading" text="Personal Information" accessibilityRole="header" />
+              <TouchableOpacity
+                onPress={handleEditPersonalInfo}
+                accessible={true}
+                accessibilityLabel="Edit personal information"
+                accessibilityRole="button"
+              >
+                <Icon icon="components" size={20} />
+              </TouchableOpacity>
+            </View>
+          }
+          ContentComponent={
+            <View style={themed($infoContainer)}>
+              <View style={themed($infoItem)} accessible={true}>
+                <View style={themed($iconContainer)}>
+                  <Icon icon="lock" size={20} containerStyle={themed($iconWrapper)} />
+                </View>
+                <View style={themed($infoTextContainer)}>
+                  <Text preset="formLabel" text="Email" style={themed($infoLabel)} />
+                  <Text
+                    text={user?.email || "Add email"}
+                    style={themed($infoValue)}
+                    accessibilityLabel={`Email: ${user?.email || "not set"}`}
+                  />
+                </View>
               </View>
-              <View style={themed($infoTextContainer)}>
-                <Text preset="formLabel" text="Email" style={themed($infoLabel)} />
-                <Text
-                  text={user?.email || "Add email"}
-                  style={themed($infoValue)}
-                  accessibilityLabel={`Email: ${user?.email || "not set"}`}
-                />
+
+              <View style={themed($infoItem)} accessible={true}>
+                <View style={themed($iconContainer)}>
+                  <Icon icon="components" size={20} containerStyle={themed($iconWrapper)} />
+                </View>
+                <View style={themed($infoTextContainer)}>
+                  <Text preset="formLabel" text="Age" style={themed($infoLabel)} />
+                  <Text
+                    text={user?.age?.toString() || "Add age"}
+                    style={themed($infoValue)}
+                    accessibilityLabel={`Age: ${user?.age || "not set"}`}
+                  />
+                </View>
+              </View>
+
+              <View style={themed($infoItem)} accessible={true}>
+                <View style={themed($iconContainer)}>
+                  <Icon icon="components" size={20} containerStyle={themed($iconWrapper)} />
+                </View>
+                <View style={themed($infoTextContainer)}>
+                  <Text preset="formLabel" text="Bio" style={themed($infoLabel)} />
+                  <Text
+                    text={user?.about || "Add a short bio"}
+                    style={themed($infoValue)}
+                    accessibilityLabel={`Bio: ${user?.about || "not set"}`}
+                  />
+                </View>
               </View>
             </View>
-
-            <View style={themed($infoItem)} accessible={true}>
-              <View style={themed($iconContainer)}>
-                <Icon icon="components" size={20} containerStyle={themed($iconWrapper)} />
-              </View>
-              <View style={themed($infoTextContainer)}>
-                <Text preset="formLabel" text="Age" style={themed($infoLabel)} />
-                <Text
-                  text={user?.age?.toString() || "Add age"}
-                  style={themed($infoValue)}
-                  accessibilityLabel={`Age: ${user?.age || "not set"}`}
-                />
-              </View>
-            </View>
-
-            <View style={themed($infoItem)} accessible={true}>
-              <View style={themed($iconContainer)}>
-                <Icon icon="components" size={20} containerStyle={themed($iconWrapper)} />
-              </View>
-              <View style={themed($infoTextContainer)}>
-                <Text preset="formLabel" text="Bio" style={themed($infoLabel)} />
-                <Text
-                  text={user?.about || "Add a short bio"}
-                  style={themed($infoValue)}
-                  accessibilityLabel={`Bio: ${user?.about || "not set"}`}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
+          }
+        />
         <View style={themed($itemsContainer)}>
           <Button onPress={toggleTheme} text={`Toggle Theme: ${themeContext}`} />
         </View>
@@ -201,15 +203,9 @@ const $nameText: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.xs,
 })
 
-const $sectionContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
-  borderRadius: spacing.sm,
+const $item: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   padding: spacing.md,
-  shadowColor: colors.palette.neutral800,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 3.84,
-  elevation: 3,
+  minHeight: 120,
 })
 
 const $sectionHeader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
