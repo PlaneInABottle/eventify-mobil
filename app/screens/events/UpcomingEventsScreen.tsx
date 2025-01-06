@@ -7,7 +7,7 @@ import MapView, { Region, Marker, MapMarkerProps } from "react-native-maps"
 import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
 import { ButtonAccessoryProps } from "@/components/Button"
-import { colors, spacing, typography, ThemedStyle } from "@/theme"
+import { ThemedStyle } from "@/theme"
 import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -89,7 +89,10 @@ const MarkerField = observer(
   forwardRef(function MarkerField(props: MarkerFieldProps, ref: React.Ref<MarkerFieldRef>) {
     const { event, ...MapMarkerProps } = props
     const sheet = useRef<BottomSheetModal>(null)
-    const { themed } = useAppTheme()
+    const {
+      themed,
+      theme: { colors, spacing },
+    } = useAppTheme()
     const {
       eventStore: { toggleChat, hasJoinedChat, isLoading },
     } = useStores()
@@ -110,6 +113,7 @@ const MarkerField = observer(
         <Marker key={event.id} onPress={presentOptions} title={event.title} {...MapMarkerProps} />
         <BottomSheetModal
           ref={sheet}
+          backgroundStyle={themed($bottomSheetBackground)}
           snapPoints={["70%"]}
           stackBehavior="replace"
           enableDismissOnClose
@@ -118,7 +122,10 @@ const MarkerField = observer(
           )}
         >
           <BottomSheetScrollView
-            contentContainerStyle={[$bottomSheetContent, { paddingBottom: bottom + spacing.xl }]}
+            contentContainerStyle={themed([
+              $bottomSheetContent,
+              { paddingBottom: bottom + spacing.xl },
+            ])}
           >
             {event.image_url && (
               <AutoImage
@@ -129,28 +136,36 @@ const MarkerField = observer(
               />
             )}
 
-            <View style={$headerContainer}>
-              <Text preset="heading" text={event.title} style={$title} />
-              <View style={$dateTimeContainer}>
-                <View style={$iconTextContainer}>
+            <View style={themed($headerContainer)}>
+              <Text preset="heading" text={event.title} style={themed($title)} />
+              <View style={themed($dateTimeContainer)}>
+                <View style={themed($iconTextContainer)}>
                   <Icon icon="components" size={20} color={colors.palette.primary500} />
-                  <Text text={event.dateFormatted.textLabel} style={$dateTimeText} />
+                  <Text
+                    text={event.dateFormatted.textLabel}
+                    style={themed($dateTimeText)}
+                    size="xxs"
+                  />
                 </View>
-                <View style={$iconTextContainer}>
+                <View style={themed($iconTextContainer)}>
                   <Icon icon="ladybug" size={20} color={colors.palette.primary500} />
-                  <Text text={event.timeFormatted.textLabel} style={$dateTimeText} />
+                  <Text
+                    text={event.timeFormatted.textLabel}
+                    style={themed($dateTimeText)}
+                    size="xxs"
+                  />
                 </View>
               </View>
             </View>
 
-            <View style={$descriptionContainer}>
-              <Text preset="subheading" text="About" style={$sectionTitle} />
-              <Text text={event.description || "No description available"} style={$description} />
+            <View style={themed($descriptionContainer)}>
+              <Text preset="subheading" text="About" style={themed($sectionTitle)} />
+              <Text text={event.description || "No description available"} />
             </View>
 
-            <View style={$organizerContainer}>
-              <Text preset="subheading" text="Organizer" style={$sectionTitle} />
-              <Text text={event.organizer_id} style={$organizerText} />
+            <View style={themed($organizerContainer)}>
+              <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
+              <Text text={event.organizer_id} />
             </View>
 
             {event.hasChat && (
@@ -182,6 +197,10 @@ const $screenContentContainer: ViewStyle = {
   flex: 1,
 }
 
+const $bottomSheetBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+})
+
 const $mapView: ViewStyle = {
   ...StyleSheet.absoluteFillObject,
 }
@@ -198,64 +217,47 @@ const $disabledButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   opacity: 0.7,
 })
 
-const $bottomSheetContent: ViewStyle = {
+const $bottomSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
-}
+})
 
-const $headerContainer: ViewStyle = {
+const $headerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
-}
+})
 
-const $title: TextStyle = {
-  fontSize: 24,
-  fontFamily: typography.primary.semiBold,
-  color: colors.palette.neutral800,
+const $title: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.xs,
-}
+})
 
-const $dateTimeContainer: ViewStyle = {
+const $dateTimeContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "flex-start",
   marginBottom: spacing.md,
   gap: spacing.md,
-}
+})
 
-const $iconTextContainer: ViewStyle = {
+const $iconTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   gap: spacing.xxs,
-}
+})
 
-const $dateTimeText: TextStyle = {
-  fontSize: 14,
-  color: colors.palette.neutral600,
+const $dateTimeText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginLeft: spacing.xxs,
-}
+  color: colors.textDim,
+})
 
-const $descriptionContainer: ViewStyle = {
+const $descriptionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
-}
+})
 
-const $sectionTitle: TextStyle = {
-  fontSize: 18,
-  color: colors.palette.neutral800,
+const $sectionTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.xs,
-}
+})
 
-const $description: TextStyle = {
-  fontSize: 16,
-  color: colors.palette.neutral600,
-  lineHeight: 24,
-}
-
-const $organizerContainer: ViewStyle = {
+const $organizerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.xl,
-}
-
-const $organizerText: TextStyle = {
-  fontSize: 16,
-  color: colors.palette.neutral600,
-}
+})
 
 const $image: ThemedStyle<ImageStyle> = ({ spacing }) => ({
   width: "100%",
