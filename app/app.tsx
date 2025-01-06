@@ -36,6 +36,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
 // Web linking configuration
+// TODO: change to use the correct domain
 const prefix = Linking.createURL("/")
 const config = {
   screens: {
