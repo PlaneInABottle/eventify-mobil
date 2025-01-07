@@ -116,6 +116,11 @@ interface CardProps extends TouchableOpacityProps {
    * Overrides all other `footer*` props.
    */
   FooterComponent?: ReactElement
+
+  /**
+   * Style overrides for the wrapper.
+   */
+  wrapperStyle?: StyleProp<ViewStyle>
 }
 
 /**
@@ -146,6 +151,7 @@ export function Card(props: CardProps) {
     contentStyle: $contentStyleOverride,
     headingStyle: $headingStyleOverride,
     footerStyle: $footerStyleOverride,
+    wrapperStyle: $wrapperStyleOverride,
     ContentTextProps,
     HeadingTextProps,
     FooterTextProps,
@@ -196,6 +202,7 @@ export function Card(props: CardProps) {
     { justifyContent: $alignmentWrapperFlexOptions[verticalAlignment] },
     LeftComponent && { marginStart: spacing.md },
     RightComponent && { marginEnd: spacing.md },
+    $wrapperStyleOverride,
   ]
 
   return (
