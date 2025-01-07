@@ -30,11 +30,7 @@ export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
     }
 
     return (
-      <Screen
-        preset="fixed"
-        contentContainerStyle={$screenContentContainer}
-        safeAreaEdges={["bottom"]}
-      >
+      <Screen preset="fixed" contentContainerStyle={$screenContentContainer}>
         <MapView
           style={$mapView}
           onRegionChangeComplete={(region) => {
