@@ -59,11 +59,7 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
       [],
     )
     return (
-      <Screen
-        preset="scroll"
-        contentContainerStyle={$styles.container}
-        safeAreaEdges={["top", "bottom"]}
-      >
+      <Screen preset="scroll" contentContainerStyle={$styles.container}>
         <View style={themed($formContainer)}>
           <TextField
             value={displayName}
