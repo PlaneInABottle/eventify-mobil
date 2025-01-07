@@ -3,6 +3,7 @@ import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 
+export interface ChatMessage extends Instance<typeof ChatMessageModel> {}
 const ChatMessageModel = types.model("ChatMessage").props({
   id: types.identifier,
   event_chat_id: types.string,
@@ -12,18 +13,48 @@ const ChatMessageModel = types.model("ChatMessage").props({
 })
 
 export interface Chat extends Instance<typeof ChatModel> {}
-const ChatModel = types.model("Chat").props({
-  id: types.identifier,
-  event_id: types.string,
+const ChatModel = types
+  .model("Chat")
+  .props({
+    id: types.identifier,
+    event_id: types.string,
 
-  messages: types.array(ChatMessageModel),
-})
-
+    messages: types.array(ChatMessageModel),
+  })
+  .volatile(() => ({
+    offset: 0,
+  }))
+  .actions((store) => ({
+    getChatMessages: flow(function* (limit: number = 10): Generator<any, void, any> {
+      try {
+        const { data: messages, error } = yield supabase
+          .from("messages")
+          .select("*")
+          .eq("event_chat_id", store.id)
+          .order("created_at", { ascending: false })
+          .limit(limit)
+          .range(store.offset, store.offset + limit)
+        if (error) throw error
+        if (store.offset === 0) {
+          store.messages.clear()
+        }
+        store.messages.push(...messages)
+        store.offset += messages.length
+      } catch (error) {
+        console.error(error)
+      }
+    }),
+  }))
 export const ChatStoreModel = types
   .model("ChatStore")
   .props({
     chats: types.map(ChatModel),
   })
+  .views((store) => ({
+    getChat(eventChatId: string) {
+      return store.chats.get(eventChatId)
+    },
+  }))
   .actions(withSetPropAction)
   .actions((store) => ({
     hasJoinedChat(eventChatId: string) {
