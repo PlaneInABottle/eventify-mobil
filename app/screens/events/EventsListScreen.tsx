@@ -46,7 +46,7 @@ export const EventsListScreen: FC<EventsListScreenProps> = observer(
     const { themed } = useAppTheme()
 
     return (
-      <Screen preset="fixed" contentContainerStyle={$styles.flex1} safeAreaEdges={["bottom"]}>
+      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<Event>
           contentContainerStyle={themed([$styles.container, $listContentContainer])}
           data={eventStore.eventsForList.slice() as Event[]}
