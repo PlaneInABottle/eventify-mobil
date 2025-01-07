@@ -1,28 +1,25 @@
 import { $styles, ThemedStyle } from "@/theme"
 import { observer } from "mobx-react-lite"
 import { FC, useEffect } from "react"
-import { Alert, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
-import { AutoImage, Button, Card, ListItem, ListView, Screen, Text } from "@/components"
+import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import { AutoImage, Card, ListItem, ListView, Screen, Text } from "@/components"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { useHeader } from "@/utils/useHeader"
 import { useStores } from "@/models"
 import { Chat } from "@/models/ChatStore"
 import { ContentStyle } from "@shopify/flash-list"
 
 export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   function ChatListScreen(_props) {
+    const { navigation } = _props
     const { themed } = useAppTheme()
     const { chatStore, eventStore } = useStores()
 
     useEffect(() => {
       chatStore.fetchUserChats()
     }, [])
-    chatStore.chats.forEach((chat) => {
-      console.log("chat", chat)
-    })
     const handlePressChat = (chat: Chat) => {
-      console.log("handlePressChat", chat)
+      navigation.navigate("Chat", { eventChatId: chat.id })
     }
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
@@ -46,6 +43,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
                 textStyle={themed($listItemText)}
                 containerStyle={themed($listItem)}
                 bottomSeparator
+                onPress={() => handlePressChat(item)}
                 LeftComponent={
                   event?.image_url ? (
                     <AutoImage
@@ -103,11 +101,11 @@ const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
   paddingTop: spacing.lg + spacing.xl,
   paddingBottom: spacing.lg,
 })
-const $listItem: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $listItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   padding: spacing.xs,
 })
 
-const $listItemText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+const $listItemText: ThemedStyle<TextStyle> = ({ spacing }) => ({
   paddingLeft: spacing.md,
 })
 
