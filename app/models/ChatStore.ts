@@ -50,6 +50,9 @@ export const ChatStoreModel = types
   .props({
     chats: types.map(ChatModel),
   })
+  .volatile(() => ({
+    isLoading: false,
+  }))
   .views((store) => ({
     getChat(eventChatId: string) {
       return store.chats.get(eventChatId)
@@ -70,6 +73,7 @@ export const ChatStoreModel = types
           .select("*, event_chats_participants!inner()")
           .eq("event_chats_participants.user_id", userId)
         if (error) throw error
+        store.chats.clear()
         chats.forEach((chat: Chat) => {
           store.chats.put(chat)
         })
@@ -79,7 +83,8 @@ export const ChatStoreModel = types
     }),
   }))
   .actions((store) => ({
-    joinChat: flow(function* (eventChatId: string): Generator<any, void, any> {
+    joinChat: flow(function* (eventChatId: string, eventId: string): Generator<any, void, any> {
+      store.isLoading = true
       try {
         if (store.hasJoinedChat(eventChatId)) return
         const { data, error } = yield supabase
@@ -91,13 +96,19 @@ export const ChatStoreModel = types
           .select()
           .single()
         if (error) throw error
-        console.log("joined chat", data)
-        // store.chats.put(data)
+        store.chats.set(data.event_chat_id, {
+          id: data.event_chat_id,
+          event_id: eventId,
+        })
       } catch (error) {
         console.error(error)
+      } finally {
+        store.isLoading = false
       }
     }),
+
     quitChat: flow(function* (eventChatId: string): Generator<any, void, any> {
+      store.isLoading = true
       try {
         if (!store.hasJoinedChat(eventChatId)) return
         const { data, error } = yield supabase
@@ -105,12 +116,24 @@ export const ChatStoreModel = types
           .delete()
           .eq("event_chat_id", eventChatId)
           .eq("user_id", getRootStore(store).userStore.userId)
+          .select()
+          .single()
         if (error) throw error
-        console.log("quit chat", data)
+
+        store.chats.delete(eventChatId)
       } catch (error) {
         console.error(error)
+      } finally {
+        store.isLoading = false
       }
     }),
+  }))
+  .actions((store) => ({
+    toggleChat(eventChatId: string | undefined | null, eventId: string) {
+      if (!eventChatId) return
+      if (store.hasJoinedChat(eventChatId)) store.quitChat(eventChatId)
+      else store.joinChat(eventChatId, eventId)
+    },
   }))
 // import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
 // import { EventChatModel } from "./EventChat"
