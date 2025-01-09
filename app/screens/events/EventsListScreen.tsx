@@ -42,7 +42,7 @@ interface EventsListScreenProps extends EventTabScreenProps<"EventsList"> {}
 
 export const EventsListScreen: FC<EventsListScreenProps> = observer(
   function EventsListScreen(_props) {
-    const { eventStore } = useStores()
+    const { eventStore, chatStore } = useStores()
     const { themed } = useAppTheme()
 
     return (
@@ -50,12 +50,10 @@ export const EventsListScreen: FC<EventsListScreenProps> = observer(
         <ListView<Event>
           contentContainerStyle={themed([$styles.container, $listContentContainer])}
           data={eventStore.eventsForList.slice() as Event[]}
-          extraData={
-            eventStore.joinedChats.length + eventStore.favorites.length + eventStore.events.size
-          }
+          extraData={chatStore.chats.size + eventStore.favorites.length + eventStore.events.size}
           estimatedItemSize={177}
           ListEmptyComponent={
-            eventStore.isLoading ? (
+            eventStore.isLoading || chatStore.isLoading ? (
               <ActivityIndicator />
             ) : (
               <EmptyState
@@ -100,9 +98,8 @@ export const EventsListScreen: FC<EventsListScreenProps> = observer(
             <EventCard
               event={item}
               isFavorite={eventStore.hasFavorite(item)}
-              isChatJoined={eventStore.hasJoinedChat(item)}
               onPressFavorite={() => eventStore.toggleFavorite(item)}
-              onPressChat={() => eventStore.toggleChat(item)}
+              onPressChat={() => chatStore.toggleChat(item.event_chat_id, item.id)}
             />
           )}
         />
@@ -114,13 +111,11 @@ export const EventsListScreen: FC<EventsListScreenProps> = observer(
 const EventCard = observer(function EventCard({
   event,
   isFavorite,
-  isChatJoined,
   onPressFavorite,
   onPressChat,
 }: {
   event: Event
   isFavorite: boolean
-  isChatJoined: boolean
   onPressFavorite: () => void
   onPressChat: () => void
 }) {
@@ -128,6 +123,11 @@ const EventCard = observer(function EventCard({
     theme: { colors },
     themed,
   } = useAppTheme()
+
+  const {
+    chatStore: { hasJoinedChat, isLoading },
+  } = useStores()
+  const isChatJoined = !!event.event_chat_id && hasJoinedChat(event.event_chat_id)
 
   const liked = useSharedValue(isFavorite ? 1 : 0)
   const chatJoined = useSharedValue(isChatJoined ? 1 : 0)
@@ -346,6 +346,7 @@ const EventCard = observer(function EventCard({
                   : translate("eventsListScreen:joinChat")
               }
               LeftAccessory={ChatButtonLeftAccessory}
+              disabled={isLoading}
             >
               <Text
                 size="xxs"
