@@ -2,7 +2,7 @@ import { $styles, ThemedStyle } from "@/theme"
 import { observer } from "mobx-react-lite"
 import { FC, useEffect } from "react"
 import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
-import { AutoImage, Card, ListItem, ListView, Screen, Text } from "@/components"
+import { AutoImage, Button, Card, ListItem, ListView, Screen, Text } from "@/components"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
@@ -25,7 +25,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<Chat>
           data={Array.from(chatStore.chats.values())}
-          extraData={chatStore.chats.values()}
+          extraData={chatStore.chats.size}
           estimatedItemSize={100}
           contentContainerStyle={themed([$listContentContainer, $styles.container])}
           ListHeaderComponent={
@@ -34,6 +34,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
             </View>
           }
           // renderItem={({ item }) => <ChatItemCard chat={item} handlePressChat={handlePressChat} />}
+
           renderItem={({ item }) => {
             const event = eventStore.events.get(item.event_id)
             return (
