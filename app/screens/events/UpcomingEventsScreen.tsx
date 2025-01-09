@@ -90,7 +90,7 @@ const MarkerField = observer(
       theme: { colors, spacing },
     } = useAppTheme()
     const {
-      eventStore: { toggleChat, hasJoinedChat, isLoading },
+      chatStore: { toggleChat, hasJoinedChat, isLoading },
     } = useStores()
     const { bottom } = useSafeAreaInsets()
 
@@ -165,11 +165,17 @@ const MarkerField = observer(
               <Text text={event.organizer_id} />
             </View>
 
-            {event.hasChat && (
+            {event.hasChat && event.event_chat_id && (
               <Button
-                text={isLoading ? "Loading..." : hasJoinedChat(event) ? "Leave Chat" : "Join Chat"}
+                text={
+                  isLoading
+                    ? "Loading..."
+                    : hasJoinedChat(event.event_chat_id)
+                      ? "Leave Chat"
+                      : "Join Chat"
+                }
                 onPress={() => {
-                  toggleChat(event)
+                  toggleChat(event.event_chat_id as string, event.id)
                 }}
                 disabled={isLoading}
                 disabledStyle={themed($disabledButton)}
