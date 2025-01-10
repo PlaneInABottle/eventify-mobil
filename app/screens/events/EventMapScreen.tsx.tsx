@@ -1,441 +1,273 @@
-import { ComponentType, FC, useCallback, useMemo } from "react"
-import {
-  ViewStyle,
-  View,
-  TextStyle,
-  Platform,
-  AccessibilityProps,
-  ImageStyle,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native"
-import {
-  EmptyState,
-  Card,
-  Icon,
-  ListView,
-  Switch,
-  Screen,
-  Text,
-  Button,
-  ButtonAccessoryProps,
-} from "@/components"
+import { FC, forwardRef, useCallback, useImperativeHandle, useRef } from "react"
+import { ViewStyle, StyleSheet, ActivityIndicator, ImageStyle, View, TextStyle } from "react-native"
+import { AutoImage, Button, Icon, Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { EventTabScreenProps } from "@/navigators/MainNavigator"
-import { observer } from "mobx-react-lite"
-import { Event } from "@/models/Event"
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated"
-import { isRTL, translate } from "@/i18n"
-import { $styles, ThemedStyle } from "@/theme"
-import { ContentStyle } from "@shopify/flash-list"
+import MapView, { Region, Marker, MapMarkerProps } from "react-native-maps"
 import { useStores } from "@/models"
-
-const ICON_SIZE = 14
+import { observer } from "mobx-react-lite"
+import { ButtonAccessoryProps } from "@/components/Button"
+import { ThemedStyle } from "@/theme"
+import { Event } from "@/models/Event"
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
-
+// TODO: Custom icons, and organizer name instead of id.
 export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMapScreen(_props) {
-  const { eventStore, chatStore } = useStores()
+  const {
+    eventStore: { eventsInBounds, fetchEventsInBounds, isSearching },
+  } = useStores()
   const { themed } = useAppTheme()
 
+  const regionRef = useRef<Region | null>(null)
+
+  const handleSearchThisArea = () => {
+    if (regionRef.current) {
+      fetchEventsInBounds(regionRef.current)
+    }
+  }
+
   return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-      <ListView<Event>
-        contentContainerStyle={themed([$styles.container, $listContentContainer])}
-        data={eventStore.eventsForList.slice() as Event[]}
-        extraData={chatStore.chats.size + eventStore.favorites.length + eventStore.events.size}
-        estimatedItemSize={177}
-        ListEmptyComponent={
-          eventStore.isLoading || chatStore.isLoading ? (
-            <ActivityIndicator />
-          ) : (
-            <EmptyState
-              preset="generic"
-              style={themed($emptyState)}
-              headingTx={
-                eventStore.favoritesOnly
-                  ? "eventsListScreen:noFavoritesEmptyState.heading"
-                  : "eventsListScreen:noEventsEmptyState.heading"
-              }
-              contentTx={
-                eventStore.favoritesOnly
-                  ? "eventsListScreen:noFavoritesEmptyState.content"
-                  : "eventsListScreen:noEventsEmptyState.content"
-              }
-              button={eventStore.favoritesOnly ? "" : ""}
-              imageStyle={$emptyStateImage}
-              ImageProps={{ resizeMode: "contain" }}
-            />
-          )
-        }
-        ListHeaderComponent={
-          <View style={themed($heading)}>
-            <Text preset="heading" tx="eventsListScreen:title" />
-            {(eventStore.favoritesOnly || eventStore.eventsForList.length > 0) && (
-              <View style={themed($toggle)}>
-                <Switch
-                  value={eventStore.favoritesOnly}
-                  onValueChange={() =>
-                    eventStore.setProp("favoritesOnly", !eventStore.favoritesOnly)
-                  }
-                  labelTx="eventsListScreen:onlyFavorites"
-                  labelPosition="left"
-                  labelStyle={$labelStyle}
-                  accessibilityLabel={translate("eventsListScreen:accessibility.switch")}
-                />
-              </View>
-            )}
-          </View>
-        }
-        renderItem={({ item }) => (
-          <EventCard
-            event={item}
-            isFavorite={eventStore.hasFavorite(item)}
-            onPressFavorite={() => eventStore.toggleFavorite(item)}
-            onPressChat={() => chatStore.toggleChat(item.event_chat_id, item.id)}
-          />
+    <Screen preset="fixed" contentContainerStyle={$screenContentContainer}>
+      <MapView
+        style={$mapView}
+        onRegionChangeComplete={(region) => {
+          regionRef.current = region
+        }}
+        initialRegion={{
+          latitude: 39.88825,
+          longitude: 32.8324,
+          latitudeDelta: 0.922,
+          longitudeDelta: 0.0421,
+        }}
+      >
+        {eventsInBounds.map(
+          (event) =>
+            event && (
+              <MarkerField
+                key={event.id}
+                event={event}
+                coordinate={{
+                  latitude: event.lat,
+                  longitude: event.long,
+                }}
+              />
+            ),
         )}
+      </MapView>
+
+      <Button
+        preset="filled"
+        tx={isSearching ? "common:searching" : "upcomingEvents:searchThisArea"}
+        style={themed($searchButton)}
+        disabledStyle={themed($disabledButton)}
+        onPress={handleSearchThisArea}
+        disabled={isSearching}
+        RightAccessory={isSearching ? LoadingIndicator : undefined}
       />
     </Screen>
   )
 })
 
-const EventCard = observer(function EventCard({
-  event,
-  isFavorite,
-  onPressFavorite,
-  onPressChat,
-}: {
+interface MarkerFieldProps extends Omit<MapMarkerProps, "ref"> {
   event: Event
-  isFavorite: boolean
-  onPressFavorite: () => void
-  onPressChat: () => void
-}) {
-  const {
-    theme: { colors },
-    themed,
-  } = useAppTheme()
-
-  const {
-    chatStore: { hasJoinedChat, isLoading },
-  } = useStores()
-  const isChatJoined = !!event.event_chat_id && hasJoinedChat(event.event_chat_id)
-
-  const liked = useSharedValue(isFavorite ? 1 : 0)
-  const chatJoined = useSharedValue(isChatJoined ? 1 : 0)
-
-  // Grey heart
-  const animatedLikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND),
-        },
-      ],
-      opacity: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.CLAMP),
-    }
-  })
-
-  // Pink heart
-  const animatedUnlikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: liked.value }],
-      opacity: liked.value,
-    }
-  })
-
-  // Grey community
-  const animatedChatJoinedButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: interpolate(chatJoined.value, [0, 1], [1, 0], Extrapolation.EXTEND),
-        },
-      ],
-      opacity: interpolate(chatJoined.value, [0, 1], [1, 0], Extrapolation.CLAMP),
-    }
-  })
-
-  // Pink community
-  const animatedChatQuitButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: chatJoined.value }],
-      opacity: chatJoined.value,
-    }
-  })
-
-  const handlePressFavorite = useCallback(() => {
-    onPressFavorite()
-    liked.value = withSpring(liked.value ? 0 : 1)
-  }, [liked, onPressFavorite])
-
-  const handlePressChat = useCallback(() => {
-    onPressChat()
-    chatJoined.value = withSpring(chatJoined.value ? 0 : 1)
-  }, [chatJoined, onPressChat])
-
-  const accessibilityHintProps = useMemo(
-    () =>
-      Platform.select<AccessibilityProps>({
-        ios: {
-          accessibilityLabel: event.title,
-          accessibilityHint: translate("eventsListScreen:accessibility.cardHint", {
-            action: isFavorite ? "unfavorite" : "favorite",
-          }),
-        },
-        android: {
-          accessibilityLabel: event.title,
-          accessibilityActions: [
-            {
-              name: "longpress",
-              label: translate("eventsListScreen:accessibility.favoriteAction"),
-            },
-          ],
-          onAccessibilityAction: ({ nativeEvent }) => {
-            if (nativeEvent.actionName === "longpress") {
-              handlePressFavorite()
-            }
-          },
-        },
-      }),
-    [event.title, isFavorite, handlePressFavorite],
-  )
-
-  const handlePressCard = () => {
-    console.log("handlePressCard", event.title)
-  }
-
-  const ButtonLeftAccessory: ComponentType<ButtonAccessoryProps> = useMemo(
-    () =>
-      function ButtonLeftAccessory() {
-        return (
-          <View>
-            <Animated.View
-              style={[
-                $styles.row,
-                themed($iconContainer),
-                StyleSheet.absoluteFill,
-                animatedLikeButtonStyles,
-              ]}
-            >
-              <Icon
-                icon="heart"
-                size={ICON_SIZE}
-                color={colors.palette.neutral800} // dark grey
-              />
-            </Animated.View>
-            <Animated.View
-              style={[$styles.row, themed($iconContainer), animatedUnlikeButtonStyles]}
-            >
-              <Icon
-                icon="heart"
-                size={ICON_SIZE}
-                color={colors.palette.primary400} // pink
-              />
-            </Animated.View>
-          </View>
-        )
-      },
-    [animatedLikeButtonStyles, animatedUnlikeButtonStyles, colors, themed],
-  )
-
-  const ChatButtonLeftAccessory: ComponentType<ButtonAccessoryProps> = useMemo(
-    () =>
-      function ChatButtonLeftAccessory() {
-        return (
-          <View>
-            <Animated.View
-              style={[
-                $styles.row,
-                themed($iconContainer),
-                StyleSheet.absoluteFill,
-                animatedChatJoinedButtonStyles,
-              ]}
-            >
-              <Icon
-                icon="community"
-                size={ICON_SIZE}
-                color={colors.palette.neutral800} // dark grey
-              />
-            </Animated.View>
-            <Animated.View
-              style={[$styles.row, themed($iconContainer), animatedChatQuitButtonStyles]}
-            >
-              <Icon
-                icon="community"
-                size={ICON_SIZE}
-                color={colors.palette.primary400} // pink
-              />
-            </Animated.View>
-          </View>
-        )
-      },
-    [animatedChatJoinedButtonStyles, animatedChatQuitButtonStyles, colors, themed],
-  )
-  return (
-    <Card
-      style={themed($item)}
-      verticalAlignment="force-footer-bottom"
-      onPress={handlePressCard}
-      onLongPress={handlePressFavorite}
-      HeadingComponent={
-        <View style={[$styles.row, themed($metadata)]}>
-          <Text
-            style={themed($metadataText)}
-            size="xxs"
-            accessibilityLabel={event.dateFormatted.accessibilityLabel}
-          >
-            {event.dateFormatted.textLabel}
-          </Text>
-          <Text
-            style={themed($metadataText)}
-            size="xxs"
-            accessibilityLabel={event.timeFormatted.accessibilityLabel}
-          >
-            {event.timeFormatted.textLabel}
-          </Text>
-        </View>
-      }
-      content={event.title}
-      {...accessibilityHintProps}
-      // RightComponent={
-      //   imageSource ? (
-      //     <AutoImage source={imageSource} style={themed($itemThumbnail)} maxWidth={80} />
-      //   ) : undefined
-      // }
-      FooterComponent={
-        <View style={$styles.row}>
-          <Button
-            onPress={handlePressFavorite}
-            onLongPress={handlePressFavorite}
-            style={themed([$favoriteButton, isFavorite && $unFavoriteButton])}
-            accessibilityLabel={
-              isFavorite
-                ? translate("eventsListScreen:accessibility.unfavoriteIcon")
-                : translate("eventsListScreen:accessibility.favoriteIcon")
-            }
-            LeftAccessory={ButtonLeftAccessory}
-          >
-            <Text
-              size="xxs"
-              accessibilityLabel={event.timeFormatted.accessibilityLabel}
-              weight="medium"
-              text={
-                isFavorite
-                  ? translate("eventsListScreen:unfavoriteButton")
-                  : translate("eventsListScreen:favoriteButton")
-              }
-            />
-          </Button>
-          {event.hasChat && (
-            <Button
-              onPress={handlePressChat}
-              onLongPress={handlePressChat}
-              style={themed([$favoriteButton, isChatJoined && $unFavoriteButton])}
-              accessibilityLabel={
-                isChatJoined
-                  ? translate("eventsListScreen:quitChat")
-                  : translate("eventsListScreen:joinChat")
-              }
-              LeftAccessory={ChatButtonLeftAccessory}
-              disabled={isLoading}
-            >
-              <Text
-                size="xxs"
-                accessibilityLabel={event.timeFormatted.accessibilityLabel}
-                weight="medium"
-                text={
-                  isChatJoined
-                    ? translate("eventsListScreen:quitChat")
-                    : translate("eventsListScreen:joinChat")
-                }
-              />
-            </Button>
-          )}
-        </View>
-      }
-    />
-  )
-})
-// #region Styles
-const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.lg,
-  paddingTop: spacing.lg + spacing.xl,
-  paddingBottom: spacing.lg,
-})
-
-const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginBottom: spacing.md,
-})
-
-const $item: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  padding: spacing.md,
-  marginTop: spacing.md,
-  minHeight: 120,
-  backgroundColor: colors.palette.neutral100,
-})
-
-// const $itemThumbnail: ThemedStyle<ImageStyle> = ({ spacing }) => ({
-//   marginTop: spacing.sm,
-//   borderRadius: 50,
-//   alignSelf: "flex-start",
-// })
-
-const $toggle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.md,
-})
-
-const $labelStyle: TextStyle = {
-  textAlign: "left",
 }
 
-const $iconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  height: ICON_SIZE,
-  width: ICON_SIZE,
-  marginEnd: spacing.sm,
+export interface MarkerFieldRef {
+  presentOptions: () => void
+  dismissOptions: () => void
+}
+
+const MarkerField = observer(
+  forwardRef(function MarkerField(props: MarkerFieldProps, ref: React.Ref<MarkerFieldRef>) {
+    const { event, ...MapMarkerProps } = props
+    const sheet = useRef<BottomSheetModal>(null)
+    const {
+      themed,
+      theme: { colors, spacing },
+    } = useAppTheme()
+    const {
+      chatStore: { toggleChat, hasJoinedChat, isLoading },
+    } = useStores()
+    const { bottom } = useSafeAreaInsets()
+
+    useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }))
+
+    const presentOptions = useCallback(() => {
+      sheet.current?.present()
+    }, [])
+
+    const dismissOptions = useCallback(() => {
+      sheet.current?.dismiss()
+    }, [])
+
+    return (
+      <>
+        <Marker key={event.id} onPress={presentOptions} title={event.title} {...MapMarkerProps} />
+        <BottomSheetModal
+          ref={sheet}
+          backgroundStyle={themed($bottomSheetBackground)}
+          snapPoints={["70%"]}
+          stackBehavior="replace"
+          handleIndicatorStyle={themed($handleIndicator)}
+          enableDismissOnClose
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
+          )}
+        >
+          <BottomSheetScrollView
+            contentContainerStyle={themed([
+              $bottomSheetContent,
+              { paddingBottom: bottom + spacing.xl },
+            ])}
+          >
+            {event.image_url && (
+              <AutoImage
+                source={{
+                  uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${event.image_url}`,
+                }}
+                style={themed($image)}
+              />
+            )}
+
+            <View style={themed($headerContainer)}>
+              <Text preset="heading" text={event.title} style={themed($title)} />
+              <View style={themed($dateTimeContainer)}>
+                <View style={themed($iconTextContainer)}>
+                  <Icon icon="components" size={20} color={colors.palette.primary500} />
+                  <Text
+                    text={event.dateFormatted.textLabel}
+                    style={themed($dateTimeText)}
+                    size="xxs"
+                  />
+                </View>
+                <View style={themed($iconTextContainer)}>
+                  <Icon icon="ladybug" size={20} color={colors.palette.primary500} />
+                  <Text
+                    text={event.timeFormatted.textLabel}
+                    style={themed($dateTimeText)}
+                    size="xxs"
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={themed($descriptionContainer)}>
+              <Text preset="subheading" text="About" style={themed($sectionTitle)} />
+              <Text text={event.description || "No description available"} />
+            </View>
+
+            <View style={themed($organizerContainer)}>
+              <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
+              <Text text={event.organizer_id} />
+            </View>
+
+            {event.hasChat && event.event_chat_id && (
+              <Button
+                text={
+                  isLoading
+                    ? "Loading..."
+                    : hasJoinedChat(event.event_chat_id)
+                      ? "Leave Chat"
+                      : "Join Chat"
+                }
+                onPress={() => {
+                  toggleChat(event.event_chat_id as string, event.id)
+                }}
+                disabled={isLoading}
+                disabledStyle={themed($disabledButton)}
+                RightAccessory={isLoading ? LoadingIndicator : undefined}
+              />
+            )}
+          </BottomSheetScrollView>
+        </BottomSheetModal>
+      </>
+    )
+  }),
+)
+
+const LoadingIndicator = (props: ButtonAccessoryProps) => {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+  return <ActivityIndicator size="small" color={colors.palette.neutral800} style={props.style} />
+}
+
+const $screenContentContainer: ViewStyle = {
+  flex: 1,
+}
+
+const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral800,
 })
 
-const $metadata: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.textDim,
+const $bottomSheetBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+})
+
+const $mapView: ViewStyle = {
+  ...StyleSheet.absoluteFillObject,
+}
+
+const $searchButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  position: "absolute",
+  top: spacing.lg,
+  alignSelf: "center",
+  minWidth: 200,
+})
+
+const $disabledButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral400,
+  opacity: 0.7,
+})
+
+const $bottomSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+})
+
+const $headerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
 })
 
-const $metadataText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.textDim,
-  marginEnd: spacing.md,
+const $title: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.xs,
 })
 
-const $favoriteButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  borderRadius: 17,
-  marginTop: spacing.md,
+const $dateTimeContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
   justifyContent: "flex-start",
-  backgroundColor: colors.palette.neutral300,
-  borderColor: colors.palette.neutral300,
-  paddingHorizontal: spacing.md,
-  paddingTop: spacing.xxxs,
-  paddingBottom: 0,
-  marginEnd: spacing.md,
-  minHeight: 32,
-  alignSelf: "flex-start",
+  marginBottom: spacing.md,
+  gap: spacing.md,
 })
 
-const $unFavoriteButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: colors.palette.primary100,
-  backgroundColor: colors.palette.primary100,
+const $iconTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xxs,
 })
 
-const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.xxl,
+const $dateTimeText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginLeft: spacing.xxs,
+  color: colors.textDim,
 })
 
-const $emptyStateImage: ImageStyle = {
-  transform: [{ scaleX: isRTL ? -1 : 1 }],
-}
-// #endregion
+const $descriptionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
+
+const $sectionTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xs,
+})
+
+const $organizerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xl,
+})
+
+const $image: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  width: "100%",
+  height: 200,
+  alignSelf: "center",
+  marginBottom: spacing.md,
+  borderRadius: 16,
+})
