@@ -1,2 +1,2 @@
-export * from "./UpcomingEventsScreen"
-export * from "./EventsListScreen"
+export * from "./EventListScreen.tsx"
+export * from "./EventMapScreen.tsx"

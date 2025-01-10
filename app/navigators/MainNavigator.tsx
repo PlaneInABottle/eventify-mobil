@@ -10,15 +10,15 @@ import { Icon } from "../components"
 import type { ThemedStyle } from "@/theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { UpcomingEventsScreen } from "@/screens/events/UpcomingEventsScreen"
-import { EventsListScreen } from "@/screens/events/EventsListScreen"
+import { EventListScreen } from "@/screens/events/EventListScreen.tsx"
+import { EventMapScreen } from "@/screens/events/EventMapScreen.tsx"
 import { ProfileScreen } from "@/screens/ProfileScreen"
 import { ChatListScreen } from "@/screens/chat/ChatListScreen"
 
 // Define the Event tab's parameter list
 export type EventTabParamList = {
-  UpcomingEvents: undefined
-  EventsList: undefined
+  EventListScreen: undefined
+  EventMapScreen: undefined
 }
 
 // Define the main tab parameter list
@@ -63,17 +63,17 @@ function EventsNavigator() {
       }}
     >
       <EventTab.Screen
-        name="UpcomingEvents"
-        component={UpcomingEventsScreen}
+        name="EventListScreen"
+        component={EventListScreen}
         options={{
-          tabBarLabel: "Upcoming",
+          tabBarLabel: "Map",
         }}
       />
       <EventTab.Screen
-        name="EventsList"
-        component={EventsListScreen}
+        name="EventMapScreen"
+        component={EventMapScreen}
         options={{
-          tabBarLabel: "Past",
+          tabBarLabel: "List",
         }}
       />
     </EventTab.Navigator>

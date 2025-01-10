@@ -12,7 +12,7 @@ import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-interface EventListScreenProps extends EventTabScreenProps<"UpcomingEvents"> {}
+interface EventListScreenProps extends EventTabScreenProps<"EventListScreen"> {}
 // TODO: Custom icons, and organizer name instead of id.
 export const EventListScreen: FC<EventListScreenProps> = observer(function EventListScreen(_props) {
   const {

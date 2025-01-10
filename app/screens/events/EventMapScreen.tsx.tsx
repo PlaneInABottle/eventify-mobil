@@ -38,75 +38,73 @@ import { useStores } from "@/models"
 
 const ICON_SIZE = 14
 
-interface EventsListScreenProps extends EventTabScreenProps<"EventsList"> {}
+interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
 
-export const EventsListScreen: FC<EventsListScreenProps> = observer(
-  function EventsListScreen(_props) {
-    const { eventStore, chatStore } = useStores()
-    const { themed } = useAppTheme()
+export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMapScreen(_props) {
+  const { eventStore, chatStore } = useStores()
+  const { themed } = useAppTheme()
 
-    return (
-      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-        <ListView<Event>
-          contentContainerStyle={themed([$styles.container, $listContentContainer])}
-          data={eventStore.eventsForList.slice() as Event[]}
-          extraData={chatStore.chats.size + eventStore.favorites.length + eventStore.events.size}
-          estimatedItemSize={177}
-          ListEmptyComponent={
-            eventStore.isLoading || chatStore.isLoading ? (
-              <ActivityIndicator />
-            ) : (
-              <EmptyState
-                preset="generic"
-                style={themed($emptyState)}
-                headingTx={
-                  eventStore.favoritesOnly
-                    ? "eventsListScreen:noFavoritesEmptyState.heading"
-                    : "eventsListScreen:noEventsEmptyState.heading"
-                }
-                contentTx={
-                  eventStore.favoritesOnly
-                    ? "eventsListScreen:noFavoritesEmptyState.content"
-                    : "eventsListScreen:noEventsEmptyState.content"
-                }
-                button={eventStore.favoritesOnly ? "" : ""}
-                imageStyle={$emptyStateImage}
-                ImageProps={{ resizeMode: "contain" }}
-              />
-            )
-          }
-          ListHeaderComponent={
-            <View style={themed($heading)}>
-              <Text preset="heading" tx="eventsListScreen:title" />
-              {(eventStore.favoritesOnly || eventStore.eventsForList.length > 0) && (
-                <View style={themed($toggle)}>
-                  <Switch
-                    value={eventStore.favoritesOnly}
-                    onValueChange={() =>
-                      eventStore.setProp("favoritesOnly", !eventStore.favoritesOnly)
-                    }
-                    labelTx="eventsListScreen:onlyFavorites"
-                    labelPosition="left"
-                    labelStyle={$labelStyle}
-                    accessibilityLabel={translate("eventsListScreen:accessibility.switch")}
-                  />
-                </View>
-              )}
-            </View>
-          }
-          renderItem={({ item }) => (
-            <EventCard
-              event={item}
-              isFavorite={eventStore.hasFavorite(item)}
-              onPressFavorite={() => eventStore.toggleFavorite(item)}
-              onPressChat={() => chatStore.toggleChat(item.event_chat_id, item.id)}
+  return (
+    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
+      <ListView<Event>
+        contentContainerStyle={themed([$styles.container, $listContentContainer])}
+        data={eventStore.eventsForList.slice() as Event[]}
+        extraData={chatStore.chats.size + eventStore.favorites.length + eventStore.events.size}
+        estimatedItemSize={177}
+        ListEmptyComponent={
+          eventStore.isLoading || chatStore.isLoading ? (
+            <ActivityIndicator />
+          ) : (
+            <EmptyState
+              preset="generic"
+              style={themed($emptyState)}
+              headingTx={
+                eventStore.favoritesOnly
+                  ? "eventsListScreen:noFavoritesEmptyState.heading"
+                  : "eventsListScreen:noEventsEmptyState.heading"
+              }
+              contentTx={
+                eventStore.favoritesOnly
+                  ? "eventsListScreen:noFavoritesEmptyState.content"
+                  : "eventsListScreen:noEventsEmptyState.content"
+              }
+              button={eventStore.favoritesOnly ? "" : ""}
+              imageStyle={$emptyStateImage}
+              ImageProps={{ resizeMode: "contain" }}
             />
-          )}
-        />
-      </Screen>
-    )
-  },
-)
+          )
+        }
+        ListHeaderComponent={
+          <View style={themed($heading)}>
+            <Text preset="heading" tx="eventsListScreen:title" />
+            {(eventStore.favoritesOnly || eventStore.eventsForList.length > 0) && (
+              <View style={themed($toggle)}>
+                <Switch
+                  value={eventStore.favoritesOnly}
+                  onValueChange={() =>
+                    eventStore.setProp("favoritesOnly", !eventStore.favoritesOnly)
+                  }
+                  labelTx="eventsListScreen:onlyFavorites"
+                  labelPosition="left"
+                  labelStyle={$labelStyle}
+                  accessibilityLabel={translate("eventsListScreen:accessibility.switch")}
+                />
+              </View>
+            )}
+          </View>
+        }
+        renderItem={({ item }) => (
+          <EventCard
+            event={item}
+            isFavorite={eventStore.hasFavorite(item)}
+            onPressFavorite={() => eventStore.toggleFavorite(item)}
+            onPressChat={() => chatStore.toggleChat(item.event_chat_id, item.id)}
+          />
+        )}
+      />
+    </Screen>
+  )
+})
 
 const EventCard = observer(function EventCard({
   event,
