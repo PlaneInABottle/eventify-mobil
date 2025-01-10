@@ -12,65 +12,63 @@ import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-interface UpcomingEventsScreenProps extends EventTabScreenProps<"UpcomingEvents"> {}
+interface EventListScreenProps extends EventTabScreenProps<"UpcomingEvents"> {}
 // TODO: Custom icons, and organizer name instead of id.
-export const UpcomingEventsScreen: FC<UpcomingEventsScreenProps> = observer(
-  function UpcomingEventsScreen(_props) {
-    const {
-      eventStore: { eventsInBounds, fetchEventsInBounds, isSearching },
-    } = useStores()
-    const { themed } = useAppTheme()
+export const EventListScreen: FC<EventListScreenProps> = observer(function EventListScreen(_props) {
+  const {
+    eventStore: { eventsInBounds, fetchEventsInBounds, isSearching },
+  } = useStores()
+  const { themed } = useAppTheme()
 
-    const regionRef = useRef<Region | null>(null)
+  const regionRef = useRef<Region | null>(null)
 
-    const handleSearchThisArea = () => {
-      if (regionRef.current) {
-        fetchEventsInBounds(regionRef.current)
-      }
+  const handleSearchThisArea = () => {
+    if (regionRef.current) {
+      fetchEventsInBounds(regionRef.current)
     }
+  }
 
-    return (
-      <Screen preset="fixed" contentContainerStyle={$screenContentContainer}>
-        <MapView
-          style={$mapView}
-          onRegionChangeComplete={(region) => {
-            regionRef.current = region
-          }}
-          initialRegion={{
-            latitude: 39.88825,
-            longitude: 32.8324,
-            latitudeDelta: 0.922,
-            longitudeDelta: 0.0421,
-          }}
-        >
-          {eventsInBounds.map(
-            (event) =>
-              event && (
-                <MarkerField
-                  key={event.id}
-                  event={event}
-                  coordinate={{
-                    latitude: event.lat,
-                    longitude: event.long,
-                  }}
-                />
-              ),
-          )}
-        </MapView>
+  return (
+    <Screen preset="fixed" contentContainerStyle={$screenContentContainer}>
+      <MapView
+        style={$mapView}
+        onRegionChangeComplete={(region) => {
+          regionRef.current = region
+        }}
+        initialRegion={{
+          latitude: 39.88825,
+          longitude: 32.8324,
+          latitudeDelta: 0.922,
+          longitudeDelta: 0.0421,
+        }}
+      >
+        {eventsInBounds.map(
+          (event) =>
+            event && (
+              <MarkerField
+                key={event.id}
+                event={event}
+                coordinate={{
+                  latitude: event.lat,
+                  longitude: event.long,
+                }}
+              />
+            ),
+        )}
+      </MapView>
 
-        <Button
-          preset="filled"
-          tx={isSearching ? "common:searching" : "upcomingEvents:searchThisArea"}
-          style={themed($searchButton)}
-          disabledStyle={themed($disabledButton)}
-          onPress={handleSearchThisArea}
-          disabled={isSearching}
-          RightAccessory={isSearching ? LoadingIndicator : undefined}
-        />
-      </Screen>
-    )
-  },
-)
+      <Button
+        preset="filled"
+        tx={isSearching ? "common:searching" : "upcomingEvents:searchThisArea"}
+        style={themed($searchButton)}
+        disabledStyle={themed($disabledButton)}
+        onPress={handleSearchThisArea}
+        disabled={isSearching}
+        RightAccessory={isSearching ? LoadingIndicator : undefined}
+      />
+    </Screen>
+  )
+})
 
 interface MarkerFieldProps extends Omit<MapMarkerProps, "ref"> {
   event: Event
