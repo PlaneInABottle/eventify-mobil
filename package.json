@@ -22,6 +22,7 @@
     "build:android:prod": "eas build --profile production --platform android --local",
     "start": "npx expo start",
     "android": "npx expo run:android",
+    "android:m51": "npx expo run:android -d SM_M515F",
     "ios": "npx expo run:ios",
     "web": "npx expo start --web",
     "bundle:web": "npx expo export --platform web",
