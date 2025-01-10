@@ -63,15 +63,15 @@ function EventsNavigator() {
       }}
     >
       <EventTab.Screen
-        name="EventListScreen"
-        component={EventListScreen}
+        name="EventMapScreen"
+        component={EventMapScreen}
         options={{
           tabBarLabel: "Map",
         }}
       />
       <EventTab.Screen
-        name="EventMapScreen"
-        component={EventMapScreen}
+        name="EventListScreen"
+        component={EventListScreen}
         options={{
           tabBarLabel: "List",
         }}
