@@ -3,6 +3,7 @@ import { User, UserModel } from "./User"
 import { supabase } from "@/services/auth/supabase"
 import * as ImagePicker from "expo-image-picker"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { getRootStore } from "./helpers/getRootStore"
 export const UserStoreModel = types
   .model("UserStore")
   .props({
@@ -137,6 +138,24 @@ export const UserStoreModel = types
         return false
       } finally {
         store.setUploading(false)
+      }
+    }),
+  }))
+  .actions((store) => ({
+    report: flow(function* (reportedItemId: string, reportType: string, reason: string) {
+      store.setLoading(true)
+      try {
+        const { error } = yield supabase.from("reports").insert({
+          reporter_id: getRootStore(store).userStore.userId,
+          report_type: reportType,
+          reported_id: reportedItemId,
+          reason,
+        })
+        if (error) throw error
+      } catch (error) {
+        console.error("There was an error while sending report: ", error)
+      } finally {
+        store.setLoading(false)
       }
     }),
   }))
