@@ -1,7 +1,7 @@
 import { $styles, ThemedStyle } from "@/theme"
 import { observer } from "mobx-react-lite"
-import { FC, useCallback, useEffect, useRef } from "react"
-import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import { FC, useCallback, useEffect, useRef, useState } from "react"
+import { Alert, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { AutoImage, Card, ListItem, ListView, Screen, Text } from "@/components"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -9,6 +9,8 @@ import { useStores } from "@/models"
 import { Chat } from "@/models/ChatStore"
 import { ContentStyle } from "@shopify/flash-list"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
+import { NavigationProp, useNavigation } from "@react-navigation/native"
+import { AppStackParamList } from "@/navigators"
 
 export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   function ChatListScreen(_props) {
@@ -55,9 +57,10 @@ interface ChatListItemProps {
   handlePressChat: () => void
   imageUrl: string | undefined | null
 }
-const ChatListItem: FC<ChatListItemProps> = (props) => {
+const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props) {
   const { title, imageUrl, handlePressChat, chatId } = props
   const { themed } = useAppTheme()
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>()
   const {
     chatStore: { quitChat },
   } = useStores()
@@ -66,6 +69,11 @@ const ChatListItem: FC<ChatListItemProps> = (props) => {
   const presentOptions = useCallback(() => {
     sheet.current?.present()
   }, [])
+
+  const dismissOptions = useCallback(() => {
+    sheet.current?.dismiss()
+  }, [])
+
   return (
     <>
       <ListItem
@@ -91,8 +99,8 @@ const ChatListItem: FC<ChatListItemProps> = (props) => {
         ref={sheet}
         backgroundStyle={themed($bottomSheetBackground)}
         stackBehavior="replace"
-        // snapPoints={["20%"]}
-        enableDynamicSizing
+        snapPoints={["20%"]}
+        // enableDynamicSizing
         handleIndicatorStyle={themed($handleIndicator)}
         enableDismissOnClose
         backdropComponent={(props) => (
@@ -107,12 +115,24 @@ const ChatListItem: FC<ChatListItemProps> = (props) => {
             onPress={() => quitChat(chatId)}
           />
 
-          <ListItem text="Report Chat" rightIcon="caretRight" topSeparator bottomSeparator />
+          <ListItem
+            text="Report Chat"
+            onPress={() => {
+              dismissOptions()
+              navigation.navigate("Report", {
+                reportedItemId: chatId,
+                reportType: "chat",
+              })
+            }}
+            rightIcon="caretRight"
+            topSeparator
+            bottomSeparator
+          />
         </BottomSheetView>
       </BottomSheetModal>
     </>
   )
-}
+})
 const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
   paddingTop: spacing.lg + spacing.xl,
