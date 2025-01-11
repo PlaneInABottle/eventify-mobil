@@ -1,6 +1,6 @@
 import { $styles, ThemedStyle } from "@/theme"
 import { observer } from "mobx-react-lite"
-import { FC, useEffect } from "react"
+import { FC, useCallback, useEffect, useRef } from "react"
 import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { AutoImage, Card, ListItem, ListView, Screen, Text } from "@/components"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
@@ -8,18 +8,18 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
 import { Chat } from "@/models/ChatStore"
 import { ContentStyle } from "@shopify/flash-list"
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 
 export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   function ChatListScreen(_props) {
     const { navigation } = _props
     const { themed } = useAppTheme()
     const { chatStore, eventStore } = useStores()
-
     useEffect(() => {
       chatStore.fetchUserChats()
     }, [])
-    const handlePressChat = (chat: Chat) => {
-      navigation.navigate("Chat", { eventChatId: chat.id })
+    const handlePressChat = (chatId: string) => {
+      navigation.navigate("Chat", { eventChatId: chatId })
     }
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
@@ -33,29 +33,14 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
               <Text preset="heading" text="Chats" />
             </View>
           }
-          // renderItem={({ item }) => <ChatItemCard chat={item} handlePressChat={handlePressChat} />}
-
           renderItem={({ item }) => {
             const event = eventStore.events.get(item.event_id)
             return (
-              <ListItem
-                text={event?.title}
-                TextProps={{ preset: "subheading" }}
-                textStyle={themed($listItemText)}
-                containerStyle={themed($listItem)}
-                bottomSeparator
-                onPress={() => handlePressChat(item)}
-                LeftComponent={
-                  event?.image_url ? (
-                    <AutoImage
-                      source={{
-                        uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${event?.image_url}`,
-                      }}
-                      style={$itemThumbnail}
-                    />
-                  ) : undefined
-                }
-                rightIcon="caretRight"
+              <ChatListItem
+                title={event?.title}
+                handlePressChat={() => handlePressChat(item.id)}
+                imageUrl={event?.image_url}
+                chatId={item.id}
               />
             )
           }}
@@ -64,39 +49,70 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
     )
   },
 )
-
-interface ChatItemProps {
-  chat: Chat
-  handlePressChat: (chat: Chat) => void
+interface ChatListItemProps {
+  title?: string
+  chatId: string
+  handlePressChat: () => void
+  imageUrl: string | undefined | null
 }
-// Not used, but could be used if we want to add a chat list item card
-const ChatItemCard = observer(function ChatItem({ chat, handlePressChat }: ChatItemProps) {
+const ChatListItem: FC<ChatListItemProps> = (props) => {
+  const { title, imageUrl, handlePressChat, chatId } = props
   const { themed } = useAppTheme()
-  const { eventStore } = useStores()
-  const event = eventStore.events.get(chat.event_id)
+  const {
+    chatStore: { quitChat },
+  } = useStores()
+  const sheet = useRef<BottomSheetModal>(null)
 
+  const presentOptions = useCallback(() => {
+    sheet.current?.present()
+  }, [])
   return (
-    <Card
-      style={themed($item)}
-      verticalAlignment="center"
-      onPress={() => handlePressChat(chat)}
-      LeftComponent={
-        event?.image_url ? (
-          <AutoImage
-            source={{
-              uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${event?.image_url}`,
-            }}
-            style={$itemThumbnail}
+    <>
+      <ListItem
+        text={title}
+        TextProps={{ preset: "subheading" }}
+        textStyle={themed($listItemText)}
+        containerStyle={themed($listItem)}
+        bottomSeparator
+        onPress={handlePressChat}
+        onLongPress={presentOptions}
+        LeftComponent={
+          imageUrl ? (
+            <AutoImage
+              source={{
+                uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${imageUrl}`,
+              }}
+              style={$itemThumbnail}
+            />
+          ) : undefined
+        }
+      />
+      <BottomSheetModal
+        ref={sheet}
+        backgroundStyle={themed($bottomSheetBackground)}
+        stackBehavior="replace"
+        // snapPoints={["20%"]}
+        enableDynamicSizing
+        handleIndicatorStyle={themed($handleIndicator)}
+        enableDismissOnClose
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}
+      >
+        <BottomSheetView style={themed($bottomSheetContent)}>
+          <ListItem
+            text="Leave Chat"
+            rightIcon="caretRight"
+            topSeparator
+            onPress={() => quitChat(chatId)}
           />
-        ) : undefined
-      }
-      // RightComponent={
-      //   <Button preset="default" text="Click It" onPress={() => Alert.alert("pressed")} />
-      // }
-      HeadingComponent={<Text preset="subheading" text={event?.title} />}
-    />
+
+          <ListItem text="Report Chat" rightIcon="caretRight" topSeparator bottomSeparator />
+        </BottomSheetView>
+      </BottomSheetModal>
+    </>
   )
-})
+}
 const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
   paddingTop: spacing.lg + spacing.xl,
@@ -125,4 +141,14 @@ const $itemThumbnail: ImageStyle = {
 }
 const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
+})
+
+const $bottomSheetBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+})
+const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral800,
+})
+const $bottomSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
 })
