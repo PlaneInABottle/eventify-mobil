@@ -40,6 +40,7 @@ export type AppStackParamList = {
   ForgotPassword: undefined
   EditProfile: undefined
   Chat: { eventChatId: string }
+  Report: { reportedItemId: string; reportType: string }
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -83,6 +84,7 @@ const AppStack = observer(function AppStack() {
           <Stack.Screen name="Main" component={MainNavigator} />
           <Stack.Screen name="EditProfile" component={Screens.EditProfileScreen} />
           <Stack.Screen name="Chat" component={Screens.ChatScreen} />
+          <Stack.Screen name="Report" component={Screens.ReportScreen} />
         </>
       ) : (
         <>
