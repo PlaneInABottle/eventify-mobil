@@ -43,7 +43,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
     setThemeContextOverride(themeContext === "dark" ? "light" : "dark")
   }, [themeContext, setThemeContextOverride])
   return (
-    <Screen preset="scroll" contentContainerStyle={$styles.container} safeAreaEdges={["top"]}>
+    <Screen preset="scroll" contentContainerStyle={$styles.container}>
       <>
         {/* Profile Header */}
         <View style={themed($headerContainer)}>
