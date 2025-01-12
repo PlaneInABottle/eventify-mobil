@@ -21,7 +21,7 @@ interface ProfileScreenProps extends MainTabScreenProps<"Profile"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileScreen(_props) {
   const { setThemeContextOverride, themeContext, themed } = useAppTheme()
-  const { userStore } = useStores()
+  const { userStore, authenticationStore } = useStores()
   const user = userStore.user
 
   const handleEditPersonalInfo = () => {
@@ -158,6 +158,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         <View style={themed($itemsContainer)}>
           <Button onPress={toggleTheme} text={`Toggle Theme: ${themeContext}`} />
         </View>
+        <View style={themed($itemsContainer)}>
+          <Button onPress={() => authenticationStore.logout()} text={"Logout"} />
+        </View>
       </>
     </Screen>
   )
@@ -196,7 +199,7 @@ const $userInfoContainer: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
 })
 const $itemsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginVertical: spacing.xl,
+  marginTop: spacing.lg,
 })
 
 const $nameText: ThemedStyle<TextStyle> = ({ spacing }) => ({
