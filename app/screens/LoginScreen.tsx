@@ -74,7 +74,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     <Screen
       preset="auto"
       contentContainerStyle={themed($screenContentContainer)}
-      safeAreaEdges={["top", "bottom"]}
+      safeAreaEdges={["top"]}
     >
       <View style={themed($topContainer)}>
         <Text
