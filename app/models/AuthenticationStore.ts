@@ -56,28 +56,29 @@ export const AuthenticationStoreModel: IAnyModelType = types
     },
   }))
   .actions((store) => ({
-    handleSuccessfulAuth: flow(function* (
-      session: Session,
-      userId: string,
-    ): Generator<any, boolean, any> {
+    handleSuccessfulAuth: flow(function* (session: Session, userId: string) {
       if (!session?.access_token || !userId) {
         store.setError("Invalid session data")
         return false
       }
+      try {
+        // First fetch profile
+        const profileSuccess = yield getRootStore(store).userStore.fetchProfile(userId)
+        if (!profileSuccess) {
+          throw Error("There was an error fetching user")
+        }
+        // Then set auth state
+        store.setAuthToken(session.access_token)
+        store.setAuthEmail(session.user?.email ?? "")
+        store.distributeAuthToken(session.access_token)
 
-      // First fetch profile
-      const profileSuccess = yield getRootStore(store).userStore.fetchProfile(userId)
-      if (!profileSuccess) {
-        store.setError("Failed to load user profile")
+        return true
+      } catch (error) {
+        console.error(error)
         return false
+      } finally {
+        store.setLoading(false)
       }
-
-      // Then set auth state
-      store.setAuthToken(session.access_token)
-      store.setAuthEmail(session.user?.email ?? "")
-      store.distributeAuthToken(session.access_token)
-
-      return true
     }),
   }))
   .actions((store) => ({
@@ -102,8 +103,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
           return success
         }
 
-        store.setError("No session data received")
-        return false
+        throw Error("Session data couldn't fetched")
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
@@ -153,8 +153,8 @@ export const AuthenticationStoreModel: IAnyModelType = types
         async (event: AuthChangeEvent, session: Session | null) => {
           switch (event) {
             case "SIGNED_IN":
-              // Only handle automatic sign-ins (not from login/register)
-              if (session?.access_token && !store.authToken) {
+              // Only handle automatic sign-ins (not from login/register), this is probably wrong
+              if (session?.access_token && !!store.authToken) {
                 await store.handleSuccessfulAuth(session, session.user?.id)
               }
               break

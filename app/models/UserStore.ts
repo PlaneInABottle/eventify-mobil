@@ -1,10 +1,10 @@
-import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
+import { Instance, SnapshotOut, types, flow, SnapshotIn, IAnyModelType } from "mobx-state-tree"
 import { User, UserModel } from "./User"
 import { supabase } from "@/services/auth/supabase"
 import * as ImagePicker from "expo-image-picker"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { getRootStore } from "./helpers/getRootStore"
-export const UserStoreModel = types
+export const UserStoreModel: IAnyModelType = types
   .model("UserStore")
   .props({
     user: types.maybe(UserModel),
@@ -37,22 +37,21 @@ export const UserStoreModel = types
     },
   }))
   .actions((store) => ({
-    fetchProfile: flow(function* (userId: string) {
-      if (!userId) {
-        store.setError("User ID is required")
-        return false
-      }
-
-      store.setLoading(true)
+    fetchProfile: flow(function* (userIdProp: string) {
       try {
+        store.setLoading(true)
+        if (!userIdProp) {
+          throw Error("User Id is not found")
+        }
+
         const { data: profile, error } = yield supabase
           .from("profiles")
           .select("*")
-          .eq("id", userId)
+          .eq("id", userIdProp)
           .single()
 
         if (error) {
-          throw error
+          throw Error(error)
         }
 
         if (!profile) {
@@ -62,7 +61,7 @@ export const UserStoreModel = types
         store.setProp("user", profile)
         return true
       } catch (error) {
-        console.log(error)
+        console.error(error)
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
       } finally {
@@ -86,7 +85,7 @@ export const UserStoreModel = types
         store.setProp("user", { ...store.user, ...updates })
         return true
       } catch (error) {
-        console.log("Error", error)
+        console.error("Error", error)
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
         return false
       } finally {
@@ -133,7 +132,7 @@ export const UserStoreModel = types
         yield store.updateProfile({ avatar_url: data.path })
         return true
       } catch (error) {
-        console.log("Error", error)
+        console.error("Error", error)
         store.setError(error instanceof Error ? error.message : "Failed to upload avatar")
         return false
       } finally {
