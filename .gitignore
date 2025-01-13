@@ -91,3 +91,7 @@ web-build/
 
 # Yarn
 .yarn/*
+
+# App Bundle
+*.aab
+*.apk
