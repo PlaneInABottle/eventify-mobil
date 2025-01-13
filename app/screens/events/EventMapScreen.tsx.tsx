@@ -7,7 +7,7 @@ import MapView, { Region, Marker, MapMarkerProps } from "react-native-maps"
 import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
 import { ButtonAccessoryProps } from "@/components/Button"
-import { ThemedStyle } from "@/theme"
+import { $styles, ThemedStyle } from "@/theme"
 import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -29,7 +29,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
   }
 
   return (
-    <Screen preset="fixed" contentContainerStyle={$screenContentContainer}>
+    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
       <MapView
         style={$mapView}
         onRegionChangeComplete={(region) => {
