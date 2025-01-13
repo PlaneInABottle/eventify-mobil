@@ -57,11 +57,10 @@ export const AuthenticationStoreModel: IAnyModelType = types
   }))
   .actions((store) => ({
     handleSuccessfulAuth: flow(function* (session: Session, userId: string) {
-      if (!session?.access_token || !userId) {
-        store.setError("Invalid session data")
-        return false
-      }
       try {
+        if (!session?.access_token || !userId) {
+          throw Error("Invalid session data")
+        }
         // First fetch profile
         const profileSuccess = yield getRootStore(store).userStore.fetchProfile(userId)
         if (!profileSuccess) {
