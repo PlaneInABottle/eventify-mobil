@@ -51,7 +51,12 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
 
   // BUG: Keyboard hides the text field unless keyboardOffset is set, but this is not a good solution
   return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1} keyboardOffset={100}>
+    <Screen
+      preset="fixed"
+      contentContainerStyle={$styles.flex1}
+      safeAreaEdges={["bottom"]}
+      keyboardOffset={100}
+    >
       <ListView<ChatMessage>
         inverted
         data={fakeMessages}
