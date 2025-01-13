@@ -53,8 +53,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
   return (
     <Screen
       preset="fixed"
-      contentContainerStyle={$styles.flex1}
-      safeAreaEdges={["bottom"]}
+      contentContainerStyle={[$styles.flex1, themed($screenContentContainer)]}
       keyboardOffset={100}
     >
       <ListView<ChatMessage>
@@ -137,3 +136,5 @@ const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
 })
+
+const $screenContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({})
