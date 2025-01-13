@@ -41,6 +41,7 @@ export type AppStackParamList = {
   EditProfile: undefined
   Chat: { eventChatId: string }
   Report: { reportedItemId: string; reportType: string }
+  Event: { eventId: string }
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
