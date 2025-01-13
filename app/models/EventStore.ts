@@ -79,7 +79,11 @@ export const EventStoreModel = types
           return
         }
         store.events.forEach((event) => {
-          if (!store.favorites.includes(event) && !store.joinedChats.includes(event)) {
+          if (
+            !getRootStore(store).chatStore.joinedEvents.includes(event) &&
+            !store.favorites.includes(event) &&
+            !store.joinedChats.includes(event)
+          ) {
             store.events.delete(event.id)
           }
         })

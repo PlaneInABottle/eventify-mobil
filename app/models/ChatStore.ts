@@ -2,6 +2,7 @@ import { flow, SnapshotOut, SnapshotIn, Instance, types } from "mobx-state-tree"
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { EventModel } from "./Event"
 
 export interface ChatMessage extends Instance<typeof ChatMessageModel> {}
 const ChatMessageModel = types.model("ChatMessage").props({
@@ -49,6 +50,7 @@ export const ChatStoreModel = types
   .model("ChatStore")
   .props({
     chats: types.map(ChatModel),
+    joinedEvents: types.array(types.safeReference(EventModel)),
   })
   .volatile(() => ({
     isLoading: false,
@@ -74,8 +76,10 @@ export const ChatStoreModel = types
           .eq("event_chats_participants.user_id", userId)
         if (error) throw error
         store.chats.clear()
+        store.joinedEvents.clear()
         chats.forEach((chat: Chat) => {
           store.chats.put(chat)
+          store.joinedEvents.push(chat.event_id)
         })
       } catch (error) {
         console.error(error)
@@ -100,6 +104,7 @@ export const ChatStoreModel = types
           id: data.event_chat_id,
           event_id: eventId,
         })
+        store.joinedEvents.push(eventId)
       } catch (error) {
         console.error(error)
       } finally {
@@ -120,7 +125,11 @@ export const ChatStoreModel = types
           .single()
         if (error) throw error
 
+        const chat = store.getChat(eventChatId)
+        if (!chat?.event_id) throw Error("Chat not found")
         store.chats.delete(eventChatId)
+        const event = getRootStore(store).eventStore.events.get(chat?.event_id)
+        store.joinedEvents.remove(event)
       } catch (error) {
         console.error(error)
       } finally {
