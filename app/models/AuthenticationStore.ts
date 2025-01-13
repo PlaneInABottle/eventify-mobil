@@ -151,13 +151,6 @@ export const AuthenticationStoreModel: IAnyModelType = types
       } = supabase.auth.onAuthStateChange(
         async (event: AuthChangeEvent, session: Session | null) => {
           switch (event) {
-            case "SIGNED_IN":
-              // Only handle automatic sign-ins (not from login/register), this is probably wrong
-              if (session?.access_token && !!store.authToken) {
-                await store.handleSuccessfulAuth(session, session.user?.id)
-              }
-              break
-
             case "SIGNED_OUT":
               store.logout()
               break
