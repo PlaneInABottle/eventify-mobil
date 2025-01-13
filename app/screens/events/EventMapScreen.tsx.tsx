@@ -85,12 +85,11 @@ const MarkerField = observer(
     const sheet = useRef<BottomSheetModal>(null)
     const {
       themed,
-      theme: { colors, spacing },
+      theme: { colors },
     } = useAppTheme()
     const {
       chatStore: { toggleChat, hasJoinedChat, isLoading },
     } = useStores()
-    const { bottom } = useSafeAreaInsets()
 
     useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }))
 
@@ -116,12 +115,7 @@ const MarkerField = observer(
             <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
           )}
         >
-          <BottomSheetScrollView
-            contentContainerStyle={themed([
-              $bottomSheetContent,
-              { paddingBottom: bottom + spacing.xl },
-            ])}
-          >
+          <BottomSheetScrollView contentContainerStyle={themed([$bottomSheetContent])}>
             {event.image_url && (
               <AutoImage
                 source={{
