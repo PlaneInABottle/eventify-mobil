@@ -10,7 +10,6 @@ import { ButtonAccessoryProps } from "@/components/Button"
 import { $styles, ThemedStyle } from "@/theme"
 import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
 // TODO: Custom icons, and organizer name instead of id.
@@ -186,10 +185,6 @@ const LoadingIndicator = (props: ButtonAccessoryProps) => {
     theme: { colors },
   } = useAppTheme()
   return <ActivityIndicator size="small" color={colors.palette.neutral800} style={props.style} />
-}
-
-const $screenContentContainer: ViewStyle = {
-  flex: 1,
 }
 
 const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
