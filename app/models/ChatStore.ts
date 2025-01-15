@@ -173,6 +173,10 @@ export const ChatStoreModel = types
         store.socket.on("connect", () => console.log("connected to the server"))
 
         store.socket.on("disconnect", () => console.log("User Disconnected"))
+
+        store.socket.on("receiveMessage", (data) => {
+          console.log("new message arrived: ", data)
+        })
       } else {
         throw Error("Socket Not Found")
       }
@@ -183,7 +187,6 @@ export const ChatStoreModel = types
       try {
         if (!authenticationToken) return
 
-        console.log("api csocket url: ", api.config)
         const socket = io(api.config.socketUrl, {
           secure: true,
           auth: {
@@ -211,6 +214,25 @@ export const ChatStoreModel = types
     leaveSocketChatRoom(chatRoomId: string) {
       store.socket!.emit("leaveRoom", chatRoomId)
     },
+  }))
+  .actions((store) => ({
+    sendMessage: flow(function* (chatId: string, message: string) {
+      try {
+        const userId = getRootStore(store).userStore.userId as string | undefined
+        if (!userId) throw Error("User not found")
+
+        const { error } = yield supabase
+          .from("messages")
+          .insert({ event_chat_id: chatId, sender_id: userId, content: message })
+
+        if (error) throw Error(error)
+      } catch (error) {
+        console.error(
+          "There was an error while sending message: ",
+          error instanceof Error ? error.message : "Please contact admins",
+        )
+      }
+    }),
   }))
 
 // import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
