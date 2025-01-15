@@ -1,8 +1,10 @@
 import { flow, SnapshotOut, SnapshotIn, Instance, types } from "mobx-state-tree"
+import { Socket, io } from "socket.io-client"
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { EventModel } from "./Event"
+import { api } from "@/services/api"
 
 export interface ChatMessage extends Instance<typeof ChatMessageModel> {}
 const ChatMessageModel = types.model("ChatMessage").props({
@@ -54,6 +56,7 @@ export const ChatStoreModel = types
   })
   .volatile(() => ({
     isLoading: false,
+    socket: null as Socket | null,
   }))
   .views((store) => ({
     getChat(eventChatId: string) {
@@ -144,6 +147,72 @@ export const ChatStoreModel = types
       else store.joinChat(eventChatId, eventId)
     },
   }))
+  .actions((store) => ({
+    setSocket(socket: Socket) {
+      store.socket = socket
+    },
+    // //     setIsConnected(connected: boolean) {
+    // //       store.isConnected = connected
+    // //     },
+    // //     setActiveEveatChat(chatId: number) {
+    // //       store.activeEventChatId = chatId
+    // //     },
+    // //     addEventChat(chat: typeof EventChatModel.Type) {
+    // //       store.eventChats.push(chat)
+    // //     },
+    // //     addMessage(chatId: number, message: typeof ChatMessageModel.Type) {
+    // //       const chat = store.eventChats.find((c) => c.id === chatId)
+    // //       if (chat) {
+    // //         chat.messages.push(message)
+    // //       }
+    // //     },
+  }))
+  .actions((store) => ({
+    setupSocketListeners() {
+      if (store.socket) {
+        store.socket.on("connect", () => console.log("connected to the server"))
+
+        store.socket.on("disconnect", () => console.log("User Disconnected"))
+      } else {
+        throw Error("Socket Not Found")
+      }
+    },
+  }))
+  .actions((store) => ({
+    connect: flow(function* (authenticationToken: string) {
+      try {
+        if (!authenticationToken) return
+
+        console.log("api csocket url: ", api.config)
+        const socket = io(api.config.socketUrl, {
+          secure: true,
+          auth: {
+            token: `Bearer ${authenticationToken}`,
+          },
+        })
+        store.setSocket(socket)
+        store.setupSocketListeners()
+      } catch (error) {
+        console.error(
+          "There was an error while connecting to the socket: ",
+          error instanceof Error
+            ? error.message
+            : "If the issue persists, please contact the admins",
+        )
+      }
+    }),
+    disconnect() {
+      if (store.socket) store.socket!.disconnect()
+      else throw Error("Socket Not Found")
+    },
+    joinSocketChatRoom(chatRoomId: string) {
+      store.socket!.emit("joinRoom", chatRoomId)
+    },
+    leaveSocketChatRoom(chatRoomId: string) {
+      store.socket!.emit("leaveRoom", chatRoomId)
+    },
+  }))
+
 // import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
 // import { EventChatModel } from "./EventChat"
 // import { ChatMessageModel } from "./ChatMessage"

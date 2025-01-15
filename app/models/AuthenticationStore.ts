@@ -52,7 +52,10 @@ export const AuthenticationStoreModel: IAnyModelType = types
       store.authEmail = ""
       store.error = undefined
       api.apisauce.deleteHeader("Authorization")
-      getRootStore(store).userStore.clearUser()
+      const rootStore = getRootStore(store)
+      rootStore.userStore.clearUser()
+      rootStore.chatStore.disconnect()
+      rootStore.chatStore.socket = null
     },
   }))
   .actions((store) => ({
@@ -70,6 +73,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         store.setAuthToken(session.access_token)
         store.setAuthEmail(session.user?.email ?? "")
         store.distributeAuthToken(session.access_token)
+        getRootStore(store).chatStore.connect(session.access_token)
 
         return true
       } catch (error) {
@@ -151,6 +155,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
       } = supabase.auth.onAuthStateChange(
         async (event: AuthChangeEvent, session: Session | null) => {
           switch (event) {
+            case "SIGNED_IN":
+              if (store.authToken) getRootStore(store).chatStore.connect(store.authToken)
+              break
             case "SIGNED_OUT":
               store.logout()
               break
