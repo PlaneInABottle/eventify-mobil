@@ -7,4 +7,5 @@
  */
 export default {
   API_URL: "https://eventify-backend-five.vercel.app",
+  SOCKET_URL: "http://188.245.246.89:3001",
 }
