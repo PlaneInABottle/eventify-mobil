@@ -80,6 +80,11 @@ export interface ApiConfig {
   url: string
 
   /**
+   * The URL of the socket.
+   */
+  socketUrl: string
+
+  /**
    * Milliseconds before we timeout the request.
    */
   timeout: number

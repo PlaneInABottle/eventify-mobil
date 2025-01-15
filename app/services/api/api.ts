@@ -25,6 +25,7 @@ import { stringify } from "qs-esm"
  */
 export const DEFAULT_API_CONFIG: ApiConfig = {
   url: Config.API_URL,
+  socketUrl: Config.SOCKET_URL,
   timeout: 10000,
 }
 
