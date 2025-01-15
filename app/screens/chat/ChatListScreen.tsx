@@ -21,6 +21,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
       chatStore.fetchUserChats()
     }, [])
     const handlePressChat = (chatId: string) => {
+      chatStore.joinSocketChatRoom(chatId)
       navigation.navigate("Chat", { eventChatId: chatId })
     }
     return (
