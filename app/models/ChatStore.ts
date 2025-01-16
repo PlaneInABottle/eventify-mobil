@@ -21,11 +21,15 @@ const ChatModel = types
   .props({
     id: types.identifier,
     event_id: types.string,
-
     messages: types.array(ChatMessageModel),
   })
   .volatile(() => ({
     offset: 0,
+  }))
+  .actions((store) => ({
+    clearMessages() {
+      store.messages.clear()
+    },
   }))
   .actions((store) => ({
     getChatMessages: flow(function* (limit: number = 10): Generator<any, void, any> {
@@ -39,7 +43,7 @@ const ChatModel = types
           .range(store.offset, store.offset + limit)
         if (error) throw error
         if (store.offset === 0) {
-          store.messages.clear()
+          store.clearMessages()
         }
         store.messages.push(...messages)
         store.offset += messages.length
@@ -47,6 +51,10 @@ const ChatModel = types
         console.error(error)
       }
     }),
+    pushNewMessage(message: ChatMessage) {
+      store.messages.unshift(message)
+      store.offset = store.offset + 1
+    },
   }))
 export const ChatStoreModel = types
   .model("ChatStore")
@@ -57,6 +65,8 @@ export const ChatStoreModel = types
   .volatile(() => ({
     isLoading: false,
     socket: null as Socket | null,
+    isConnected: false,
+    activeChat: undefined as undefined | Chat,
   }))
   .views((store) => ({
     getChat(eventChatId: string) {
@@ -88,6 +98,13 @@ export const ChatStoreModel = types
         console.error(error)
       }
     }),
+    pushMessageToChat(message: ChatMessage) {
+      try {
+        store.activeChat?.pushNewMessage(message)
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : "Please contact the admin")
+      }
+    },
   }))
   .actions((store) => ({
     joinChat: flow(function* (eventChatId: string, eventId: string): Generator<any, void, any> {
@@ -151,30 +168,25 @@ export const ChatStoreModel = types
     setSocket(socket: Socket) {
       store.socket = socket
     },
-    // //     setIsConnected(connected: boolean) {
-    // //       store.isConnected = connected
-    // //     },
-    // //     setActiveEveatChat(chatId: number) {
-    // //       store.activeEventChatId = chatId
-    // //     },
-    // //     addEventChat(chat: typeof EventChatModel.Type) {
-    // //       store.eventChats.push(chat)
-    // //     },
-    // //     addMessage(chatId: number, message: typeof ChatMessageModel.Type) {
-    // //       const chat = store.eventChats.find((c) => c.id === chatId)
-    // //       if (chat) {
-    // //         chat.messages.push(message)
-    // //       }
-    // //     },
   }))
   .actions((store) => ({
     setupSocketListeners() {
       if (store.socket) {
-        store.socket.on("connect", () => console.log("connected to the server"))
+        store.socket.on("connect", () => {
+          console.log("connected to the server")
+        })
 
         store.socket.on("disconnect", () => console.log("User Disconnected"))
 
         store.socket.on("get-message", (data) => {
+          store.pushMessageToChat({
+            id: data.id,
+            content: data.content,
+            sender_id: data.sender.id,
+            created_at: data.created_at,
+            event_chat_id: data.event_chat_id,
+          })
+
           console.log("new message arrived: ", data)
         })
       } else {
@@ -193,6 +205,11 @@ export const ChatStoreModel = types
             token: `Bearer ${authenticationToken}`,
           },
         })
+
+        socket.on("connect", () => {
+          if (!store.socket) store.setSocket(socket)
+          console.log("connected from the normal socket")
+        })
         store.setSocket(socket)
         store.setupSocketListeners()
       } catch (error) {
@@ -210,9 +227,11 @@ export const ChatStoreModel = types
     },
     joinSocketChatRoom(chatRoomId: string) {
       store.socket!.emit("joinRoom", chatRoomId)
+      store.activeChat = store.getChat(chatRoomId)
     },
     leaveSocketChatRoom(chatRoomId: string) {
       store.socket!.emit("leaveRoom", chatRoomId)
+      store.activeChat = undefined
     },
   }))
   .actions((store) => ({
@@ -221,13 +240,20 @@ export const ChatStoreModel = types
         const userId = getRootStore(store).userStore.userId as string | undefined
         if (!userId) throw Error("User not found")
 
-        const { error } = yield supabase
+        const { data, error } = yield supabase
           .from("messages")
           .insert({ event_chat_id: chatId, sender_id: userId, content: message })
+          .select()
+          .single()
 
         if (error) throw Error(error)
 
-        store.socket!.emit("send-message", { roomId: chatId, message })
+        store.socket!.emit("send-message", {
+          content: data.content,
+          id: data.id,
+          event_chat_id: data.event_chat_id,
+          created_at: data.created_at,
+        })
       } catch (error) {
         console.error(
           "There was an error while sending message: ",
@@ -236,130 +262,6 @@ export const ChatStoreModel = types
       }
     }),
   }))
-
-// import { Instance, SnapshotOut, types, flow, SnapshotIn } from "mobx-state-tree"
-// import { EventChatModel } from "./EventChat"
-// import { ChatMessageModel } from "./ChatMessage"
-// import { Socket, io } from "socket.io-client"
-// import { api } from "../services/api"
-// import { getRootStore } from "./helpers/getRootStore"
-
-// export const ChatStoreModel = types
-//   .model("ChatStore")
-//   .props({
-//     eventChats: types.array(EventChatModel),
-//     activeEventChatId: types.maybe(types.number),
-//   })
-//   .volatile(() => ({
-//     socket: null as Socket | null,
-//     isConnected: false,
-//   }))
-//   .actions((store) => {
-//     afterCreate(){
-//         self.connectWebSocket()
-//     },
-//     connectWebSocket(){
-//         const socket = io(api.config.url, {
-//             auth: {
-//                 token: authStore.authToken,
-//             },
-//         })
-//     }
-//   })
-// //   .views((store) => ({
-// //     get activeEventChat() {
-// //       return store.eventChats.find((chat) => chat.id === store.activeEventChatId)
-// //     },
-// //   }))
-// //   .actions((store) => ({
-// //     setSocket(socket: Socket) {
-// //       store.socket = socket
-// //     },
-// //     setIsConnected(connected: boolean) {
-// //       store.isConnected = connected
-// //     },
-// //     setActiveEventChat(chatId: number) {
-// //       store.activeEventChatId = chatId
-// //     },
-// //     addEventChat(chat: typeof EventChatModel.Type) {
-// //       store.eventChats.push(chat)
-// //     },
-// //     addMessage(chatId: number, message: typeof ChatMessageModel.Type) {
-// //       const chat = store.eventChats.find((c) => c.id === chatId)
-// //       if (chat) {
-// //         chat.messages.push(message)
-// //       }
-// //     },
-// //   }))
-// //   .actions((store) => ({
-// //     setupSocketListeners() {
-// //       if (!store.socket) return
-
-// //       store.socket.on("connect", () => {
-// //         store.setIsConnected(true)
-// //       })
-
-// //       store.socket.on("disconnect", () => {
-// //         store.setIsConnected(false)
-// //       })
-
-// //       store.socket.on("chat:message", (message) => {
-// //         store.addMessage(message.eventChatId, message)
-// //       })
-
-// //       // Join the active chat room when it changes
-// //       store.socket.on("chat:joined", (chatId) => {
-// //         console.log(`Joined chat room: ${chatId}`)
-// //       })
-// //     },
-// //   }))
-// //   .actions((store) => ({
-// //     connect: flow(function* () {
-// //       const authStore = getRootStore(store).authenticationStore
-// //       if (!authStore.authToken) return
-
-// //       const socket = io(api.config.url, {
-// //         auth: {
-// //           token: authStore.authToken,
-// //         },
-// //       })
-// //       store.setSocket(socket)
-// //       store.setupSocketListeners()
-// //     }),
-
-// //     disconnect() {
-// //       if (store.socket) {
-// //         store.socket.disconnect()
-// //         store.socket = null
-// //       }
-// //       store.setIsConnected(false)
-// //     },
-
-// //     joinChat: flow(function* (chatId: number) {
-// //       if (!store.socket || !store.isConnected) return
-
-// //       store.setActiveEventChat(chatId)
-// //       store.socket.emit("chat:join", chatId)
-// //     }),
-
-// //     leaveChat: flow(function* (chatId: number) {
-// //       if (!store.socket || !store.isConnected) return
-
-// //       if (store.activeEventChatId === chatId) {
-// //         store.setActiveEventChat(undefined)
-// //       }
-// //       store.socket.emit("chat:leave", chatId)
-// //     }),
-
-// //     sendMessage: flow(function* (content: string) {
-// //       if (!store.socket || !store.isConnected || !store.activeEventChatId) return
-
-// //       store.socket.emit("chat:message", {
-// //         eventChatId: store.activeEventChatId,
-// //         content,
-// //       })
-// //     }),
-// //   }))
 
 export interface ChatStore extends Instance<typeof ChatStoreModel> {}
 export interface ChatStoreSnapshotOut extends SnapshotOut<typeof ChatStoreModel> {}
