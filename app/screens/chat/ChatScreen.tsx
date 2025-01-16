@@ -35,11 +35,11 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
     title: "Chat",
     leftIcon: "back",
     onLeftPress: () => {
-      chatStore.leaveSocketChatRoom(eventChatId)
+      //     chatStore.leaveSocketChatRoom(eventChatId)
       navigation.goBack()
     },
   })
-
+  /*
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -52,6 +52,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
       return () => subscription.remove()
     }, []),
   )
+    */
   const handleSendMessage = () => {
     chatStore.sendMessage(eventChatId, message)
     setMessage("")
