@@ -164,6 +164,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
               break
 
             case "TOKEN_REFRESHED":
+              console.log("TOKEN_REFRESHED")
               if (session?.access_token) {
                 store.setAuthToken(session.access_token)
                 store.distributeAuthToken(session.access_token)
