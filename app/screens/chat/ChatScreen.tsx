@@ -35,6 +35,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
     title: "Chat",
     leftIcon: "back",
     onLeftPress: () => {
+      chatStore.leaveSocketChatRoom(eventChatId)
       navigation.goBack()
     },
   })
