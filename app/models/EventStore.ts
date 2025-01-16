@@ -143,44 +143,6 @@ export const EventStoreModel = types
 
       store.isLoading = false
     }),
-
-    joinChat: flow(function* (event: Event): Generator<any, void, any> {
-      if (store.joinedChats.includes(event)) return
-      store.isLoading = true
-      store.joinedChats.push(event) // Optimistic update
-
-      const { error } = yield supabase.from("event_chats_participants").insert({
-        event_chat_id: event.event_chat_id,
-        user_id: getRootStore(store).userStore.userId,
-      })
-
-      if (error) {
-        store.setError(error.message)
-        store.joinedChats.remove(event) // Rollback on error
-      }
-
-      store.isLoading = false
-    }),
-
-    quitChat: flow(function* (event: Event): Generator<any, void, any> {
-      if (!store.joinedChats.includes(event)) return
-
-      store.isLoading = true
-      store.joinedChats.remove(event) // Optimistic update
-
-      const { error } = yield supabase
-        .from("event_chats_participants")
-        .delete()
-        .eq("event_chat_id", event.event_chat_id)
-        .eq("user_id", getRootStore(store).userStore.userId)
-
-      if (error) {
-        store.setError(error.message)
-        store.joinedChats.push(event) // Rollback on error
-      }
-
-      store.isLoading = false
-    }),
   }))
   .actions((store) => ({
     toggleFavorite(event: Event) {
@@ -188,13 +150,6 @@ export const EventStoreModel = types
         store.removeFavorite(event)
       } else {
         store.addFavorite(event)
-      }
-    },
-    toggleChat(event: Event) {
-      if (store.hasJoinedChat(event)) {
-        store.quitChat(event)
-      } else {
-        store.joinChat(event)
       }
     },
   }))
