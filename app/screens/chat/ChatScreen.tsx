@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
 import { FC, useCallback, useState } from "react"
 import { AppStackScreenProps } from "@/navigators"
 import { $styles, ThemedStyle } from "@/theme"
-import { Card, ListView, Screen, TextField } from "@/components"
+import { Card, Icon, ListView, Screen, TextField } from "@/components"
 import { useStores } from "@/models"
 import { ChatMessage } from "@/models/ChatStore"
 import { TextStyle, ViewStyle } from "react-native"
@@ -19,7 +19,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
   const { chatStore } = useStores()
   const chat = chatStore.getChat(eventChatId)
   const { themed } = useAppTheme()
-
+  const [message, setMessage] = useState<string>("")
   // Generate fake messages
   const generateFakeMessages = useCallback(
     (count: number): ChatMessage[] => {
@@ -49,12 +49,16 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
     },
   })
 
+  const handleSendMessage = () => {
+    chatStore.sendMessage(eventChatId, message)
+    setMessage("")
+  }
   // BUG: Keyboard hides the text field unless keyboardOffset is set, but this is not a good solution
   return (
     <Screen
       preset="fixed"
       contentContainerStyle={[$styles.flex1, themed($screenContentContainer)]}
-      keyboardOffset={100}
+      keyboardOffset={130}
     >
       <ListView<ChatMessage>
         inverted
@@ -69,6 +73,11 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
         placeholder="Type a message"
         containerStyle={themed($textFieldContainer)}
         inputWrapperStyle={themed($inputWrapperStyle)}
+        value={message}
+        onChangeText={setMessage}
+        RightAccessory={() =>
+          message && <Icon onPress={handleSendMessage} icon="caretRight" color="white" size={41} />
+        }
       />
     </Screen>
   )

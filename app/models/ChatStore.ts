@@ -174,7 +174,7 @@ export const ChatStoreModel = types
 
         store.socket.on("disconnect", () => console.log("User Disconnected"))
 
-        store.socket.on("receiveMessage", (data) => {
+        store.socket.on("get-message", (data) => {
           console.log("new message arrived: ", data)
         })
       } else {
@@ -226,6 +226,8 @@ export const ChatStoreModel = types
           .insert({ event_chat_id: chatId, sender_id: userId, content: message })
 
         if (error) throw Error(error)
+
+        store.socket!.emit("send-message", { roomId: chatId, message })
       } catch (error) {
         console.error(
           "There was an error while sending message: ",

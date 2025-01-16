@@ -156,6 +156,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         async (event: AuthChangeEvent, session: Session | null) => {
           switch (event) {
             case "SIGNED_IN":
+              console.log("Signed in")
               if (store.authToken) getRootStore(store).chatStore.connect(store.authToken)
               break
             case "SIGNED_OUT":
