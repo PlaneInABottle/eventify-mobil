@@ -107,64 +107,6 @@ export const ChatStoreModel = types
     },
   }))
   .actions((store) => ({
-    joinChat: flow(function* (eventChatId: string, eventId: string): Generator<any, void, any> {
-      store.isLoading = true
-      try {
-        if (store.hasJoinedChat(eventChatId)) return
-        const { data, error } = yield supabase
-          .from("event_chats_participants")
-          .insert({
-            event_chat_id: eventChatId,
-            user_id: getRootStore(store).userStore.userId,
-          })
-          .select()
-          .single()
-        if (error) throw error
-        store.chats.set(data.event_chat_id, {
-          id: data.event_chat_id,
-          event_id: eventId,
-        })
-        store.joinedEvents.push(eventId)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        store.isLoading = false
-      }
-    }),
-
-    quitChat: flow(function* (eventChatId: string): Generator<any, void, any> {
-      store.isLoading = true
-      try {
-        if (!store.hasJoinedChat(eventChatId)) return
-        const { data, error } = yield supabase
-          .from("event_chats_participants")
-          .delete()
-          .eq("event_chat_id", eventChatId)
-          .eq("user_id", getRootStore(store).userStore.userId)
-          .select()
-          .single()
-        if (error) throw error
-
-        const chat = store.getChat(eventChatId)
-        if (!chat?.event_id) throw Error("Chat not found")
-        store.chats.delete(eventChatId)
-        const event = getRootStore(store).eventStore.events.get(chat?.event_id)
-        store.joinedEvents.remove(event)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        store.isLoading = false
-      }
-    }),
-  }))
-  .actions((store) => ({
-    toggleChat(eventChatId: string | undefined | null, eventId: string) {
-      if (!eventChatId) return
-      if (store.hasJoinedChat(eventChatId)) store.quitChat(eventChatId)
-      else store.joinChat(eventChatId, eventId)
-    },
-  }))
-  .actions((store) => ({
     setSocket(socket: Socket) {
       store.socket = socket
     },
@@ -261,6 +203,65 @@ export const ChatStoreModel = types
         )
       }
     }),
+  }))
+  .actions((store) => ({
+    joinChat: flow(function* (eventChatId: string, eventId: string): Generator<any, void, any> {
+      store.isLoading = true
+      try {
+        if (store.hasJoinedChat(eventChatId)) return
+        const { data, error } = yield supabase
+          .from("event_chats_participants")
+          .insert({
+            event_chat_id: eventChatId,
+            user_id: getRootStore(store).userStore.userId,
+          })
+          .select()
+          .single()
+        if (error) throw error
+        store.chats.set(data.event_chat_id, {
+          id: data.event_chat_id,
+          event_id: eventId,
+        })
+        store.joinedEvents.push(eventId)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        store.isLoading = false
+      }
+    }),
+
+    quitChat: flow(function* (eventChatId: string): Generator<any, void, any> {
+      store.isLoading = true
+      try {
+        if (!store.hasJoinedChat(eventChatId)) return
+        const { data, error } = yield supabase
+          .from("event_chats_participants")
+          .delete()
+          .eq("event_chat_id", eventChatId)
+          .eq("user_id", getRootStore(store).userStore.userId)
+          .select()
+          .single()
+        if (error) throw error
+
+        const chat = store.getChat(eventChatId)
+        if (!chat?.event_id) throw Error("Chat not found")
+        store.chats.delete(eventChatId)
+        const event = getRootStore(store).eventStore.events.get(chat?.event_id)
+        store.joinedEvents.remove(event)
+        store.leaveSocketChatRoom(eventChatId)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        store.isLoading = false
+      }
+    }),
+  }))
+  .actions((store) => ({
+    toggleChat(eventChatId: string | undefined | null, eventId: string) {
+      if (!eventChatId) return
+      if (store.hasJoinedChat(eventChatId)) store.quitChat(eventChatId)
+      else store.joinChat(eventChatId, eventId)
+    },
   }))
 
 export interface ChatStore extends Instance<typeof ChatStoreModel> {}
