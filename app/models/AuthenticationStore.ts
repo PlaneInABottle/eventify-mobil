@@ -168,6 +168,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
               if (session?.access_token) {
                 store.setAuthToken(session.access_token)
                 store.distributeAuthToken(session.access_token)
+                getRootStore(store).chatStore.connect(session?.access_token)
               }
               break
 
