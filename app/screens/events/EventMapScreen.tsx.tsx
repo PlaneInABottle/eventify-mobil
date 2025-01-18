@@ -153,7 +153,7 @@ const MarkerField = observer(
 
             <View style={themed($organizerContainer)}>
               <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
-              <Text text={event.organizer_id} />
+              <Text text={event.organizer_name} />
             </View>
 
             {event.hasChat && event.event_chat_id && (
