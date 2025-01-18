@@ -17,8 +17,9 @@ interface ChatScreenProps extends AppStackScreenProps<"Chat"> {}
 export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_props) {
   const { route, navigation } = _props
   const { eventChatId } = route.params
-  const { chatStore } = useStores()
+  const { chatStore, userStore } = useStores()
   const chat = chatStore.getChat(eventChatId) as Chat
+  const userId = userStore.userId
   const {
     themed,
     theme: { colors },
@@ -70,7 +71,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
         extraData={chat?.offset}
         estimatedItemSize={40}
         contentContainerStyle={themed($listContentContainer)}
-        renderItem={({ item }) => <ChatBubble message={item} />}
+        renderItem={({ item }) => <ChatBubble message={item} userId={userId} />}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
       />
@@ -89,12 +90,12 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
     </Screen>
   )
 })
-const ChatBubble = ({ message }: { message: ChatMessage }) => {
+const ChatBubble = ({ message, userId }: { message: ChatMessage; userId: string }) => {
   const { themed } = useAppTheme()
   return (
     <Card
       verticalAlignment="force-footer-bottom"
-      style={themed($card)}
+      style={[themed($card), userId === message.sender_id ? { alignSelf: "flex-end" } : undefined]}
       wrapperStyle={themed($wrapperStyle)}
       heading={message.sender_display_name}
       headingStyle={themed($headingText)}
