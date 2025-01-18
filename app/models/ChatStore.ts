@@ -229,7 +229,7 @@ export const ChatStoreModel = types
       store.isLoading = true
       try {
         if (!store.hasJoinedChat(eventChatId)) return
-        const { data, error } = yield supabase
+        const { error } = yield supabase
           .from("event_chats_participants")
           .delete()
           .eq("event_chat_id", eventChatId)
@@ -240,8 +240,8 @@ export const ChatStoreModel = types
 
         const chat = store.getChat(eventChatId)
         if (!chat?.event_id) throw Error("Chat not found")
-        store.chats.delete(eventChatId)
         const event = getRootStore(store).eventStore.events.get(chat?.event_id)
+        store.chats.delete(eventChatId)
         store.joinedEvents.remove(event)
         store.leaveSocketChatRoom(eventChatId)
       } catch (error) {
