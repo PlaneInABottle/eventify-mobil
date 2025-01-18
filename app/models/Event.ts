@@ -11,10 +11,12 @@ export const EventModel = types
     start_time: types.string,
     end_time: types.maybeNull(types.string),
     organizer_id: types.string,
+    organizer_name: types.maybeNull(types.string),
     lat: types.float,
     long: types.float,
     image_url: types.maybeNull(types.string),
     event_chat_id: types.maybeNull(types.string),
+    is_favorite: types.maybeNull(types.boolean),
   })
   .views((event) => ({
     get coordinates(): [number, number] {
