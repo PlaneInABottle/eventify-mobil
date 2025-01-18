@@ -1,4 +1,4 @@
-import { Instance, SnapshotOut, types } from "mobx-state-tree"
+import { Instance, SnapshotOut, flow, types } from "mobx-state-tree"
 import { AuthenticationStoreModel } from "./AuthenticationStore"
 import { EpisodeStoreModel } from "./EpisodeStore"
 import { UserStoreModel } from "./UserStore"
@@ -27,6 +27,15 @@ export const RootStoreModel = types
       store.setProp("eventStore", undefined)
       store.setProp("chatStore", undefined)
     },
+    getInitialData: flow(function* (userId: string) {
+      try {
+        store.userStore.fetchProfile(userId)
+        yield store.eventStore.fetchInitialEvents(userId)
+        store.chatStore.fetchUserChats(userId)
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
+      }
+    }),
   }))
 
 /**
