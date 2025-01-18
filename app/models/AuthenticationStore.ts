@@ -67,16 +67,13 @@ export const AuthenticationStoreModel: IAnyModelType = types
         if (!session?.access_token || !userId) {
           throw Error("Invalid session data")
         }
-        // First fetch profile
-        const profileSuccess = yield getRootStore(store).userStore.fetchProfile(userId)
-        if (!profileSuccess) {
-          throw Error("There was an error fetching user")
-        }
-        // Then set auth state
         store.setAuthToken(session.access_token)
         store.setAuthEmail(session.user?.email ?? "")
         store.distributeAuthToken(session.access_token)
+
+        // Get initial data
         getRootStore(store).chatStore.connect(session.access_token)
+        getRootStore(store).getInitialData(userId)
 
         return true
       } catch (error) {
