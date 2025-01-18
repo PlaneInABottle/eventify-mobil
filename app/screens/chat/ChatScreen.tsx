@@ -96,7 +96,7 @@ const ChatBubble = ({ message }: { message: ChatMessage }) => {
       verticalAlignment="force-footer-bottom"
       style={themed($card)}
       wrapperStyle={themed($wrapperStyle)}
-      heading={message.sender_id}
+      heading={message.sender_display_name}
       headingStyle={themed($headingText)}
       HeadingTextProps={{
         size: "xxs",
