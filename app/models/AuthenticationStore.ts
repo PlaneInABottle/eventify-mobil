@@ -34,6 +34,11 @@ export const AuthenticationStoreModel: IAnyModelType = types
     setError(value: string | undefined): void {
       store.error = value
     },
+    clearAuthentication() {
+      store.authEmail = ""
+      store.authToken = undefined
+      store.error = undefined
+    },
   }))
   .actions((store) => ({
     setAuthToken(value?: string): void {
@@ -47,15 +52,13 @@ export const AuthenticationStoreModel: IAnyModelType = types
     setAuthEmail(value: string): void {
       store.authEmail = value.replace(/ /g, "")
     },
-    logout(): void {
-      store.authToken = undefined
-      store.authEmail = ""
-      store.error = undefined
-      api.apisauce.deleteHeader("Authorization")
-      const rootStore = getRootStore(store)
-      rootStore.userStore.clearUser()
-      rootStore.chatStore.disconnect()
-      rootStore.chatStore.socket = null
+    logout() {
+      try {
+        getRootStore(store).resetAllStores()
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
+        else console.error("There was an unknown error while logging out")
+      }
     },
   }))
   .actions((store) => ({
