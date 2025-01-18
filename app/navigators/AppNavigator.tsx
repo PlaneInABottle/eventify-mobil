@@ -16,6 +16,7 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
+import * as Linking from "expo-linking"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -61,13 +62,16 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
   const {
-    authenticationStore: { isAuthenticated },
+    authenticationStore: { isAuthenticated, createSessionFromUrl },
   } = useStores()
 
   const {
     theme: { colors },
   } = useAppTheme()
 
+  const url = Linking.useURL()
+  if (url) createSessionFromUrl(url)
+  console.log("URL: ", url)
   return (
     <Stack.Navigator
       screenOptions={{
@@ -112,7 +116,6 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
     useThemeProvider()
 
   useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
-
   return (
     <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
       <BottomSheetModalProvider>

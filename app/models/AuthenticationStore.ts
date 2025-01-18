@@ -3,6 +3,10 @@ import { Instance, SnapshotOut, types, flow, IAnyModelType } from "mobx-state-tr
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { AuthChangeEvent, AuthError, Session } from "@supabase/supabase-js"
+import { makeRedirectUri } from "expo-auth-session"
+import * as QueryParams from "expo-auth-session/build/QueryParams"
+import * as WebBrowser from "expo-web-browser"
+import * as Linking from "expo-linking"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -147,6 +151,33 @@ export const AuthenticationStoreModel: IAnyModelType = types
         return false
       } finally {
         store.setLoading(false)
+      }
+    }),
+    createSessionFromUrl: flow(function* (url: string) {
+      try {
+        const { params, errorCode } = QueryParams.getQueryParams(url)
+
+        console.log("params:: ", params)
+        if (errorCode) throw new Error(errorCode)
+
+        // eslint-disable-next-line camelcase
+        const { access_token, refresh_token } = params
+
+        // eslint-disable-next-line camelcase
+        if (!access_token) return
+
+        const { data, error } = yield supabase.auth.setSession({
+          // eslint-disable-next-line camelcase
+          access_token,
+          // eslint-disable-next-line camelcase
+          refresh_token,
+        })
+        if (error) throw error
+        console.log("Session: ", data.session, "---------data-----------", data)
+        // store.handleSuccessfulAuth(data.session, data.session.user.id)
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
+        else console.error(e)
       }
     }),
     setupAuthListener() {
