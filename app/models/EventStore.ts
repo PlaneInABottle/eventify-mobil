@@ -11,7 +11,6 @@ export const EventStoreModel = types
     events: types.map(EventModel),
     eventsInBounds: types.array(types.safeReference(EventModel)),
     favorites: types.array(types.safeReference(EventModel)),
-    joinedChats: types.array(types.safeReference(EventModel)),
     selectedEvent: types.maybe(types.safeReference(EventModel)),
     favoritesOnly: false,
   })
@@ -23,9 +22,10 @@ export const EventStoreModel = types
   .actions(withSetPropAction)
   .views((store) => ({
     get eventsForList() {
+      const joinedChats = getRootStore(store).chatStore.joinedEvents as Event[]
       return store.favoritesOnly
         ? store.favorites
-        : Array.from(new Set([...store.favorites, ...store.eventsInBounds, ...store.joinedChats]))
+        : Array.from(new Set([...store.favorites, ...store.eventsInBounds, ...joinedChats]))
     },
     get ongoingEvents() {
       return Array.from(store.events.values()).filter((event) => event.isOngoing)
@@ -42,11 +42,25 @@ export const EventStoreModel = types
     hasFavorite(event: Event) {
       return store.favorites.includes(event)
     },
-    hasJoinedChat(event: Event) {
-      return store.joinedChats.includes(event)
-    },
   }))
   .actions((store) => ({
+    fetchInitialEvents: flow(function* (userId) {
+      try {
+        const { data: events, error } = yield supabase.rpc("get_users_initial_events", {
+          _user_id: userId,
+        })
+        if (error) throw Error(error.message)
+
+        events.forEach((event: Event) => {
+          store.events.put(event)
+          store.eventsInBounds.push(event.id)
+          if (event.is_favorite) store.favorites.push(event.id)
+        })
+        // chatStore.fetchUserChats()
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
+      }
+    }),
     fetchEventsInBounds: flow(function* (bounds: Region) {
       store.setError(undefined)
       store.isSearching = true
@@ -81,8 +95,7 @@ export const EventStoreModel = types
         store.events.forEach((event) => {
           if (
             !getRootStore(store).chatStore.joinedEvents.includes(event) &&
-            !store.favorites.includes(event) &&
-            !store.joinedChats.includes(event)
+            !store.favorites.includes(event)
           ) {
             store.events.delete(event.id)
           }
