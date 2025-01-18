@@ -108,7 +108,7 @@ export function MainNavigator() {
         options={{
           tabBarLabel: "Events",
           tabBarIcon: ({ focused }) => (
-            <Icon icon="components" color={focused ? colors.tint : colors.tintInactive} size={30} />
+            <Icon icon="eventMap" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
         }}
       />
@@ -118,7 +118,7 @@ export function MainNavigator() {
         options={{
           tabBarLabel: "Chats",
           tabBarIcon: ({ focused }) => (
-            <Icon icon="bell" color={focused ? colors.tint : colors.tintInactive} size={30} />
+            <Icon icon="chat" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
         }}
       />

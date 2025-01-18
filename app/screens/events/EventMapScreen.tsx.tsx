@@ -128,7 +128,7 @@ const MarkerField = observer(
               <Text preset="heading" text={event.title} style={themed($title)} />
               <View style={themed($dateTimeContainer)}>
                 <View style={themed($iconTextContainer)}>
-                  <Icon icon="components" size={20} color={colors.palette.primary500} />
+                  <Icon icon="calendar" size={20} color={colors.palette.primary500} />
                   <Text
                     text={event.dateFormatted.textLabel}
                     style={themed($dateTimeText)}
@@ -136,7 +136,7 @@ const MarkerField = observer(
                   />
                 </View>
                 <View style={themed($iconTextContainer)}>
-                  <Icon icon="ladybug" size={20} color={colors.palette.primary500} />
+                  <Icon icon="clock" size={20} color={colors.palette.primary500} />
                   <Text
                     text={event.timeFormatted.textLabel}
                     style={themed($dateTimeText)}

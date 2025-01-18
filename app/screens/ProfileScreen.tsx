@@ -99,7 +99,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               accessibilityRole="button"
               disabled={userStore.isLoading}
             >
-              <Icon icon="components" size={20} />
+              <Icon icon="refresh" size={20} />
             </TouchableOpacity>
           </View>
 
@@ -125,7 +125,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
                 accessibilityLabel="Edit personal information"
                 accessibilityRole="button"
               >
-                <Icon icon="components" size={20} />
+                <Icon icon="more" size={24} />
               </TouchableOpacity>
             </View>
           }
@@ -147,7 +147,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
               <View style={themed($infoItem)} accessible={true}>
                 <View style={themed($iconContainer)}>
-                  <Icon icon="components" size={20} containerStyle={themed($iconWrapper)} />
+                  <Icon icon="growth" size={20} containerStyle={themed($iconWrapper)} />
                 </View>
                 <View style={themed($infoTextContainer)}>
                   <Text preset="formLabel" text="Age" style={themed($infoLabel)} />
@@ -161,7 +161,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
               <View style={themed($infoItem)} accessible={true}>
                 <View style={themed($iconContainer)}>
-                  <Icon icon="components" size={20} containerStyle={themed($iconWrapper)} />
+                  <Icon icon="biography" size={20} containerStyle={themed($iconWrapper)} />
                 </View>
                 <View style={themed($infoTextContainer)}>
                   <Text preset="formLabel" text="Bio" style={themed($infoLabel)} />
