@@ -111,15 +111,15 @@ export const ChatStoreModel = types
     },
   }))
   .actions((store) => ({
-    setupSocketListeners() {
+    setupSocketListeners(socket: Socket) {
       if (store.socket) {
-        store.socket.on("connect", () => {
+        socket.on("connect", () => {
           console.log("connected to the server")
         })
 
-        store.socket.on("disconnect", () => console.log("User Disconnected"))
+        socket.on("disconnect", () => console.log("User Disconnected"))
 
-        store.socket.on("get-message", (data) => {
+        socket.on("get-message", (data) => {
           store.pushMessageToChat({
             id: data.id,
             content: data.content,
@@ -147,12 +147,8 @@ export const ChatStoreModel = types
           },
         })
 
-        socket.on("connect", () => {
-          if (!store.socket) store.setSocket(socket)
-          console.log("connected from the normal socket")
-        })
         store.setSocket(socket)
-        store.setupSocketListeners()
+        store.setupSocketListeners(socket)
       } catch (error) {
         console.error(
           "There was an error while connecting to the socket: ",
