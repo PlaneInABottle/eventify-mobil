@@ -155,12 +155,22 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
             </View>
           }
         />
-        <View style={themed($itemsContainer)}>
-          <Button onPress={toggleTheme} text={`Toggle Theme: ${themeContext}`} />
-        </View>
-        <View style={themed($itemsContainer)}>
-          <Button onPress={() => authenticationStore.logout()} text={"Logout"} />
-        </View>
+        <Button
+          onPress={toggleTheme}
+          text={`Toggle Theme: ${themeContext}`}
+          style={themed($itemsContainer)}
+        />
+        <Button
+          onPress={() => authenticationStore.logout()}
+          text={"Logout"}
+          style={themed($itemsContainer)}
+        />
+        <Button
+          onPress={() => console.log("Account deleted")}
+          text={"Delete Account"}
+          style={themed($deleteButton)}
+          preset="danger"
+        />
       </>
     </Screen>
   )
@@ -200,6 +210,10 @@ const $userInfoContainer: ThemedStyle<ViewStyle> = () => ({
 })
 const $itemsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.lg,
+})
+
+const $deleteButton: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  marginTop: spacing.xxxl,
 })
 
 const $nameText: ThemedStyle<TextStyle> = ({ spacing }) => ({
