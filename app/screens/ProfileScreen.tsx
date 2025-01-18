@@ -8,6 +8,7 @@ import {
   ImageStyle,
   ActivityIndicator,
   LayoutAnimation,
+  Alert,
 } from "react-native"
 import { Screen, Text, Icon, Button, Card } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -26,6 +27,25 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
   const handleEditPersonalInfo = () => {
     navigate("EditProfile")
+  }
+
+  const handleDeleteProfile = () => {
+    Alert.alert(
+      "YOU ARE DELETING YOUR ACCOUNT",
+      "Are you sure you want to delete your account? This action can not taken back.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            userStore.deleteProfile()
+          },
+        },
+      ],
+    )
   }
 
   const toggleTheme = useCallback(() => {
@@ -166,7 +186,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           style={themed($itemsContainer)}
         />
         <Button
-          onPress={() => console.log("Account deleted")}
+          onPress={handleDeleteProfile}
           text={"Delete Account"}
           style={themed($deleteButton)}
           preset="danger"

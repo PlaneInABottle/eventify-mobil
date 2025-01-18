@@ -157,6 +157,17 @@ export const UserStoreModel: IAnyModelType = types
         store.setLoading(false)
       }
     }),
+    deleteProfile: flow(function* () {
+      try {
+        const { error } = yield supabase.rpc("delete_user")
+
+        if (error) throw Error("There was an error while deleting profile")
+
+        getRootStore(store).resetAllStores()
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
+      }
+    }),
   }))
 
 export interface UserStore extends Instance<typeof UserStoreModel> {}
