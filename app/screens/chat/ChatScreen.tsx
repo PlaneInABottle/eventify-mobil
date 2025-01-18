@@ -1,16 +1,14 @@
 import { observer } from "mobx-react-lite"
-import React, { FC, useCallback, useState } from "react"
+import { FC, useCallback, useState } from "react"
 import { AppStackScreenProps } from "@/navigators"
 import { $styles, ThemedStyle } from "@/theme"
 import { Card, Icon, ListView, Screen, TextField } from "@/components"
 import { useStores } from "@/models"
 import { Chat, ChatMessage } from "@/models/ChatStore"
-import { BackHandler, TextStyle, ViewStyle } from "react-native"
+import { TextStyle, ViewStyle } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { faker } from "@faker-js/faker"
 import { useHeader } from "@/utils/useHeader"
 import { ContentStyle } from "@shopify/flash-list"
-import { useFocusEffect } from "@react-navigation/native"
 
 interface ChatScreenProps extends AppStackScreenProps<"Chat"> {}
 
