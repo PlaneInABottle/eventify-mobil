@@ -12,7 +12,7 @@ import { $styles } from "../theme"
 import { Text, TextProps } from "./Text"
 import { useAppTheme } from "@/utils/useAppTheme"
 
-type Presets = "default" | "filled" | "reversed"
+type Presets = "default" | "filled" | "reversed" | "danger"
 
 export interface ButtonAccessoryProps {
   style: StyleProp<any>
@@ -225,22 +225,30 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({ backgroundColor: colors.palette.neutral800 }),
   ],
+  danger: [
+    $styles.row,
+    $baseViewStyle,
+    ({ colors }) => ({ backgroundColor: colors.palette.angry500 }),
+  ],
 }
 
 const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [$baseTextStyle],
   filled: [$baseTextStyle],
   reversed: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
+  danger: [$baseTextStyle, ({ colors }) => ({ color: "white" })],
 }
 
 const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   default: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
   filled: ({ colors }) => ({ backgroundColor: colors.palette.neutral400 }),
   reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral700 }),
+  danger: ({ colors }) => ({ backgroundColor: colors.palette.angry500 }),
 }
 
 const $pressedTextPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   default: () => ({ opacity: 0.9 }),
   filled: () => ({ opacity: 0.9 }),
   reversed: () => ({ opacity: 0.9 }),
+  danger: () => ({ opacity: 0.7 }),
 }
