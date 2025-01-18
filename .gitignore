@@ -95,3 +95,8 @@ web-build/
 # App Bundle
 *.aab
 *.apk
+
+
+
+# Vim
+*.vim
