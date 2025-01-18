@@ -11,7 +11,7 @@ export const EventModel = types
     start_time: types.string,
     end_time: types.maybeNull(types.string),
     organizer_id: types.string,
-    organizer_name: types.maybeNull(types.string),
+    organizer_name: types.string,
     lat: types.float,
     long: types.float,
     image_url: types.maybeNull(types.string),
