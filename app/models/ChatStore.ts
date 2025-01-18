@@ -11,6 +11,7 @@ const ChatMessageModel = types.model("ChatMessage").props({
   id: types.identifier,
   event_chat_id: types.string,
   sender_id: types.string,
+  sender_display_name: types.string,
   content: types.string,
   created_at: types.string,
 })
@@ -34,21 +35,19 @@ const ChatModel = types
   .actions((store) => ({
     getChatMessages: flow(function* (limit: number = 10): Generator<any, void, any> {
       try {
-        const { data: messages, error } = yield supabase
-          .from("messages")
-          .select("*")
-          .eq("event_chat_id", store.id)
-          .order("created_at", { ascending: false })
-          .limit(limit)
-          .range(store.offset, store.offset + limit)
-        if (error) throw error
+        const { data: messages, error } = yield supabase.rpc("get_messages_with_pagination", {
+          p_event_chat_id: store.id,
+          p_limit: limit,
+          p_offset: store.offset,
+        })
+        if (error) throw Error(error.message)
         if (store.offset === 0) {
           store.clearMessages()
         }
         store.messages.push(...messages)
         store.offset += messages.length
-      } catch (error) {
-        console.error(error)
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
       }
     }),
     pushNewMessage(message: ChatMessage) {
@@ -124,6 +123,7 @@ export const ChatStoreModel = types
             id: data.id,
             content: data.content,
             sender_id: data.sender.id,
+            sender_display_name: data.sender.display_name,
             created_at: data.created_at,
             event_chat_id: data.event_chat_id,
           })
