@@ -80,22 +80,21 @@ export const ChatStoreModel = types
     },
   }))
   .actions((store) => ({
-    fetchUserChats: flow(function* (): Generator<any, void, any> {
+    fetchUserChats: flow(function* (userId: string): Generator<any, void, any> {
       try {
-        const userId = getRootStore(store).userStore.userId
         const { data: chats, error } = yield supabase
           .from("event_chats")
           .select("*, event_chats_participants!inner()")
           .eq("event_chats_participants.user_id", userId)
-        if (error) throw error
+        if (error) throw Error(error.message)
         store.chats.clear()
         store.joinedEvents.clear()
         chats.forEach((chat: Chat) => {
           store.chats.put(chat)
           store.joinedEvents.push(chat.event_id)
         })
-      } catch (error) {
-        console.error(error)
+      } catch (e) {
+        if (e instanceof Error) console.error(e.message)
       }
     }),
     pushMessageToChat(message: ChatMessage) {
