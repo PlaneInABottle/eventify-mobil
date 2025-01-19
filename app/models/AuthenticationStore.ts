@@ -3,10 +3,7 @@ import { Instance, SnapshotOut, types, flow, IAnyModelType } from "mobx-state-tr
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { AuthChangeEvent, AuthError, Session } from "@supabase/supabase-js"
-import { makeRedirectUri } from "expo-auth-session"
 import * as QueryParams from "expo-auth-session/build/QueryParams"
-import * as WebBrowser from "expo-web-browser"
-import * as Linking from "expo-linking"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -18,6 +15,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
     isLoading: false,
     authSubscription: null as any, // or proper Supabase subscription type
     error: undefined as string | undefined,
+    resetPasswordError: undefined as string | undefined,
   }))
   .views((store) => ({
     get isAuthenticated(): boolean {
@@ -153,11 +151,29 @@ export const AuthenticationStoreModel: IAnyModelType = types
         store.setLoading(false)
       }
     }),
+    updatePassword: flow(function* (newPassword: string) {
+      store.setLoading(true)
+      try {
+        const { error } = yield supabase.auth.updateUser({
+          password: newPassword,
+        })
+        if (error) throw Error(error.message)
+        const { error: signoutError } = yield supabase.auth.signOut()
+
+        if (signoutError) throw Error(signoutError.message)
+        return { status: "ok" }
+      } catch (e: any) {
+        if (e instanceof Error) console.error(e.message)
+        return { status: "error", error: e.message ? e.message : "There was an error" }
+      } finally {
+        store.setLoading(false)
+      }
+    }),
     createSessionFromUrl: flow(function* (url: string) {
       try {
         const { params, errorCode } = QueryParams.getQueryParams(url)
 
-        console.log("params:: ", params)
+        if (params.error) throw new Error(params.error)
         if (errorCode) throw new Error(errorCode)
 
         // eslint-disable-next-line camelcase
@@ -166,14 +182,14 @@ export const AuthenticationStoreModel: IAnyModelType = types
         // eslint-disable-next-line camelcase
         if (!access_token) return
 
-        const { data, error } = yield supabase.auth.setSession({
+        const { error } = yield supabase.auth.setSession({
           // eslint-disable-next-line camelcase
           access_token,
           // eslint-disable-next-line camelcase
           refresh_token,
         })
-        if (error) throw error
-        console.log("Session: ", data.session, "---------data-----------", data)
+        if (error) throw Error(error.message)
+
         // store.handleSuccessfulAuth(data.session, data.session.user.id)
       } catch (e) {
         if (e instanceof Error) console.error(e.message)
@@ -185,6 +201,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         data: { subscription },
       } = supabase.auth.onAuthStateChange(
         async (event: AuthChangeEvent, session: Session | null) => {
+          // NEVER MAKE A SUPABASE REQUEST ON AUTH CHANGE EVENT
           switch (event) {
             case "SIGNED_IN":
               console.log("Signed in")
@@ -204,9 +221,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
               break
 
             case "USER_UPDATED":
-              if (session?.user?.id) {
-                await getRootStore(store).userStore.fetchProfile(session.user.id)
-              }
+              console.log("USER_UPDATED")
               break
           }
         },
