@@ -36,38 +36,38 @@ import { getStateFromPath } from "@react-navigation/native"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
-// Web linking configuration
-// TODO: change to use the correct domain
+// Web linking configuration, only allow the reset password for deep linking
 const prefix = Linking.createURL("/")
 const config = {
   screens: {
-    Login: {
-      path: "login",
-    },
-    Welcome: "welcome",
-    Regiser: "register",
-    ForgotPassword: "forgotpassword",
+    // Login: {
+    // path: "login",
+    // },
+    // Welcome: "welcome",
+    // Regiser: "register",
+    // ForgotPassword: "forgotpassword",
     ResetPassword: "resetpassword",
-    Main: {
-      screens: {
-        ChatList: "chatlist",
-        Events: {
-          screens: {
-            EventMapScreen: "eventmapscreen",
-            EventListScreen: "eventlistscreen",
-          },
-        },
-        Profile: "profile",
-        DemoShowroom: {
-          path: "showroom/:queryIndex?/:itemIndex?",
-        },
-        DemoDebug: "debug",
-        DemoPodcastList: "podcast",
-        DemoCommunity: "community",
-      },
-    },
+    // Main: {
+    // screens: {
+    // ChatList: "chatlist",
+    // Events: {
+    // screens: {
+    // EventMapScreen: "eventmapscreen",
+    // EventListScreen: "eventlistscreen",
+    // },
+    // },
+    // Profile: "profile",
+    // DemoShowroom: {
+    // path: "showroom/:queryIndex?/:itemIndex?",
+    // },
+    // DemoDebug: "debug",
+    // DemoPodcastList: "podcast",
+    // DemoCommunity: "community",
+    // },
+    // },
   },
 }
+// }
 
 interface AppProps {
   hideSplashScreen: () => Promise<void>
