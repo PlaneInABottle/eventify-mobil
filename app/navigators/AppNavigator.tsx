@@ -39,6 +39,7 @@ export type AppStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>
   // 🔥 Your screens go here
   ForgotPassword: undefined
+  ResetPassword: undefined
   EditProfile: undefined
   Chat: { eventChatId: string }
   Report: { reportedItemId: string; reportType: string }
@@ -81,7 +82,7 @@ const AppStack = observer(function AppStack() {
           backgroundColor: colors.background,
         },
       }}
-      initialRouteName={isAuthenticated ? "Main" : "Welcome"}
+      initialRouteName={isAuthenticated ? "Main" : "ResetPassword"}
     >
       {isAuthenticated ? (
         <>
@@ -99,6 +100,7 @@ const AppStack = observer(function AppStack() {
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
           <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />
+          <Stack.Screen name="ResetPassword" component={Screens.ResetPasswordScreen} />
         </>
       )}
 
