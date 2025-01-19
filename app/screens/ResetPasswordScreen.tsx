@@ -10,6 +10,7 @@ import { TxKeyPath, translate } from "@/i18n"
 
 export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = observer(
   function ResetPasswordScreen(_props) {
+    const { navigation } = _props
     const authPasswordInput = useRef<TextInput>(null)
     const confirmPasswordInput = useRef<TextInput>(null)
 
@@ -19,7 +20,7 @@ export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = obs
     const [isConfirmPasswordHidden, setIsConfirmPasswordHidden] = useState(true)
     const [error, setError] = useState("")
     const {
-      authenticationStore: { isLoading },
+      authenticationStore: { isLoading, updatePassword },
     } = useStores()
 
     const {
@@ -37,12 +38,9 @@ export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = obs
         return
       }
 
-      // const success = await register(authEmail, authPassword, name)
-      const success = false
-      if (success) {
-        setAuthPassword("")
-        setConfirmPassword("")
-      }
+      const result: { status: string; error?: string } = await updatePassword(authPassword)
+      if (result.status === "ok") navigation.replace("Login")
+      else console.log(result.error)
     }
 
     const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
