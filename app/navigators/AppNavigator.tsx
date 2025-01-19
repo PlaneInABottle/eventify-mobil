@@ -82,7 +82,7 @@ const AppStack = observer(function AppStack() {
           backgroundColor: colors.background,
         },
       }}
-      initialRouteName={isAuthenticated ? "Main" : "ResetPassword"}
+      initialRouteName={isAuthenticated ? "Main" : "Welcome"}
     >
       {isAuthenticated ? (
         <>
