@@ -32,6 +32,7 @@ import Config from "./config"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { loadDateFnsLocale } from "./utils/formatDate"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
+import { getStateFromPath } from "@react-navigation/native"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
@@ -41,11 +42,22 @@ const prefix = Linking.createURL("/")
 const config = {
   screens: {
     Login: {
-      path: "",
+      path: "login",
     },
     Welcome: "welcome",
-    Demo: {
+    Regiser: "register",
+    ForgotPassword: "forgotpassword",
+    ResetPassword: "resetpassword",
+    Main: {
       screens: {
+        ChatList: "chatlist",
+        Events: {
+          screens: {
+            EventMapScreen: "eventmapscreen",
+            EventListScreen: "eventlistscreen",
+          },
+        },
+        Profile: "profile",
         DemoShowroom: {
           path: "showroom/:queryIndex?/:itemIndex?",
         },
@@ -111,6 +123,11 @@ function App(props: AppProps) {
   const linking = {
     prefixes: [prefix],
     config,
+    getStateFromPath: (path: any, options: any) => {
+      const accessiblePath = path.replace("#", "?")
+
+      return getStateFromPath(accessiblePath, options)
+    },
   }
 
   // otherwise, we're ready to render the app
