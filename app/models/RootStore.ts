@@ -20,6 +20,15 @@ export const RootStoreModel = types
   })
   .actions(withSetPropAction)
   .actions((store) => ({
+    afterCreate() {
+      if (
+        store.chatStore.socket == null &&
+        store.chatStore.chats.size !== 0 &&
+        store.authenticationStore.token
+      ) {
+        store.chatStore.connect(store.authenticationStore.token)
+      }
+    },
     resetAllStores() {
       store.setProp("authenticationStore", undefined)
       store.setProp("userStore", undefined)
