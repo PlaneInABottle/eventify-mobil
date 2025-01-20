@@ -60,13 +60,13 @@ export const EventListScreen: FC<EventListScreenProps> = observer(function Event
               style={themed($emptyState)}
               headingTx={
                 eventStore.favoritesOnly
-                  ? "eventsListScreen:noFavoritesEmptyState.heading"
-                  : "eventsListScreen:noEventsEmptyState.heading"
+                  ? "eventListScreen:noFavoritesEmptyState.heading"
+                  : "eventListScreen:noEventsEmptyState.heading"
               }
               contentTx={
                 eventStore.favoritesOnly
-                  ? "eventsListScreen:noFavoritesEmptyState.content"
-                  : "eventsListScreen:noEventsEmptyState.content"
+                  ? "eventListScreen:noFavoritesEmptyState.content"
+                  : "eventListScreen:noEventsEmptyState.content"
               }
               button={eventStore.favoritesOnly ? "" : ""}
               imageStyle={$emptyStateImage}
@@ -76,7 +76,7 @@ export const EventListScreen: FC<EventListScreenProps> = observer(function Event
         }
         ListHeaderComponent={
           <View style={themed($heading)}>
-            <Text preset="heading" tx="eventsListScreen:title" />
+            <Text preset="heading" tx="eventListScreen:title" />
             {(eventStore.favoritesOnly || eventStore.eventsForList.length > 0) && (
               <View style={themed($toggle)}>
                 <Switch
@@ -84,10 +84,10 @@ export const EventListScreen: FC<EventListScreenProps> = observer(function Event
                   onValueChange={() =>
                     eventStore.setProp("favoritesOnly", !eventStore.favoritesOnly)
                   }
-                  labelTx="eventsListScreen:onlyFavorites"
+                  labelTx="eventListScreen:onlyFavorites"
                   labelPosition="left"
                   labelStyle={$labelStyle}
-                  accessibilityLabel={translate("eventsListScreen:accessibility.switch")}
+                  accessibilityLabel={translate("eventListScreen:accessibility.switch")}
                 />
               </View>
             )}
@@ -185,7 +185,7 @@ const EventCard = observer(function EventCard({
       Platform.select<AccessibilityProps>({
         ios: {
           accessibilityLabel: event.title,
-          accessibilityHint: translate("eventsListScreen:accessibility.cardHint", {
+          accessibilityHint: translate("eventListScreen:accessibility.cardHint", {
             action: isFavorite ? "unfavorite" : "favorite",
           }),
         },
@@ -194,7 +194,7 @@ const EventCard = observer(function EventCard({
           accessibilityActions: [
             {
               name: "longpress",
-              label: translate("eventsListScreen:accessibility.favoriteAction"),
+              label: translate("eventListScreen:accessibility.favoriteAction"),
             },
           ],
           onAccessibilityAction: ({ nativeEvent }) => {
@@ -317,8 +317,8 @@ const EventCard = observer(function EventCard({
             style={themed([$favoriteButton, isFavorite && $unFavoriteButton])}
             accessibilityLabel={
               isFavorite
-                ? translate("eventsListScreen:accessibility.unfavoriteIcon")
-                : translate("eventsListScreen:accessibility.favoriteIcon")
+                ? translate("eventListScreen:accessibility.unfavoriteIcon")
+                : translate("eventListScreen:accessibility.favoriteIcon")
             }
             LeftAccessory={ButtonLeftAccessory}
           >
@@ -326,10 +326,8 @@ const EventCard = observer(function EventCard({
               size="xxs"
               accessibilityLabel={event.timeFormatted.accessibilityLabel}
               weight="medium"
-              text={
-                isFavorite
-                  ? translate("eventsListScreen:unfavoriteButton")
-                  : translate("eventsListScreen:favoriteButton")
+              tx={
+                isFavorite ? "eventListScreen:unfavoriteButton" : "eventListScreen:favoriteButton"
               }
             />
           </Button>
@@ -340,8 +338,8 @@ const EventCard = observer(function EventCard({
               style={themed([$favoriteButton, isChatJoined && $unFavoriteButton])}
               accessibilityLabel={
                 isChatJoined
-                  ? translate("eventsListScreen:quitChat")
-                  : translate("eventsListScreen:joinChat")
+                  ? translate("eventListScreen:quitChat")
+                  : translate("eventListScreen:joinChat")
               }
               LeftAccessory={ChatButtonLeftAccessory}
               disabled={isLoading}
@@ -350,11 +348,7 @@ const EventCard = observer(function EventCard({
                 size="xxs"
                 accessibilityLabel={event.timeFormatted.accessibilityLabel}
                 weight="medium"
-                text={
-                  isChatJoined
-                    ? translate("eventsListScreen:quitChat")
-                    : translate("eventsListScreen:joinChat")
-                }
+                tx={isChatJoined ? "eventListScreen:quitChat" : "eventListScreen:joinChat"}
               />
             </Button>
           )}
