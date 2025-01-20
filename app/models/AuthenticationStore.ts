@@ -4,6 +4,8 @@ import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { AuthChangeEvent, AuthError, Session } from "@supabase/supabase-js"
 import * as QueryParams from "expo-auth-session/build/QueryParams"
+import { handleError } from "@/utils/errorHandler"
+import { handleSuccess } from "@/utils/successHandler"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -18,6 +20,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
     resetPasswordError: undefined as string | undefined,
   }))
   .views((store) => ({
+    get token() {
+      return store.authToken
+    },
     get isAuthenticated(): boolean {
       return !!store.authToken
     },
@@ -79,7 +84,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
         return true
       } catch (error) {
-        console.error(error)
+        handleError(error, { toast: true })
         return false
       } finally {
         store.setLoading(false)
@@ -105,6 +110,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
         if (data.session) {
           const success = yield store.handleSuccessfulAuth(data.session, data.user?.id)
+          handleSuccess("success:loginSuccess")
           return success
         }
 
@@ -139,6 +145,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
         if (data.session) {
           const success = yield store.handleSuccessfulAuth(data.session, data.user?.id)
+          handleSuccess("success:signUpSuccess")
           return success
         }
 
@@ -161,9 +168,10 @@ export const AuthenticationStoreModel: IAnyModelType = types
         const { error: signoutError } = yield supabase.auth.signOut()
 
         if (signoutError) throw Error(signoutError.message)
+        handleSuccess("success:passwordChanged")
         return { status: "ok" }
       } catch (e: any) {
-        if (e instanceof Error) console.error(e.message)
+        handleError(e, { toast: true })
         return { status: "error", error: e.message ? e.message : "There was an error" }
       } finally {
         store.setLoading(false)
