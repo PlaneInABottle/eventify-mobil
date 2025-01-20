@@ -29,10 +29,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
       return !!store.authToken
     },
     get validationError(): string {
-      if (store.authEmail.length === 0) return "can't be blank"
-      if (store.authEmail.length < 6) return "must be at least 6 characters"
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(store.authEmail))
-        return "must be a valid email address"
+      if (store.authEmail.length === 0) return "errors:cantBeBlank"
+      if (store.authEmail.length < 6) return "errors:must6Chars"
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(store.authEmail)) return "errors:mustBeValidEmail"
       return ""
     },
   }))
