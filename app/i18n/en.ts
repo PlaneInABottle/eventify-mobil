@@ -40,7 +40,7 @@ const en = {
     mustBeValidEmail: "Field must be valid email address",
   },
   success: {
-    title: "Success!",
+    title: "Success",
     // Auth
     loginSuccess: "Successfully logged in",
     logoutSuccess: "Successfully logged out",
@@ -145,7 +145,7 @@ const en = {
     reportChat: "Report Chat",
   },
   chatScreen: {
-    chat: "Chat",
+    chat: "{{eventTitle}} Chat",
 
     textInputPlaceholder: "Type a message",
   },

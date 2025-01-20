@@ -11,15 +11,21 @@ import { ContentStyle } from "@shopify/flash-list"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
+import { handleError } from "@/utils/errorHandler"
 
 export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   function ChatListScreen(_props) {
     const { navigation } = _props
     const { themed } = useAppTheme()
     const { chatStore, eventStore } = useStores()
-    const handlePressChat = (chatId: string) => {
+    const handlePressChat = (chatId: string, eventTitle: string | undefined) => {
+      if (eventTitle === undefined) {
+        handleError("errors:unknown")
+        return
+      }
+
       chatStore.joinSocketChatRoom(chatId)
-      navigation.navigate("Chat", { eventChatId: chatId })
+      navigation.navigate("Chat", { eventChatId: chatId, eventTitle })
     }
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
@@ -38,7 +44,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
             return (
               <ChatListItem
                 title={event?.title}
-                handlePressChat={() => handlePressChat(item.id)}
+                handlePressChat={() => handlePressChat(item.id, event?.title)}
                 imageUrl={event?.image_url}
                 chatId={item.id}
               />

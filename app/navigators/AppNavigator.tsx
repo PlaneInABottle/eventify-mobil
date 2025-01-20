@@ -41,7 +41,7 @@ export type AppStackParamList = {
   ForgotPassword: undefined
   ResetPassword: undefined
   EditProfile: undefined
-  Chat: { eventChatId: string }
+  Chat: { eventChatId: string; eventTitle: string }
   Report: { reportedItemId: string; reportType: string }
   Event: { eventId: string }
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST

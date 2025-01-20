@@ -14,7 +14,7 @@ interface ChatScreenProps extends AppStackScreenProps<"Chat"> {}
 
 export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_props) {
   const { route, navigation } = _props
-  const { eventChatId } = route.params
+  const { eventChatId, eventTitle } = route.params
   const { chatStore, userStore } = useStores()
   const chat = chatStore.getChat(eventChatId) as Chat
   const userId = userStore.userId
@@ -32,6 +32,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
 
   useHeader({
     titleTx: "chatScreen:chat",
+    titleTxOptions: { eventTitle },
     leftIcon: "back",
     onLeftPress: () => {
       //     chatStore.leaveSocketChatRoom(eventChatId)
