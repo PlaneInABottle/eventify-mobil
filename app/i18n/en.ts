@@ -38,6 +38,10 @@ const en = {
     cantBeBlank: "Field can't be blank",
     must6Chars: "Field must be at least 6 characters",
     mustBeValidEmail: "Field must be valid email address",
+    profile: {
+      deleteFailed: "Failed to delete profile",
+      reportFailed: "Failed to submit report",
+    },
   },
   success: {
     title: "Success",

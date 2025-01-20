@@ -4,13 +4,13 @@ import { supabase } from "@/services/auth/supabase"
 import * as ImagePicker from "expo-image-picker"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { getRootStore } from "./helpers/getRootStore"
+import { handleError } from "@/utils/errorHandler"
 export const UserStoreModel: IAnyModelType = types
   .model("UserStore")
   .props({
     user: types.maybe(UserModel),
   })
   .volatile(() => ({
-    error: undefined as string | undefined,
     isLoading: false,
     isUploading: false,
   }))
@@ -23,11 +23,7 @@ export const UserStoreModel: IAnyModelType = types
   .actions((store) => ({
     clearUser() {
       store.user = undefined
-      store.error = undefined
       store.isLoading = false
-    },
-    setError(value: string | undefined) {
-      store.error = value
     },
     setLoading(value: boolean) {
       store.isLoading = value
@@ -40,9 +36,7 @@ export const UserStoreModel: IAnyModelType = types
     fetchProfile: flow(function* (userIdProp: string) {
       try {
         store.setLoading(true)
-        if (!userIdProp) {
-          throw Error("User Id is not found")
-        }
+        if (!userIdProp) throw Error("errors:notFound")
 
         const { data: profile, error } = yield supabase
           .from("profiles")
@@ -50,43 +44,32 @@ export const UserStoreModel: IAnyModelType = types
           .eq("id", userIdProp)
           .single()
 
-        if (error) {
-          throw Error(error)
-        }
+        if (error) throw error
 
-        if (!profile) {
-          throw new Error("Profile not found")
-        }
+        if (!profile) throw new Error("errors:notFound")
 
         store.setProp("user", profile)
         return true
       } catch (error) {
-        console.error(error)
-        store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
+        handleError(error)
         return false
       } finally {
         store.setLoading(false)
       }
     }),
     updateProfile: flow(function* (updates: Partial<User>) {
-      if (!store.user?.id) {
-        store.setError("No user logged in")
-        return false
-      }
+      if (!store.user?.id) throw Error("errors:notFound")
 
       store.setLoading(true)
       try {
         const { error } = yield supabase.from("profiles").update(updates).eq("id", store.user.id)
 
-        if (error) {
-          throw error
-        }
+        if (error) throw error
 
         store.setProp("user", { ...store.user, ...updates })
         return true
       } catch (error) {
-        console.error("Error", error)
-        store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
+        handleError(error)
         return false
       } finally {
         store.setLoading(false)
@@ -95,10 +78,7 @@ export const UserStoreModel: IAnyModelType = types
   }))
   .actions((store) => ({
     uploadAvatar: flow(function* () {
-      if (!store.user?.id) {
-        store.setError("No user logged in")
-        return false
-      }
+      if (!store.user?.id) throw Error("erros:notFound")
 
       store.setUploading(true)
       try {
@@ -111,7 +91,6 @@ export const UserStoreModel: IAnyModelType = types
         })
 
         if (result.canceled || !result.assets || result.assets.length === 0) {
-          console.log("User cancelled image picker.")
           return false
         }
 
@@ -132,8 +111,7 @@ export const UserStoreModel: IAnyModelType = types
         yield store.updateProfile({ avatar_url: data.path })
         return true
       } catch (error) {
-        console.error("Error", error)
-        store.setError(error instanceof Error ? error.message : "Failed to upload avatar")
+        handleError(error)
         return false
       } finally {
         store.setUploading(false)
@@ -152,7 +130,7 @@ export const UserStoreModel: IAnyModelType = types
         })
         if (error) throw error
       } catch (error) {
-        console.error("There was an error while sending report: ", error)
+        handleError(error)
       } finally {
         store.setLoading(false)
       }
@@ -161,11 +139,11 @@ export const UserStoreModel: IAnyModelType = types
       try {
         const { error } = yield supabase.rpc("delete_user")
 
-        if (error) throw Error("There was an error while deleting profile")
+        if (error) throw Error("errors:profile.deleteFailed")
 
         getRootStore(store).resetAllStores()
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
+        handleError(e)
       }
     }),
   }))
