@@ -12,33 +12,9 @@ const en = {
     searching: "Searching...",
     loading: "Loading...",
   },
-  welcomeScreen: {
-    welcome: "Welcome to Eventify",
-    tagLine: "Your one-stop platform for discovering and creating amazing events",
-    joinUs: "Join our community today!",
-    postscript:
-      "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
-    readyForLaunch: "Your app, almost ready for launch!",
-    exciting: "(ohh, this is exciting!)",
-    letsGo: "Let's go!",
-  },
-  errorScreen: {
-    title: "Something went wrong!",
-    friendlySubtitle:
-      "This is the screen that your users will see in production when an error is thrown. You'll want to customize this message (located in `app/i18n/en.ts`) and probably the layout as well (`app/screens/ErrorScreen`). If you want to remove this entirely, check `app/app.tsx` for the <ErrorBoundary> component.",
-    reset: "RESET APP",
-    traceTitle: "Error from %{name} stack",
-  },
-  emptyStateComponent: {
-    generic: {
-      heading: "So empty... so sad",
-      content: "No data found yet. Try clicking the button to refresh or reload the app.",
-      button: "Let's try this again",
-    },
-  },
-
   errors: {
     title: "There was an error.",
+    invalidCredentials: "Invalid credentials, check your credentials",
     invalidEmail: "Invalid email address.",
     timeout: "Request timed out. Please try again.",
     cannotConnect: "Cannot connect to the server. Please check your internet connection.",
@@ -52,6 +28,10 @@ const en = {
     passwordsNotMatch: "Passwords do not match, check again!",
     passwordShort: "Passwords should be longer than 5 characters",
     linkProblem: "There was a problem about the link. Please request a new one!",
+    nameRequired: "Display name is required",
+    cantBeBlank: "Field can't be blank",
+    must6Chars: "Field must be at least 6 characters",
+    mustBeValidEmail: "Field must be valid email address",
   },
   success: {
     title: "Success!",
@@ -68,8 +48,33 @@ const en = {
     // Generic
     default: "Operation completed successfully",
   },
+  errorScreen: {
+    title: "Something went wrong!",
+    friendlySubtitle:
+      "This is the screen that your users will see in production when an error is thrown. You'll want to customize this message (located in `app/i18n/en.ts`) and probably the layout as well (`app/screens/ErrorScreen`). If you want to remove this entirely, check `app/app.tsx` for the <ErrorBoundary> component.",
+    reset: "RESET APP",
+    traceTitle: "Error from %{name} stack",
+  },
+  emptyStateComponent: {
+    generic: {
+      heading: "So empty... so sad",
+      content: "No data found yet. Try clicking the button to refresh or reload the app.",
+      button: "Let's try this again",
+    },
+  },
+  welcomeScreen: {
+    welcome: "Welcome to Eventify",
+    tagLine: "Your one-stop platform for discovering and creating amazing events",
+    joinUs: "Join our community today!",
+    postscript:
+      "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
+    readyForLaunch: "Your app, almost ready for launch!",
+    exciting: "(ohh, this is exciting!)",
+    letsGo: "Let's go!",
+  },
+
   loginScreen: {
-    logIn: "Welcome Back!",
+    welcomeBack: "Welcome Back!",
     enterDetails:
       "Sign in to your account to discover and join amazing events happening around you.",
     emailFieldLabel: "Email",
@@ -84,7 +89,6 @@ const en = {
     createAccount: "Join us and start discovering amazing events near you.",
     nameFieldLabel: "Display Name",
     nameFieldPlaceholder: "Enter your display name",
-    nameRequired: "Display name is required",
     emailFieldLabel: "Email",
     passwordFieldLabel: "Password",
     confirmPasswordFieldLabel: "Confirm Password",
