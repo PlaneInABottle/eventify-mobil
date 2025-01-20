@@ -5,6 +5,7 @@ import { supabase } from "@/services/auth/supabase"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { EventModel } from "./Event"
 import { api } from "@/services/api"
+import { handleError } from "@/utils/errorHandler"
 
 export interface ChatMessage extends Instance<typeof ChatMessageModel> {}
 const ChatMessageModel = types.model("ChatMessage").props({
@@ -85,7 +86,8 @@ export const ChatStoreModel = types
           .from("event_chats")
           .select("*, event_chats_participants!inner()")
           .eq("event_chats_participants.user_id", userId)
-        if (error) throw Error(error.message)
+        if (error) throw error
+
         store.chats.clear()
         store.joinedEvents.clear()
         chats.forEach((chat: Chat) => {
@@ -93,14 +95,14 @@ export const ChatStoreModel = types
           store.joinedEvents.push(chat.event_id)
         })
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
+        handleError(e)
       }
     }),
     pushMessageToChat(message: ChatMessage) {
       try {
         store.activeChat?.pushNewMessage(message)
-      } catch (error) {
-        console.error(error instanceof Error ? error.message : "Please contact the admin")
+      } catch (e) {
+        handleError(e)
       }
     },
   }))
@@ -127,11 +129,9 @@ export const ChatStoreModel = types
             created_at: data.created_at,
             event_chat_id: data.event_chat_id,
           })
-
-          console.log("new message arrived: ", data)
         })
       } else {
-        throw Error("Socket Not Found")
+        handleError("errors:unknown")
       }
     },
   }))
@@ -149,18 +149,13 @@ export const ChatStoreModel = types
 
         store.setSocket(socket)
         store.setupSocketListeners(socket)
-      } catch (error) {
-        console.error(
-          "There was an error while connecting to the socket: ",
-          error instanceof Error
-            ? error.message
-            : "If the issue persists, please contact the admins",
-        )
+      } catch (e) {
+        handleError(e)
       }
     }),
     disconnect() {
       if (store.socket) store.socket!.disconnect()
-      else throw Error("Socket Not Found")
+      else handleError("erros:unknown")
     },
     joinSocketChatRoom(chatRoomId: string) {
       store.socket!.emit("joinRoom", chatRoomId)
@@ -175,7 +170,7 @@ export const ChatStoreModel = types
     sendMessage: flow(function* (chatId: string, message: string) {
       try {
         const userId = getRootStore(store).userStore.userId as string | undefined
-        if (!userId) throw Error("User not found")
+        if (!userId) throw Error("erros:notFound")
 
         const { data, error } = yield supabase
           .from("messages")
@@ -191,11 +186,8 @@ export const ChatStoreModel = types
           event_chat_id: data.event_chat_id,
           created_at: data.created_at,
         })
-      } catch (error) {
-        console.error(
-          "There was an error while sending message: ",
-          error instanceof Error ? error.message : "Please contact admins",
-        )
+      } catch (e) {
+        handleError(e)
       }
     }),
   }))
@@ -218,8 +210,8 @@ export const ChatStoreModel = types
           event_id: eventId,
         })
         store.joinedEvents.push(eventId)
-      } catch (error) {
-        console.error(error)
+      } catch (e) {
+        handleError(e)
       } finally {
         store.isLoading = false
       }
@@ -244,8 +236,8 @@ export const ChatStoreModel = types
         store.chats.delete(eventChatId)
         store.joinedEvents.remove(event)
         store.leaveSocketChatRoom(eventChatId)
-      } catch (error) {
-        console.error(error)
+      } catch (e) {
+        handleError(e)
       } finally {
         store.isLoading = false
       }
