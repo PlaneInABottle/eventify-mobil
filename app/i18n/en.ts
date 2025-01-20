@@ -122,6 +122,11 @@ const en = {
     description: "Discover events happening around you",
     searchThisArea: "Search This Area",
   },
+  chatListScreen: {
+    chats: "Chats",
+    leaveChat: "Leave Chat",
+    reportChat: "Report Chat",
+  },
   eventsListScreen: {
     favoriteButton: "Favorite",
     unfavoriteButton: "Unfavorite",

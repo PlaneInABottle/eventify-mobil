@@ -30,7 +30,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
           contentContainerStyle={themed([$listContentContainer, $styles.container])}
           ListHeaderComponent={
             <View style={themed($heading)}>
-              <Text preset="heading" text="Chats" />
+              <Text preset="heading" tx="chatListScreen:chats" />
             </View>
           }
           renderItem={({ item }) => {
@@ -107,14 +107,14 @@ const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props
       >
         <BottomSheetView style={themed($bottomSheetContent)}>
           <ListItem
-            text="Leave Chat"
+            tx="chatListScreen:leaveChat"
             rightIcon="caretRight"
             topSeparator
             onPress={() => quitChat(chatId)}
           />
 
           <ListItem
-            text="Report Chat"
+            tx="chatListScreen:reportChat"
             onPress={() => {
               dismissOptions()
               navigation.navigate("Report", {
