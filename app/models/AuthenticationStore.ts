@@ -8,6 +8,7 @@ import { handleError } from "@/utils/errorHandler"
 import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
+import { toCamelCase } from "@/utils/toCamelCase"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -62,7 +63,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
     },
     logout() {
       try {
+        // Logout from supabase
         getRootStore(store).resetAllStores()
+
         handleSuccess("success:logoutSuccess")
       } catch (e) {
         handleError(e)
@@ -106,6 +109,11 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
         if (error) {
           store.setError(error.message)
+
+          const errResponse = handleError(error)
+          if (errResponse.error.code)
+            store.setError(`errors:${toCamelCase(errResponse.error.code)}`)
+
           return false
         }
 
