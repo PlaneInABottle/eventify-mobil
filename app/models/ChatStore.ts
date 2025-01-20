@@ -41,14 +41,14 @@ const ChatModel = types
           p_limit: limit,
           p_offset: store.offset,
         })
-        if (error) throw Error(error.message)
+        if (error) throw error
         if (store.offset === 0) {
           store.clearMessages()
         }
         store.messages.push(...messages)
         store.offset += messages.length
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
+        handleError(e)
       }
     }),
     pushNewMessage(message: ChatMessage) {
