@@ -4,6 +4,7 @@ import { Region } from "react-native-maps"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { getRootStore } from "./helpers/getRootStore"
+import { handleError } from "@/utils/errorHandler"
 
 export const EventStoreModel = types
   .model("EventStore")
@@ -17,7 +18,6 @@ export const EventStoreModel = types
   .volatile(() => ({
     isLoading: false,
     isSearching: false,
-    error: undefined as string | undefined,
   }))
   .actions(withSetPropAction)
   .views((store) => ({
@@ -36,9 +36,6 @@ export const EventStoreModel = types
     },
   }))
   .actions((store) => ({
-    setError(error: string | undefined) {
-      store.error = error
-    },
     hasFavorite(event: Event) {
       return store.favorites.includes(event)
     },
@@ -49,7 +46,7 @@ export const EventStoreModel = types
         const { data: events, error } = yield supabase.rpc("get_users_initial_events", {
           _user_id: userId,
         })
-        if (error) throw Error(error.message)
+        if (error) throw error
 
         events.forEach((event: Event) => {
           store.events.put(event)
@@ -58,11 +55,10 @@ export const EventStoreModel = types
         })
         // chatStore.fetchUserChats()
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
+        handleError(e)
       }
     }),
     fetchEventsInBounds: flow(function* (bounds: Region) {
-      store.setError(undefined)
       store.isSearching = true
       try {
         // Calculate the bounding box corners
@@ -82,16 +78,10 @@ export const EventStoreModel = types
           max_long: east,
         })
 
-        if (error) {
-          console.error("Failed to fetch events:", error.message)
-          store.setError(error.message)
-          return
-        }
+        if (error) throw error
 
-        if (!events) {
-          store.setError("No events data received")
-          return
-        }
+        if (!events) throw Error("errors:notFound")
+
         store.events.forEach((event) => {
           if (
             !getRootStore(store).chatStore.joinedEvents.includes(event) &&
@@ -107,8 +97,8 @@ export const EventStoreModel = types
           store.eventsInBounds.push(event.id)
         })
       } catch (error) {
-        console.error("Error fetching events:", error)
-        store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
+        handleError(error)
+        return
       } finally {
         store.isSearching = false
       }
@@ -119,42 +109,50 @@ export const EventStoreModel = types
   }))
   .actions((store) => ({
     addFavorite: flow(function* (event: Event): Generator<any, void, any> {
-      if (store.favorites.includes(event)) return
+      try {
+        store.isLoading = true
+        if (store.favorites.includes(event)) return
 
-      store.isLoading = true
-      store.favorites.push(event) // Optimistic update
+        store.favorites.push(event) // Optimistic update
 
-      const { error } = yield supabase.from("favorites").insert({
-        user_id: getRootStore(store).userStore.userId,
-        event_id: event.id,
-      })
+        const { error } = yield supabase.from("favorites").insert({
+          user_id: getRootStore(store).userStore.userId,
+          event_id: event.id,
+        })
 
-      if (error) {
-        store.setError(error.message)
-        store.favorites.remove(event) // Rollback on error
+        if (error) {
+          store.favorites.remove(event) // Rollback on error
+          throw error
+        }
+      } catch (e) {
+        handleError(e)
+      } finally {
+        store.isLoading = false
       }
-
-      store.isLoading = false
     }),
 
     removeFavorite: flow(function* (event: Event): Generator<any, void, any> {
-      if (!store.favorites.includes(event)) return
+      try {
+        if (!store.favorites.includes(event)) return
 
-      store.isLoading = true
-      store.favorites.remove(event) // Optimistic update
+        store.isLoading = true
+        store.favorites.remove(event) // Optimistic update
 
-      const { error } = yield supabase
-        .from("favorites")
-        .delete()
-        .eq("user_id", getRootStore(store).userStore.userId)
-        .eq("event_id", event.id)
+        const { error } = yield supabase
+          .from("favorites")
+          .delete()
+          .eq("user_id", getRootStore(store).userStore.userId)
+          .eq("event_id", event.id)
 
-      if (error) {
-        store.setError(error.message)
-        store.favorites.push(event) // Rollback on error
+        if (error) {
+          store.favorites.push(event) // Rollback on error
+          throw error
+        }
+      } catch (e) {
+        handleError(e)
+      } finally {
+        store.isLoading = false
       }
-
-      store.isLoading = false
     }),
   }))
   .actions((store) => ({
