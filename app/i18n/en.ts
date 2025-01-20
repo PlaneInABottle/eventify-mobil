@@ -61,6 +61,13 @@ const en = {
     reset: "RESET APP",
     traceTitle: "Error from %{name} stack",
   },
+
+  reportScreen: {
+    report: "Report",
+    textInputLabel: "Report",
+    textInputPlaceholder: "Please state the report reason",
+    sendReport: "Send Report",
+  },
   emptyStateComponent: {
     generic: {
       heading: "So empty... so sad",

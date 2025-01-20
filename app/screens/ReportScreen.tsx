@@ -17,7 +17,7 @@ export const ReportScreen: FC<AppStackScreenProps<"Report">> = observer(
 
     useHeader(
       {
-        title: "Report ",
+        titleTx: "reportScreen:report",
         leftIcon: "back",
         onLeftPress: () => _props.navigation.navigate("Main", { screen: "ChatList" }),
       },
@@ -34,15 +34,15 @@ export const ReportScreen: FC<AppStackScreenProps<"Report">> = observer(
         <TextField
           value={reason}
           onChangeText={setReason}
-          placeholder="Please state the report reason"
-          label="Reason"
+          placeholderTx="reportScreen:textInputPlaceholder"
+          labelTx="reportScreen:textInputLabel"
           readOnly={userStore.isLoading}
           multiline
         />
         <Button
           disabled={!reason.trim() || userStore.isLoading}
           disabledStyle={themed($disabledButton)}
-          text="Send Report"
+          tx="reportScreen:sendReport"
           onPress={handleSendReport}
           style={themed($sendButtonStyle)}
         />
