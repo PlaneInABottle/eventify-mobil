@@ -123,9 +123,10 @@ export const AuthenticationStoreModel: IAnyModelType = types
           return success
         }
 
-        throw Error("Session data couldn't fetched")
+        throw Error("errors:notFound")
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
+        handleError(error)
         return false
       } finally {
         store.setLoading(false)
@@ -149,7 +150,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
         if (error) {
           store.setError(error.message)
-          return false
+          throw error
         }
 
         if (data.session) {
@@ -159,9 +160,10 @@ export const AuthenticationStoreModel: IAnyModelType = types
         }
 
         store.setError("No session data received")
-        return false
+        throw Error("errors:notFound")
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
+        handleError(error)
         return false
       } finally {
         store.setLoading(false)

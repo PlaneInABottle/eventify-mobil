@@ -5,6 +5,7 @@ import { UserStoreModel } from "./UserStore"
 import { EventStoreModel } from "./EventStore"
 import { ChatStoreModel } from "./ChatStore"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { handleError } from "@/utils/errorHandler"
 
 /**
  * A RootStore model.
@@ -42,7 +43,7 @@ export const RootStoreModel = types
         yield store.eventStore.fetchInitialEvents(userId)
         store.chatStore.fetchUserChats(userId)
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
+        handleError(e)
       }
     }),
   }))
