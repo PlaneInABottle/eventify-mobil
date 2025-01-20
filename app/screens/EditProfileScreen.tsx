@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite"
 import { $styles, ThemedStyle } from "@/theme"
 import { navigate } from "@/navigators/navigationUtilities"
 import { useHeader } from "@/utils/useHeader"
+import { translate } from "@/i18n"
 
 interface EditProfileScreenProps extends AppStackScreenProps<"EditProfile"> {}
 
@@ -23,36 +24,40 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleSave = async () => {
-      Alert.alert("Confirm Changes", "Are you sure you want to save these profile changes?", [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Save",
-          onPress: async () => {
-            setIsSubmitting(true)
-            try {
-              const updates = {
-                display_name: displayName,
-                about,
-                age: age ? parseInt(age, 10) : null,
-              }
-
-              const success = await userStore.updateProfile(updates)
-              if (success) {
-                navigate("Main", { screen: "Profile" })
-              }
-            } finally {
-              setIsSubmitting(false)
-            }
+      Alert.alert(
+        translate("common:confirmChanges"),
+        translate("editProfileScreen:saveAccountWarningDescription"),
+        [
+          {
+            text: translate("common:cancel"),
+            style: "cancel",
           },
-        },
-      ])
+          {
+            text: translate("common:save"),
+            onPress: async () => {
+              setIsSubmitting(true)
+              try {
+                const updates = {
+                  display_name: displayName,
+                  about,
+                  age: age ? parseInt(age, 10) : null,
+                }
+
+                const success = await userStore.updateProfile(updates)
+                if (success) {
+                  navigate("Main", { screen: "Profile" })
+                }
+              } finally {
+                setIsSubmitting(false)
+              }
+            },
+          },
+        ],
+      )
     }
     useHeader(
       {
-        title: "Edit Profile",
+        titleTx: "editProfileScreen:editProfile",
         leftIcon: "back",
         onLeftPress: () => navigate("Main", { screen: "Profile" }),
       },
@@ -64,8 +69,8 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
           <TextField
             value={displayName}
             onChangeText={setDisplayName}
-            label="Display Name"
-            placeholder="Enter your display name"
+            labelTx="editProfileScreen:displayName"
+            placeholderTx="editProfileScreen:displayNamePlaceholder"
             accessible={true}
             accessibilityLabel="Display name input"
             accessibilityRole="text"
@@ -74,8 +79,8 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
           <TextField
             value={age}
             onChangeText={setAge}
-            label="Age"
-            placeholder="Enter your age"
+            labelTx="profileScreen:age"
+            placeholderTx="editProfileScreen:agePlaceholder"
             keyboardType="numeric"
             accessible={true}
             accessibilityLabel="Age input"
@@ -85,8 +90,8 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
           <TextField
             value={about}
             onChangeText={setAbout}
-            label="About"
-            placeholder="Tell us about yourself"
+            labelTx="profileScreen:about"
+            placeholderTx="editProfileScreen:aboutPlaceholder"
             multiline
             numberOfLines={4}
             accessible={true}
@@ -94,7 +99,7 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
             accessibilityRole="text"
           />
 
-          <Button text="Save Changes" onPress={handleSave} disabled={isSubmitting} />
+          <Button tx="common:saveChanges" onPress={handleSave} disabled={isSubmitting} />
         </View>
       </Screen>
     )

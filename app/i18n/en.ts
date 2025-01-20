@@ -4,6 +4,7 @@ const en = {
   common: {
     ok: "OK!",
     cancel: "Cancel",
+    save: "Save",
     back: "Back",
     logOut: "Log Out",
     login: "Log In",
@@ -12,6 +13,8 @@ const en = {
     searching: "Searching...",
     loading: "Loading...",
     delete: "Delete",
+    confirmChanges: "Confirm Changes",
+    saveChanges: "Save Changes",
   },
   errors: {
     title: "There was an error.",
@@ -120,6 +123,7 @@ const en = {
     email: "Email",
     age: "Age",
     bio: "Biography",
+    about: "About",
     personalInformation: "Personal Information",
     addName: "Add Your Name",
     addAge: "Add Age",
@@ -130,6 +134,14 @@ const en = {
     deleteAccountWarning: "YOU ARE DELETING YOUR ACCOUNT",
     deleteAccountWarningDescription:
       "Are you sure you want to delete your account? This action can not taken back.",
+  },
+  editProfileScreen: {
+    saveAccountWarningDescription: "Are you sure you want to save these profile changes?",
+    editProfile: "Edit Profile",
+    displayName: "Display Name",
+    displayNamePlaceholder: "Enter your display name",
+    agePlaceholder: "Enter your age",
+    aboutPlaceholder: "Tell us about yourself",
   },
   upcomingEvents: {
     title: "Upcoming Events",
