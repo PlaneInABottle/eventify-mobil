@@ -20,6 +20,7 @@
     "build:android:sim": "eas build --profile development --platform android --local",
     "build:android:dev": "eas build --profile development:device --platform android --local",
     "build:android:prod": "eas build --profile production --platform android --local",
+    "build:android:prev": "eas build --profile preview:device --platform android --local",
     "start": "npx expo start",
     "android": "npx expo run:android",
     "android:m51": "npx expo run:android -d SM_M515F",
