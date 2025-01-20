@@ -33,6 +33,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller"
 import { loadDateFnsLocale } from "./utils/formatDate"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { getStateFromPath } from "@react-navigation/native"
+import Toast from "react-native-toast-message"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
@@ -141,6 +142,7 @@ function App(props: AppProps) {
               initialState={initialNavigationState}
               onStateChange={onNavigationStateChange}
             />
+            <Toast />
           </GestureHandlerRootView>
         </KeyboardProvider>
       </ErrorBoundary>
