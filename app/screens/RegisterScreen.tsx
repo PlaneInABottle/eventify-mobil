@@ -6,7 +6,6 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { TxKeyPath } from "@/i18n"
 import { useHeader } from "@/utils/useHeader"
 
 interface RegisterScreenProps extends AppStackScreenProps<"Register"> {}
@@ -42,7 +41,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
 
   useHeader(
     {
-      title: "Register",
+      titleTx: "common:register",
       leftIcon: "back",
       onLeftPress: () => navigate("Welcome"),
     },
@@ -121,12 +120,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
 
       <View style={themed($formContainer)}>
         {registerError && (
-          <Text
-            tx={`${registerError.replace("-", "")}` as TxKeyPath}
-            size="sm"
-            weight="light"
-            style={themed($hint)}
-          />
+          <Text tx={registerError} size="sm" weight="light" style={themed($hint)} />
         )}
 
         <TextField
@@ -138,7 +132,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           autoCorrect={false}
           labelTx="registerScreen:nameFieldLabel"
           placeholderTx="registerScreen:nameFieldPlaceholder"
-          helper={isSubmitted && !name.trim() ? "registerScreen:nameRequired" : undefined}
+          helperTx={isSubmitted && !name.trim() ? "errors:nameRequired" : undefined}
           status={isSubmitted && !name.trim() ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
           readOnly={isLoading}
@@ -154,7 +148,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           keyboardType="email-address"
           labelTx="registerScreen:emailFieldLabel"
           placeholderTx="registerScreen:emailFieldPlaceholder"
-          helper={error}
+          helperTx={error}
           status={error ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
           readOnly={isLoading}
@@ -189,10 +183,14 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           placeholderTx="registerScreen:confirmPasswordFieldPlaceholder"
           onSubmitEditing={handleRegister}
           RightAccessory={ConfirmPasswordRightAccessory}
-          status={confirmPassword !== authPassword && confirmPassword !== "" ? "error" : undefined}
-          helper={
-            confirmPassword !== authPassword && confirmPassword !== ""
-              ? "Passwords do not match"
+          status={
+            isSubmitted && confirmPassword !== authPassword && confirmPassword !== ""
+              ? "error"
+              : undefined
+          }
+          helperTx={
+            isSubmitted && confirmPassword !== authPassword && confirmPassword !== ""
+              ? "errors:passwordsNotMatch"
               : undefined
           }
           readOnly={isLoading}
