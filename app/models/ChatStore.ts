@@ -155,7 +155,7 @@ export const ChatStoreModel = types
     }),
     disconnect() {
       if (store.socket) store.socket!.disconnect()
-      else handleError("erros:unknown")
+      else handleError("errors:unknown")
     },
     joinSocketChatRoom(chatRoomId: string) {
       store.socket!.emit("joinRoom", chatRoomId)
@@ -170,7 +170,7 @@ export const ChatStoreModel = types
     sendMessage: flow(function* (chatId: string, message: string) {
       try {
         const userId = getRootStore(store).userStore.userId as string | undefined
-        if (!userId) throw Error("erros:notFound")
+        if (!userId) throw Error("errors:notFound")
 
         const { data, error } = yield supabase
           .from("messages")

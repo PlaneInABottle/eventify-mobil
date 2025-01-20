@@ -78,7 +78,7 @@ export const UserStoreModel: IAnyModelType = types
   }))
   .actions((store) => ({
     uploadAvatar: flow(function* () {
-      if (!store.user?.id) throw Error("erros:notFound")
+      if (!store.user?.id) throw Error("errors:notFound")
 
       store.setUploading(true)
       try {
