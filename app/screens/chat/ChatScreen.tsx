@@ -31,7 +31,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
   }, [chat])
 
   useHeader({
-    title: "Chat",
+    titleTx: "chatScreen:chat",
     leftIcon: "back",
     onLeftPress: () => {
       //     chatStore.leaveSocketChatRoom(eventChatId)
@@ -74,7 +74,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
         onEndReachedThreshold={0.5}
       />
       <TextField
-        placeholder="Type a message"
+        placeholderTx="chatScreen:textInputPlaceholder"
         containerStyle={themed($textFieldContainer)}
         inputWrapperStyle={themed($inputWrapperStyle)}
         value={message}
@@ -90,10 +90,12 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
 })
 const ChatBubble = ({ message, userId }: { message: ChatMessage; userId: string }) => {
   const { themed } = useAppTheme()
+
+  const isMessageBelongsUser = userId === message.sender_id
   return (
     <Card
       verticalAlignment="force-footer-bottom"
-      style={[themed($card), userId === message.sender_id ? { alignSelf: "flex-end" } : undefined]}
+      style={[themed($card), isMessageBelongsUser ? themed($messageBelongUser) : undefined]}
       wrapperStyle={themed($wrapperStyle)}
       heading={message.sender_display_name}
       headingStyle={themed($headingText)}
@@ -132,6 +134,10 @@ const $card: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   padding: spacing.xs,
   marginTop: spacing.xxs,
   alignSelf: "flex-start",
+})
+
+const $messageBelongUser: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignSelf: "flex-end",
 })
 
 const $wrapperStyle: ThemedStyle<ViewStyle> = () => ({

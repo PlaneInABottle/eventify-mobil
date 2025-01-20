@@ -144,6 +144,11 @@ const en = {
     leaveChat: "Leave Chat",
     reportChat: "Report Chat",
   },
+  chatScreen: {
+    chat: "Chat",
+
+    textInputPlaceholder: "Type a message",
+  },
 
   eventMapScreen: {
     searchThisArea: "Search This Area",
