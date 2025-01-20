@@ -12,7 +12,7 @@ import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
 
 interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
-// TODO: Custom icons, and organizer name instead of id.
+
 export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMapScreen(_props) {
   const {
     eventStore: { eventsInBounds, fetchEventsInBounds, isSearching },
@@ -58,7 +58,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
 
       <Button
         preset="filled"
-        tx={isSearching ? "common:searching" : "upcomingEvents:searchThisArea"}
+        tx={isSearching ? "common:searching" : "eventMapScreen:searchThisArea"}
         style={themed($searchButton)}
         disabledStyle={themed($disabledButton)}
         onPress={handleSearchThisArea}
@@ -148,7 +148,16 @@ const MarkerField = observer(
 
             <View style={themed($descriptionContainer)}>
               <Text preset="subheading" text="About" style={themed($sectionTitle)} />
-              <Text text={event.description || "No description available"} />
+              <Text
+                tx={
+                  event.description
+                    ? "eventMapScreen:eventDescription"
+                    : "eventMapScreen:noDescription"
+                }
+                txOptions={{
+                  description: event.description,
+                }}
+              />
             </View>
 
             <View style={themed($organizerContainer)}>
@@ -158,12 +167,12 @@ const MarkerField = observer(
 
             {event.hasChat && event.event_chat_id && (
               <Button
-                text={
+                tx={
                   isLoading
-                    ? "Loading..."
+                    ? "common:loading"
                     : hasJoinedChat(event.event_chat_id)
-                      ? "Leave Chat"
-                      : "Join Chat"
+                      ? "common:leaveChat"
+                      : "common:joinChat"
                 }
                 onPress={() => {
                   toggleChat(event.event_chat_id as string, event.id)

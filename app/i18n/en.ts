@@ -15,6 +15,8 @@ const en = {
     delete: "Delete",
     confirmChanges: "Confirm Changes",
     saveChanges: "Save Changes",
+    joinChat: "Join Chat",
+    leaveChat: "Leave Chat",
   },
   errors: {
     title: "There was an error.",
@@ -109,14 +111,7 @@ const en = {
     confirmNewPasswordFieldLabel: "Confirm New Password",
     confirmNewPasswordFieldPlaceholder: "Confirm New Password",
   },
-  upcomingEventsScreen: {
-    title: "Upcoming Events",
-    description: "Discover and join exciting events happening soon",
-  },
-  pastEventsScreen: {
-    title: "Past Events",
-    description: "Browse through events you've attended or missed",
-  },
+
   profileScreen: {
     title: "Profile",
     description: "Manage your account and preferences",
@@ -143,18 +138,19 @@ const en = {
     agePlaceholder: "Enter your age",
     aboutPlaceholder: "Tell us about yourself",
   },
-  upcomingEvents: {
-    title: "Upcoming Events",
-    description: "Discover events happening around you",
-    searchThisArea: "Search This Area",
-  },
+
   chatListScreen: {
     chats: "Chats",
     leaveChat: "Leave Chat",
     reportChat: "Report Chat",
   },
 
-  eventsListScreen: {
+  eventMapScreen: {
+    searchThisArea: "Search This Area",
+    eventDescription: " {{ description }}",
+    noDescription: "Sorry, we couldn't find any description about this event :(",
+  },
+  eventListScreen: {
     favoriteButton: "Favorite",
     unfavoriteButton: "Unfavorite",
     joinChat: "Join Chat",
