@@ -11,6 +11,7 @@ const en = {
     forgotPassword: "Forgot Password?",
     searching: "Searching...",
     loading: "Loading...",
+    delete: "Delete",
   },
   errors: {
     title: "There was an error.",
@@ -116,6 +117,19 @@ const en = {
   profileScreen: {
     title: "Profile",
     description: "Manage your account and preferences",
+    email: "Email",
+    age: "Age",
+    bio: "Biography",
+    personalInformation: "Personal Information",
+    addName: "Add Your Name",
+    addAge: "Add Age",
+    addEmail: "Add Your Email",
+    addBio: "Add Your Biography",
+    toggleTheme: "Toggle Theme : {{ themeContext }}",
+    deleteAccount: "Delete Account",
+    deleteAccountWarning: "YOU ARE DELETING YOUR ACCOUNT",
+    deleteAccountWarningDescription:
+      "Are you sure you want to delete your account? This action can not taken back.",
   },
   upcomingEvents: {
     title: "Upcoming Events",
@@ -127,6 +141,7 @@ const en = {
     leaveChat: "Leave Chat",
     reportChat: "Report Chat",
   },
+
   eventsListScreen: {
     favoriteButton: "Favorite",
     unfavoriteButton: "Unfavorite",

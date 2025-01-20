@@ -17,6 +17,7 @@ import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
 import { $styles, colors, ThemedStyle } from "@/theme"
 import { navigate } from "@/navigators/navigationUtilities"
+import { translate } from "@/i18n"
 
 interface ProfileScreenProps extends MainTabScreenProps<"Profile"> {}
 
@@ -31,15 +32,15 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
   const handleDeleteProfile = () => {
     Alert.alert(
-      "YOU ARE DELETING YOUR ACCOUNT",
-      "Are you sure you want to delete your account? This action can not taken back.",
+      translate("profileScreen:deleteAccountWarning"),
+      translate("profileScreen:deleteAccountWarningDescription"),
       [
         {
-          text: "Cancel",
+          text: translate("common:cancel"),
           style: "cancel",
         },
         {
-          text: "Delete",
+          text: translate("common:delete"),
           onPress: async () => {
             userStore.deleteProfile()
           },
@@ -107,7 +108,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           <View style={themed($userInfoContainer)}>
             <Text
               preset="heading"
-              text={user?.display_name || "Add Your Name"}
+              tx={user?.display_name || "profileScreen:addName"}
               style={themed($nameText)}
               accessibilityRole="header"
             />
@@ -118,7 +119,11 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           style={themed($item)}
           HeadingComponent={
             <View style={themed($sectionHeader)}>
-              <Text preset="subheading" text="Personal Information" accessibilityRole="header" />
+              <Text
+                preset="subheading"
+                tx="profileScreen:personalInformation"
+                accessibilityRole="header"
+              />
               <TouchableOpacity
                 onPress={handleEditPersonalInfo}
                 accessible={true}
@@ -136,9 +141,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
                   <Icon icon="lock" size={20} containerStyle={themed($iconWrapper)} />
                 </View>
                 <View style={themed($infoTextContainer)}>
-                  <Text preset="formLabel" text="Email" style={themed($infoLabel)} />
+                  <Text preset="formLabel" tx="profileScreen:email" style={themed($infoLabel)} />
                   <Text
-                    text={user?.email || "Add email"}
+                    tx={user?.email || "profileScreen:addEmail"}
                     style={themed($infoValue)}
                     accessibilityLabel={`Email: ${user?.email || "not set"}`}
                   />
@@ -150,9 +155,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
                   <Icon icon="growth" size={20} containerStyle={themed($iconWrapper)} />
                 </View>
                 <View style={themed($infoTextContainer)}>
-                  <Text preset="formLabel" text="Age" style={themed($infoLabel)} />
+                  <Text preset="formLabel" tx="profileScreen:age" style={themed($infoLabel)} />
                   <Text
-                    text={user?.age?.toString() || "Add age"}
+                    tx={user?.age?.toString() || "profileScreen:addAge"}
                     style={themed($infoValue)}
                     accessibilityLabel={`Age: ${user?.age || "not set"}`}
                   />
@@ -164,9 +169,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
                   <Icon icon="biography" size={20} containerStyle={themed($iconWrapper)} />
                 </View>
                 <View style={themed($infoTextContainer)}>
-                  <Text preset="formLabel" text="Bio" style={themed($infoLabel)} />
+                  <Text preset="formLabel" tx="profileScreen:bio" style={themed($infoLabel)} />
                   <Text
-                    text={user?.about || "Add a short bio"}
+                    tx={user?.about || "profileScreen:addBio"}
                     style={themed($infoValue)}
                     accessibilityLabel={`Bio: ${user?.about || "not set"}`}
                   />
@@ -177,17 +182,20 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         />
         <Button
           onPress={toggleTheme}
-          text={`Toggle Theme: ${themeContext}`}
+          tx="profileScreen:toggleTheme"
+          txOptions={{
+            themeContext,
+          }}
           style={themed($itemsContainer)}
         />
         <Button
           onPress={() => authenticationStore.logout()}
-          text={"Logout"}
+          tx="common:logOut"
           style={themed($itemsContainer)}
         />
         <Button
           onPress={handleDeleteProfile}
-          text={"Delete Account"}
+          tx="profileScreen:deleteAccount"
           style={themed($deleteButton)}
           preset="danger"
         />
