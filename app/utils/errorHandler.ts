@@ -65,7 +65,7 @@ export function handleError(error: unknown, config: ErrorConfig = defaultConfig)
       type: "error",
       text1: translate("errors:title"),
       text2: message,
-      position: "bottom",
+      position: "top",
     })
   }
 
