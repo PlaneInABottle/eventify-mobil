@@ -7,6 +7,7 @@ import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { TxKeyPath } from "@/i18n"
+import { useHeader } from "@/utils/useHeader"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
@@ -17,6 +18,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   const [authPassword, setAuthPassword] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const navigate = navigation.navigate
   const {
     authenticationStore: {
       authEmail,
@@ -27,6 +29,15 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       isLoading,
     },
   } = useStores()
+
+  useHeader(
+    {
+      title: "Log In",
+      leftIcon: "back",
+      onLeftPress: () => navigate("Welcome"),
+    },
+    [],
+  )
 
   const {
     themed,
@@ -71,11 +82,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   )
 
   return (
-    <Screen
-      preset="auto"
-      contentContainerStyle={themed($screenContentContainer)}
-      safeAreaEdges={["top"]}
-    >
+    <Screen preset="auto" contentContainerStyle={themed($screenContentContainer)}>
       <View style={themed($topContainer)}>
         <Text
           testID="login-heading"
@@ -158,7 +165,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 })
 
 const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.xxl,
+  paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.lg,
 })
 

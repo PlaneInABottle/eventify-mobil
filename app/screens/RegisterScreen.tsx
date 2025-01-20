@@ -7,10 +7,14 @@ import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { TxKeyPath } from "@/i18n"
+import { useHeader } from "@/utils/useHeader"
 
 interface RegisterScreenProps extends AppStackScreenProps<"Register"> {}
 
 export const RegisterScreen: FC<RegisterScreenProps> = observer(function RegisterScreen(_props) {
+  const {
+    navigation: { navigate },
+  } = _props
   const authPasswordInput = useRef<TextInput>(null)
   const confirmPasswordInput = useRef<TextInput>(null)
 
@@ -36,6 +40,14 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
     theme: { colors },
   } = useAppTheme()
 
+  useHeader(
+    {
+      title: "Register",
+      leftIcon: "back",
+      onLeftPress: () => navigate("Welcome"),
+    },
+    [],
+  )
   const error = isSubmitted ? validationError : ""
 
   async function handleRegister() {
@@ -91,7 +103,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
     <Screen
       preset="auto"
       contentContainerStyle={themed($screenContentContainer)}
-      safeAreaEdges={["top", "bottom"]}
+      safeAreaEdges={["bottom"]}
     >
       <View style={themed($topContainer)}>
         <Text
@@ -200,7 +212,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
 })
 
 const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.xxl,
+  paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.lg,
 })
 

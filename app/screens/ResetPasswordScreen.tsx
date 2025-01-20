@@ -7,10 +7,13 @@ import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { TxKeyPath, translate } from "@/i18n"
+import { useHeader } from "@/utils/useHeader"
 
 export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = observer(
   function ResetPasswordScreen(_props) {
-    const { navigation } = _props
+    const {
+      navigation: { navigate },
+    } = _props
     const authPasswordInput = useRef<TextInput>(null)
     const confirmPasswordInput = useRef<TextInput>(null)
 
@@ -28,6 +31,14 @@ export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = obs
       theme: { colors },
     } = useAppTheme()
 
+    useHeader(
+      {
+        title: "Reset Password",
+        leftIcon: "back",
+        onLeftPress: () => navigate("Welcome"),
+      },
+      [],
+    )
     async function handleResetPassword() {
       if (authPassword.length <= 5) {
         setError("passwordShort")
@@ -39,7 +50,7 @@ export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = obs
       }
 
       const result: { status: string; error?: string } = await updatePassword(authPassword)
-      if (result.status === "ok") navigation.replace("Login")
+      if (result.status === "ok") navigate("Login")
       else console.log(result.error)
     }
 
