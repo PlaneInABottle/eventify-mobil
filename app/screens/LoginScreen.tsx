@@ -6,7 +6,7 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { TxKeyPath } from "@/i18n"
+import { TxKeyPath, translate } from "@/i18n"
 import { useHeader } from "@/utils/useHeader"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
@@ -32,7 +32,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 
   useHeader(
     {
-      title: "Log In",
+      titleTx: "common:login",
       leftIcon: "back",
       onLeftPress: () => navigate("Welcome"),
     },
@@ -86,7 +86,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       <View style={themed($topContainer)}>
         <Text
           testID="login-heading"
-          tx="loginScreen:logIn"
+          tx="loginScreen:welcomeBack"
           preset="heading"
           style={themed($logIn)}
         />
@@ -94,13 +94,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       </View>
 
       <View style={themed($formContainer)}>
-        {loginError && (
-          <Text
-            tx={`errors:${loginError.replace("-", "")}` as TxKeyPath}
-            size="sm"
-            weight="light"
-            style={themed($hint)}
-          />
+        {isSubmitted && loginError && (
+          <Text tx={loginError} size="sm" weight="light" style={themed($hint)} />
         )}
 
         <TextField
@@ -113,8 +108,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
           keyboardType="email-address"
           labelTx="loginScreen:emailFieldLabel"
           placeholderTx="loginScreen:emailFieldPlaceholder"
-          helper={error}
-          status={error ? "error" : undefined}
+          helperTx={isSubmitted && error}
+          status={isSubmitted && error ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
           readOnly={isLoading}
         />

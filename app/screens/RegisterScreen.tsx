@@ -119,7 +119,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
       </View>
 
       <View style={themed($formContainer)}>
-        {registerError && (
+        {isSubmitted && registerError && (
           <Text tx={registerError} size="sm" weight="light" style={themed($hint)} />
         )}
 
