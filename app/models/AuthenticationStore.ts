@@ -6,6 +6,8 @@ import { AuthChangeEvent, AuthError, Session } from "@supabase/supabase-js"
 import * as QueryParams from "expo-auth-session/build/QueryParams"
 import { handleError } from "@/utils/errorHandler"
 import { handleSuccess } from "@/utils/successHandler"
+import { NavigationProp, useNavigation } from "@react-navigation/native"
+import { AppStackParamList } from "@/navigators"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -62,9 +64,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
     logout() {
       try {
         getRootStore(store).resetAllStores()
+        handleSuccess("success:logoutSuccess")
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
-        else console.error("There was an unknown error while logging out")
+        handleError(e)
       }
     },
   }))
@@ -171,7 +173,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         handleSuccess("success:passwordChanged")
         return { status: "ok" }
       } catch (e: any) {
-        handleError(e, { toast: true })
+        handleError(e)
         return { status: "error", error: e.message ? e.message : "There was an error" }
       } finally {
         store.setLoading(false)
@@ -200,8 +202,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
         // store.handleSuccessfulAuth(data.session, data.session.user.id)
       } catch (e) {
-        if (e instanceof Error) console.error(e.message)
-        else console.error(e)
+        handleError("errors:linkProblem")
+        const navigation = useNavigation<NavigationProp<AppStackParamList>>()
+        navigation.navigate("Welcome")
       }
     }),
     setupAuthListener() {

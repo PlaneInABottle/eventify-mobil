@@ -90,7 +90,7 @@ export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = obs
       <Screen
         preset="auto"
         contentContainerStyle={themed($screenContentContainer)}
-        safeAreaEdges={["top", "bottom"]}
+        safeAreaEdges={["bottom"]}
       >
         <View style={themed($topContainer)}>
           <Text text="Reset Password" preset="heading" style={themed($resetPassword)} />
@@ -165,7 +165,7 @@ export const ResetPasswordScreen: FC<AppStackScreenProps<"ResetPassword">> = obs
 )
 
 const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.xxl,
+  paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.lg,
 })
 

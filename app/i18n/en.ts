@@ -38,6 +38,7 @@ const en = {
   },
 
   errors: {
+    title: "There was an error.",
     invalidEmail: "Invalid email address.",
     timeout: "Request timed out. Please try again.",
     cannotConnect: "Cannot connect to the server. Please check your internet connection.",
@@ -50,6 +51,22 @@ const en = {
     badData: "Invalid data received from the server.",
     passwordsNotMatch: "Passwords do not match, check again!",
     passwordShort: "Passwords should be longer than 5 characters",
+    linkProblem: "There was a problem about the link. Please request a new one!",
+  },
+  success: {
+    title: "Success!",
+    // Auth
+    loginSuccess: "Successfully logged in",
+    logoutSuccess: "Successfully logged out",
+    signupSuccess: "Account created successfully",
+    // Profile
+    profileUpdated: "Profile updated successfully",
+    passwordChanged: "Password changed successfully",
+    // Data
+    dataSaved: "Changes saved successfully",
+    dataDeleted: "Successfully deleted",
+    // Generic
+    default: "Operation completed successfully",
   },
   loginScreen: {
     logIn: "Welcome Back!",
