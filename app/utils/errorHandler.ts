@@ -1,5 +1,6 @@
 import { translate } from "@/i18n"
 import Toast from "react-native-toast-message"
+import { reportCrash } from "./crashReporting"
 
 export interface ErrorConfig {
   silent?: boolean
@@ -85,7 +86,7 @@ export function handleError(error: unknown, config: ErrorConfig = defaultConfig)
   // Report in production
   if (!__DEV__ && config.report) {
     // Your error reporting service here
-    // reportCrash(normalizedError)
+    reportCrash(normalizedError)
   }
 
   return { message, error: normalizedError }

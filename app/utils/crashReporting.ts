@@ -2,7 +2,7 @@
  * If you're using Sentry
  *   Expo https://docs.expo.dev/guides/using-sentry/
  */
-// import * as Sentry from "@sentry/react-native"
+import * as Sentry from "@sentry/react-native"
 
 /**
  * If you're using Crashlytics: https://rnfirebase.io/crashlytics/usage
@@ -21,10 +21,13 @@
  *  This is where you put your crash reporting service initialization code to call in `./app/app.tsx`
  */
 export const initCrashReporting = () => {
-  // Sentry.init({
-  //   dsn: "YOUR DSN HERE",
-  //   debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
-  // })
+  Sentry.init({
+    dsn: "https://1429360a65710ac74d69e003e1c8987c@o4508677653921792.ingest.de.sentry.io/4508677662113872",
+    debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+    tracesSampleRate: 1.0,
+    enableUserInteractionTracing: false,
+    profilesSampleRate: 1.0,
+  })
   // Bugsnag.start("YOUR API KEY")
 }
 
@@ -55,7 +58,7 @@ export const reportCrash = (error: Error, type: ErrorType = ErrorType.FATAL) => 
   } else {
     // In production, utilize crash reporting service of choice below:
     // RN
-    // Sentry.captureException(error)
+    Sentry.captureException(error)
     // crashlytics().recordError(error)
     // Bugsnag.notify(error)
   }

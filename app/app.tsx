@@ -34,6 +34,7 @@ import { loadDateFnsLocale } from "./utils/formatDate"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { getStateFromPath } from "@react-navigation/native"
 import Toast from "react-native-toast-message"
+import { initCrashReporting } from "./utils/crashReporting"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
@@ -130,7 +131,7 @@ function App(props: AppProps) {
       return getStateFromPath(accessiblePath, options)
     },
   }
-
+  initCrashReporting()
   // otherwise, we're ready to render the app
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>

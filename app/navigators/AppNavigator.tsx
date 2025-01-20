@@ -17,6 +17,7 @@ import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import * as Linking from "expo-linking"
+import * as Sentry from "@sentry/react-native"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -113,18 +114,20 @@ const AppStack = observer(function AppStack() {
 
 export interface NavigationProps extends Partial<ComponentProps<typeof NavigationContainer>> {}
 
-export const AppNavigator = observer(function AppNavigator(props: NavigationProps) {
-  const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
-    useThemeProvider()
+export const AppNavigator = Sentry.wrap(
+  observer(function AppNavigator(props: NavigationProps) {
+    const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
+      useThemeProvider()
 
-  useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
-  return (
-    <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-      <BottomSheetModalProvider>
-        <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
-          <AppStack />
-        </NavigationContainer>
-      </BottomSheetModalProvider>
-    </ThemeProvider>
-  )
-})
+    useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
+    return (
+      <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+        <BottomSheetModalProvider>
+          <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
+            <AppStack />
+          </NavigationContainer>
+        </BottomSheetModalProvider>
+      </ThemeProvider>
+    )
+  }),
+)
