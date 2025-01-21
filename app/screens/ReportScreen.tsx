@@ -27,6 +27,7 @@ export const ReportScreen: FC<AppStackScreenProps<"Report">> = observer(
     const handleSendReport = useCallback(() => {
       userStore.report(reportedItemId, reportType, reason)
       setReason("")
+      _props.navigation.goBack()
     }, [reason])
 
     return (
