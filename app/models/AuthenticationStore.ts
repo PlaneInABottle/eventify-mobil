@@ -61,16 +61,19 @@ export const AuthenticationStoreModel: IAnyModelType = types
     setAuthEmail(value: string): void {
       store.authEmail = value.replace(/ /g, "")
     },
-    logout() {
+    logout: flow(function* () {
       try {
         // Logout from supabase
+        getRootStore(store).chatStore.disconnect()
         getRootStore(store).resetAllStores()
+        const { error } = yield supabase.auth.signOut()
+        if (error) throw error
 
         handleSuccess("success:logoutSuccess")
       } catch (e) {
         handleError(e)
       }
-    },
+    }),
   }))
   .actions((store) => ({
     handleSuccessfulAuth: flow(function* (session: Session, userId: string) {
