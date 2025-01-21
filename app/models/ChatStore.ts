@@ -130,6 +130,10 @@ export const ChatStoreModel = types
             event_chat_id: data.event_chat_id,
           })
         })
+
+        socket.on("connect_error", (error) => {
+          handleError(error)
+        })
       } else {
         handleError("errors:unknown")
       }
