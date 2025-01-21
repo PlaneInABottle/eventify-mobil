@@ -44,8 +44,16 @@
     },
     "plugins": [
       "expo-localization",
-      "expo-build-properties",
       "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          },
+          "ios": {}
+        }
+      ],
       [
         "expo-splash-screen",
         {
