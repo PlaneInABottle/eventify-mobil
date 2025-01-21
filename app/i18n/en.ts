@@ -71,6 +71,9 @@ const en = {
     textInputLabel: "Report",
     textInputPlaceholder: "Please state the report reason",
     sendReport: "Send Report",
+    reportType: "Report Type",
+    reportContent: "Report Content",
+    reportedItemId: "Reported Item Id",
   },
   emptyStateComponent: {
     generic: {
@@ -157,6 +160,7 @@ const en = {
   },
   chatScreen: {
     chat: "{{eventTitle}} Chat",
+    reportMessage: "Report Message",
 
     textInputPlaceholder: "Type a message",
   },
