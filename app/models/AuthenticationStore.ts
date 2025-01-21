@@ -229,7 +229,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
               if (store.authToken) getRootStore(store).chatStore.connect(store.authToken)
               break
             case "SIGNED_OUT":
-              store.logout()
+              console.log("Signed Out")
               break
 
             case "TOKEN_REFRESHED":

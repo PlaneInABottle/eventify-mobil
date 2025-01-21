@@ -158,8 +158,13 @@ export const ChatStoreModel = types
       }
     }),
     disconnect() {
-      if (store.socket) store.socket!.disconnect()
-      else handleError("errors:unknown")
+      try {
+        store.socket?.disconnect()
+        return true
+      } catch (e) {
+        handleError(e)
+        return false
+      }
     },
     joinSocketChatRoom(chatRoomId: string) {
       store.socket!.emit("joinRoom", chatRoomId)
