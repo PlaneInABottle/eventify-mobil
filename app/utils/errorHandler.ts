@@ -1,7 +1,7 @@
 import { translate } from "@/i18n"
 import Toast from "react-native-toast-message"
 import { ErrorType, reportCrash } from "./crashReporting"
-
+import * as Sentry from "@sentry/react-native"
 export interface ErrorConfig {
   silent?: boolean
   toast?: boolean
@@ -86,7 +86,7 @@ export function handleError(error: unknown, config: ErrorConfig = defaultConfig)
   // Report in production
   if (!__DEV__ && config.report) {
     // Your error reporting service here
-    reportCrash(normalizedError, ErrorType.HANDLED)
+    Sentry.captureException(normalizedError)
   }
 
   return { message, error: normalizedError }

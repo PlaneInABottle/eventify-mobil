@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from "react"
 import { ErrorDetails } from "./ErrorDetails"
 import { reportCrash } from "@/utils/crashReporting"
+import { handleError } from "@/utils/errorHandler"
 
 interface Props {
   children: ReactNode
@@ -39,7 +40,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // You can also log error messages to an error reporting service here
     // This is a great place to put BugSnag, Sentry, crashlytics, etc:
-    reportCrash(error)
+    // reportCrash(error)
+    handleError(error, {
+      toast: false,
+    })
   }
 
   // Reset the error back to null
