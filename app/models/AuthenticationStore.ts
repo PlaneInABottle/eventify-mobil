@@ -110,9 +110,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         if (error) {
           store.setError(error.message)
 
-          const errResponse = handleError(error)
-          if (errResponse.error.code)
-            store.setError(`errors:${toCamelCase(errResponse.error.code)}`)
+          handleError(error)
 
           return false
         }
