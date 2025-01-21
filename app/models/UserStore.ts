@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { getRootStore } from "./helpers/getRootStore"
 import { handleError } from "@/utils/errorHandler"
+import { handleSuccess } from "@/utils/successHandler"
 export const UserStoreModel: IAnyModelType = types
   .model("UserStore")
   .props({
@@ -129,6 +130,9 @@ export const UserStoreModel: IAnyModelType = types
           reason,
         })
         if (error) throw error
+        handleSuccess("success:reportSent", {
+          duration: 6000,
+        })
       } catch (error) {
         handleError(error)
       } finally {
