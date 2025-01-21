@@ -55,6 +55,9 @@ const en = {
     // Data
     dataSaved: "Changes saved successfully",
     dataDeleted: "Successfully deleted",
+    // Report
+    reportSent:
+      "Your report sent to the management. We will take necessary actions in the next 24 hours.",
     // Generic
     default: "Operation completed successfully",
   },
