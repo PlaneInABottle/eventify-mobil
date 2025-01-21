@@ -41,11 +41,12 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
           }
           renderItem={({ item }) => {
             const event = eventStore.events.get(item.event_id)
+            if (!event) return null
             return (
               <ChatListItem
-                title={event?.title}
-                handlePressChat={() => handlePressChat(item.id, event?.title)}
-                imageUrl={event?.image_url}
+                title={event.title}
+                handlePressChat={() => handlePressChat(item.id, event.title)}
+                imageUrl={event.image_url}
                 chatId={item.id}
               />
             )
@@ -56,7 +57,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   },
 )
 interface ChatListItemProps {
-  title?: string
+  title: string
   chatId: string
   handlePressChat: () => void
   imageUrl: string | undefined | null
@@ -126,6 +127,7 @@ const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props
               navigation.navigate("Report", {
                 reportedItemId: chatId,
                 reportType: "chat",
+                reportContent: title,
               })
             }}
             rightIcon="caretRight"
