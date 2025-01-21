@@ -10,7 +10,7 @@ import { ViewStyle } from "react-native"
 
 export const ReportScreen: FC<AppStackScreenProps<"Report">> = observer(
   function ReportScreen(_props) {
-    const { reportedItemId, reportType } = _props.route.params
+    const { reportedItemId, reportType, reportContent } = _props.route.params
     const { userStore } = useStores()
     const { themed } = useAppTheme()
     const [reason, setReason] = useState("")
@@ -30,7 +30,11 @@ export const ReportScreen: FC<AppStackScreenProps<"Report">> = observer(
     }, [reason])
 
     return (
-      <Screen preset="fixed" contentContainerStyle={$styles.container}>
+      <Screen preset="fixed" contentContainerStyle={themed($contentContainerExtraStyle)}>
+        <TextField value={reportedItemId} labelTx="reportScreen:reportedItemId" editable={false} />
+        <TextField value={reportType} labelTx="reportScreen:reportType" editable={false} />
+        <TextField value={reportContent} labelTx="reportScreen:reportContent" editable={false} />
+
         <TextField
           value={reason}
           onChangeText={setReason}
@@ -50,6 +54,12 @@ export const ReportScreen: FC<AppStackScreenProps<"Report">> = observer(
     )
   },
 )
+
+const $contentContainerExtraStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.xl,
+  paddingTop: spacing.sm,
+  paddingHorizontal: spacing.lg,
+})
 
 const $sendButtonStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.lg,
