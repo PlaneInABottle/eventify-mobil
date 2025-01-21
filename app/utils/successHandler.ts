@@ -9,14 +9,14 @@ interface ToastConfig {
 
 const defaultConfig: ToastConfig = {
   silent: false,
-  position: "bottom",
+  position: "top",
   duration: 3000,
 }
 
 /**
  * Handles success scenarios with optional toast message
  */
-export function handleSuccess(message: string, config: ToastConfig = defaultConfig) {
+export function handleSuccess(message: string | TxKeyPath, config: ToastConfig = defaultConfig) {
   if (!config.silent) {
     Toast.show({
       type: "success",
