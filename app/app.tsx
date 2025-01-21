@@ -122,6 +122,7 @@ function App(props: AppProps) {
     return null
   }
 
+  // Number of lines decides the max line.
   const toastConfig = {
     success: (props: any) => <BaseToast {...props} text1NumberOfLines={4} text2NumberOfLines={4} />,
     error: (props: any) => <ErrorToast {...props} text1NumberOfLines={4} text2NumberOfLines={4} />,
