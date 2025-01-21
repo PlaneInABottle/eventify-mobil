@@ -39,7 +39,7 @@
     "@react-navigation/material-top-tabs": "^6.x",
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/native-stack": "^6.0.2",
-    "@sentry/react-native": "^6.5.0",
+    "@sentry/react-native": "~6.3.0",
     "@shopify/flash-list": "1.7.1",
     "@supabase/supabase-js": "^2.47.10",
     "apisauce": "3.0.1",
