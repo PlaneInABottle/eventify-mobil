@@ -2,7 +2,6 @@ import { flow, SnapshotOut, SnapshotIn, Instance, types } from "mobx-state-tree"
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { EventModel } from "./Event"
 import { handleError } from "@/utils/errorHandler"
 import SocketFactory from "@/utils/socketFactory"
 
@@ -59,7 +58,6 @@ export const ChatStoreModel = types
   .model("ChatStore")
   .props({
     chats: types.map(ChatModel),
-    joinedEvents: types.array(types.safeReference(EventModel)),
   })
   .volatile(() => ({
     isLoading: false,
@@ -86,10 +84,8 @@ export const ChatStoreModel = types
         if (error) throw error
 
         store.chats.clear()
-        store.joinedEvents.clear()
         chats.forEach((chat: Chat) => {
           store.chats.put(chat)
-          store.joinedEvents.push(chat.event_id)
         })
       } catch (e) {
         handleError(e)
@@ -201,7 +197,6 @@ export const ChatStoreModel = types
           id: data.event_chat_id,
           event_id: eventId,
         })
-        store.joinedEvents.push(eventId)
       } catch (e) {
         handleError(e)
       } finally {
@@ -224,9 +219,7 @@ export const ChatStoreModel = types
 
         const chat = store.getChat(eventChatId)
         if (!chat?.event_id) throw Error("Chat not found")
-        const event = getRootStore(store).eventStore.events.get(chat?.event_id)
         store.chats.delete(eventChatId)
-        store.joinedEvents.remove(event)
         store.leaveSocketChatRoom(eventChatId)
       } catch (e) {
         handleError(e)

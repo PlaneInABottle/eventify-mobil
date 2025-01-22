@@ -22,10 +22,7 @@ export const EventStoreModel = types
   .actions(withSetPropAction)
   .views((store) => ({
     get eventsForList() {
-      const joinedChats = getRootStore(store).chatStore.joinedEvents as Event[]
-      return store.favoritesOnly
-        ? store.favorites
-        : Array.from(new Set([...store.favorites, ...store.eventsInBounds, ...joinedChats]))
+      return store.favoritesOnly ? store.favorites : Array.from(new Set([...store.events.values()]))
     },
     get ongoingEvents() {
       return Array.from(store.events.values()).filter((event) => event.isOngoing)
@@ -46,6 +43,8 @@ export const EventStoreModel = types
         const { data: events, error } = yield supabase.rpc("get_users_initial_events", {
           _user_id: userId,
         })
+
+        console.log("Here is the data: ", events)
         if (error) throw error
 
         events.forEach((event: Event) => {
@@ -53,7 +52,6 @@ export const EventStoreModel = types
           store.eventsInBounds.push(event.id)
           if (event.is_favorite) store.favorites.push(event.id)
         })
-        // chatStore.fetchUserChats()
       } catch (e) {
         handleError(e)
       }
@@ -84,8 +82,9 @@ export const EventStoreModel = types
 
         store.events.forEach((event) => {
           if (
-            !getRootStore(store).chatStore.joinedEvents.includes(event) &&
-            !store.favorites.includes(event)
+            !store.favorites.includes(event) &&
+            event.event_chat_id &&
+            !getRootStore(store).chatStore.chats.get(event.event_chat_id)
           ) {
             store.events.delete(event.id)
           }
