@@ -28,7 +28,10 @@ export function handleSuccess(message: string | TxKeyPath, config: ToastConfig =
   }
 
   if (__DEV__) {
-    console.log("[Success]:", message)
+    console.log(
+      "[Success]:",
+      message.startsWith("success:") ? translate(message as TxKeyPath) : message,
+    )
   }
 
   return { success: true, message }
