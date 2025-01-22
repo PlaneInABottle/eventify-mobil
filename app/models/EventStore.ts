@@ -44,7 +44,6 @@ export const EventStoreModel = types
           _user_id: userId,
         })
 
-        console.log("Here is the data: ", events)
         if (error) throw error
 
         events.forEach((event: Event) => {
