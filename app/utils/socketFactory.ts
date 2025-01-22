@@ -1,5 +1,6 @@
 import { api } from "@/services/api"
 import { io, Socket } from "socket.io-client"
+import { handleError } from "./errorHandler"
 
 export interface SocketInterface {
   socket: Socket
@@ -16,7 +17,34 @@ class SocketConnection implements SocketInterface {
       auth: {
         token: `Bearer ${authenticationToken}`,
       },
+
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     })
+  }
+
+  // Emit an event to the server
+  public emit(event: string, data: any): void {
+    if (this.socket.connected) {
+      this.socket.emit(event, data)
+    } else {
+      handleError("errors:socketNotConnected")
+    }
+  }
+
+  // Listen to an event from the server
+  public on(event: string, callback: (data: any) => void): void {
+    this.socket.on(event, callback)
+  }
+
+  // Remove an event listener
+  public off(event: string, callback?: (data: any) => void): void {
+    if (callback) {
+      this.socket.off(event, callback)
+    } else {
+      this.socket.off(event)
+    }
   }
 
   // Disconnect the socket

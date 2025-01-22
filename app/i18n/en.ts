@@ -36,6 +36,7 @@ const en = {
     linkProblem: "There was a problem about the link. Please request a new one!",
     nameRequired: "Display name is required",
     cantBeBlank: "Field can't be blank",
+    socketNotConnected: "Socket not connected. Try again.",
     must6Chars: "Field must be at least 6 characters",
     mustBeValidEmail: "Field must be valid email address",
     profile: {
