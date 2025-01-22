@@ -224,6 +224,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
         async (event: AuthChangeEvent, session: Session | null) => {
           // NEVER MAKE A SUPABASE REQUEST ON AUTH CHANGE EVENT
           switch (event) {
+            case "INITIAL_SESSION":
+              console.log("init session")
+              break
             case "SIGNED_IN":
               console.log("Signed in")
               if (store.authToken) getRootStore(store).chatStore.connect(store.authToken)
