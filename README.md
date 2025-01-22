@@ -6,6 +6,7 @@ we will keep the chat information different or we are fucked a bit.-->
 <!--Change icons-->
 <!--Add about page, will show the version etc check the debug screen from demo-->
 <!--Add sentry to the socket backend-->
+<!-- Changing image will delete the old one, make this happen please-->
 
 <!--Publish to the play store, and app store. Next 2 weeks-->
 
