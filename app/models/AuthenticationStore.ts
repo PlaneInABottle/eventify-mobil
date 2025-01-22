@@ -9,6 +9,7 @@ import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { toCamelCase } from "@/utils/toCamelCase"
+import SocketFactory from "@/utils/socketFactory"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -86,7 +87,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         store.distributeAuthToken(session.access_token)
 
         // Get initial data
-        getRootStore(store).chatStore.connect(session.access_token)
+        getRootStore(store).chatStore.connect()
         getRootStore(store).getInitialData(userId)
 
         return true
@@ -229,7 +230,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
               break
             case "SIGNED_IN":
               console.log("Signed in")
-              if (store.authToken) getRootStore(store).chatStore.connect(store.authToken)
+              if (store.authToken) getRootStore(store).chatStore.connect()
               break
             case "SIGNED_OUT":
               console.log("Signed Out")
@@ -240,7 +241,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
               if (session?.access_token) {
                 store.setAuthToken(session.access_token)
                 store.distributeAuthToken(session.access_token)
-                getRootStore(store).chatStore.connect(session?.access_token)
+                getRootStore(store).chatStore.connect()
               }
               break
 

@@ -63,7 +63,6 @@ export const ChatStoreModel = types
   })
   .volatile(() => ({
     isLoading: false,
-    isConnected: false,
     activeChat: undefined as undefined | Chat,
   }))
   .views((store) => ({
@@ -108,15 +107,8 @@ export const ChatStoreModel = types
     setupSocketListeners() {
       const socket = SocketFactory.create(getRootStore(store).authenticationStore.token)
 
-      socket.on("connect", () => {
-        console.log("connected to the server")
-        store.isConnected = true
-      })
-
-      socket.on("disconnect", () => {
-        console.log("User Disconnected")
-        store.isConnected = false
-      })
+      socket.off("get-message")
+      socket.off("connect_error")
 
       socket.on("get-message", (data) => {
         store.pushMessageToChat({
