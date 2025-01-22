@@ -180,6 +180,7 @@ const $card: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   padding: spacing.xs,
   marginTop: spacing.xxs,
   alignSelf: "flex-start",
+  maxWidth: "80%",
 })
 
 const $messageBelongUser: ThemedStyle<ViewStyle> = ({ spacing }) => ({
