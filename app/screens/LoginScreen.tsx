@@ -60,8 +60,6 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   }
 
   function handleForgotPassword() {
-    // TODO: Implement forgot password flow
-    console.log("Forgot password")
     navigation.navigate("ForgotPassword")
   }
 
