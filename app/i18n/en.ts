@@ -8,6 +8,7 @@ const en = {
     back: "Back",
     logOut: "Log Out",
     login: "Log In",
+    email: "Email",
     register: "Register",
     forgotPassword: "Forgot Password?",
     searching: "Searching...",
@@ -50,6 +51,7 @@ const en = {
     loginSuccess: "Successfully logged in",
     logoutSuccess: "Successfully logged out",
     signupSuccess: "Account created successfully",
+    resetPasswordEmailSentSuccess: "Reset password email sent. Check your inbox.",
     // Profile
     profileUpdated: "Profile updated successfully",
     passwordChanged: "Password changed successfully",
@@ -128,6 +130,9 @@ const en = {
     newPasswordFielPlaceholder: "Enter New Password",
     confirmNewPasswordFieldLabel: "Confirm New Password",
     confirmNewPasswordFieldPlaceholder: "Confirm New Password",
+  },
+  forgotPasswordScreen: {
+    enterEmail: "Enter your email address to reset your password",
   },
 
   profileScreen: {

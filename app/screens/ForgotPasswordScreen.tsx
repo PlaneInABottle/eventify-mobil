@@ -5,6 +5,7 @@ import { AppStackScreenProps } from "@/navigators"
 import { Button, Screen, Text, TextField } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import type { ThemedStyle } from "@/theme"
+import { useStores } from "@/models"
 
 interface ForgotPasswordScreenProps extends AppStackScreenProps<"ForgotPassword"> {}
 
@@ -12,18 +13,21 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = observer(
   function ForgotPasswordScreen({ navigation }) {
     const [email, setEmail] = useState("")
     const [isSubmitted, setIsSubmitted] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [resetError, setResetError] = useState<string | null>(null)
 
     const {
       themed,
       theme: { colors },
     } = useAppTheme()
 
+    const {
+      authenticationStore: { isLoading, sendResetPasswordEmail },
+    } = useStores()
+
     // Email validation
     const validationError = useMemo(() => {
-      if (email.length === 0) return "can't be blank"
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "must be a valid email address"
+      if (email.length === 0) return "errors:cantBeBlank"
+      if (email.length < 6) return "errors:must6Chars"
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "errors:mustBeValidEmail"
       return ""
     }, [email])
 
@@ -33,23 +37,10 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = observer(
       setIsSubmitted(true)
       if (validationError) return
 
-      setIsLoading(true)
-      try {
-        // TODO: Implement actual password reset API call here
-        // const response = await api.resetPassword(email)
-        // if (response.kind === "ok") {
-        //   navigation.navigate("Login")
-        // } else {
-        //   setResetError("Unable to process your request. Please try again.")
-        // }
-
-        // Simulating API call for now
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+      const success = await sendResetPasswordEmail(email)
+      if (success) {
+        setIsSubmitted(false)
         navigation.navigate("Login")
-      } catch {
-        setResetError("An unexpected error occurred. Please try again.")
-      } finally {
-        setIsLoading(false)
       }
     }
 
@@ -60,21 +51,15 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = observer(
         safeAreaEdges={["top", "bottom"]}
       >
         <View style={themed($topContainer)}>
-          <Text preset="heading" style={themed($heading)} text="Reset Password" />
+          <Text preset="heading" style={themed($heading)} tx="resetPasswordScreen:resetPassword" />
           <Text
             preset="subheading"
             style={themed($description)}
-            text="Enter your email address to reset your password"
+            tx="forgotPasswordScreen:enterEmail"
           />
         </View>
 
         <View style={themed($formContainer)}>
-          {resetError && (
-            <Text size="sm" weight="light" style={themed($errorText)}>
-              {resetError}
-            </Text>
-          )}
-
           <TextField
             value={email}
             onChangeText={setEmail}
@@ -83,15 +68,15 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = observer(
             autoComplete="email"
             autoCorrect={false}
             keyboardType="email-address"
-            label="Email"
-            placeholder="Enter your email address"
-            helper={error}
+            labelTx="common:email"
+            placeholderTx="loginScreen:emailFieldPlaceholder"
+            helperTx={isSubmitted && error ? error : undefined}
             status={error ? "error" : undefined}
             editable={!isLoading}
           />
 
           <Button
-            text={isLoading ? "" : "Reset Password"}
+            tx={isLoading ? undefined : "resetPasswordScreen:resetPassword"}
             style={themed($resetButton)}
             preset="reversed"
             onPress={handleResetPassword}
@@ -103,7 +88,7 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = observer(
           </Button>
 
           <Button
-            text="Back"
+            tx="common:back"
             style={themed($backButton)}
             preset="default"
             onPress={() => navigation.goBack()}

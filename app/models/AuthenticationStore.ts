@@ -8,8 +8,6 @@ import { handleError } from "@/utils/errorHandler"
 import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
-import { toCamelCase } from "@/utils/toCamelCase"
-import SocketFactory from "@/utils/socketFactory"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -186,6 +184,21 @@ export const AuthenticationStoreModel: IAnyModelType = types
       } catch (e: any) {
         handleError(e)
         return { status: "error", error: e.message ? e.message : "There was an error" }
+      } finally {
+        store.setLoading(false)
+      }
+    }),
+    sendResetPasswordEmail: flow(function* (email: string) {
+      store.setLoading(true)
+      try {
+        const { error } = yield supabase.auth.resetPasswordForEmail(email)
+
+        if (error) throw error
+        handleSuccess("success:resetPasswordEmailSentSuccess")
+        return true
+      } catch (e) {
+        handleError(e)
+        return false
       } finally {
         store.setLoading(false)
       }
