@@ -64,7 +64,7 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_pro
     <Screen
       preset="fixed"
       contentContainerStyle={[$styles.flex1, themed($screenContentContainer)]}
-      keyboardOffset={130}
+      keyboardOffset={100}
     >
       <ListView<ChatMessage>
         inverted
