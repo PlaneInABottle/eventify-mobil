@@ -1,11 +1,10 @@
 import { flow, SnapshotOut, SnapshotIn, Instance, types } from "mobx-state-tree"
-import { Socket, io } from "socket.io-client"
 import { getRootStore } from "./helpers/getRootStore"
 import { supabase } from "@/services/auth/supabase"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { EventModel } from "./Event"
-import { api } from "@/services/api"
 import { handleError } from "@/utils/errorHandler"
+import SocketFactory from "@/utils/socketFactory"
 
 export interface ChatMessage extends Instance<typeof ChatMessageModel> {}
 const ChatMessageModel = types.model("ChatMessage").props({
@@ -64,7 +63,6 @@ export const ChatStoreModel = types
   })
   .volatile(() => ({
     isLoading: false,
-    socket: null as Socket | null,
     isConnected: false,
     activeChat: undefined as undefined | Chat,
   }))
@@ -107,59 +105,49 @@ export const ChatStoreModel = types
     },
   }))
   .actions((store) => ({
-    setSocket(socket: Socket) {
-      store.socket = socket
+    setupSocketListeners() {
+      const socket = SocketFactory.create(getRootStore(store).authenticationStore.token)
+
+      socket.on("connect", () => {
+        console.log("connected to the server")
+        store.isConnected = true
+      })
+
+      socket.on("disconnect", () => {
+        console.log("User Disconnected")
+        store.isConnected = false
+      })
+
+      socket.on("get-message", (data) => {
+        store.pushMessageToChat({
+          id: data.id,
+          content: data.content,
+          sender_id: data.sender.id,
+          sender_display_name: data.sender.display_name,
+          created_at: data.created_at,
+          event_chat_id: data.event_chat_id,
+        })
+      })
+
+      socket.on("connect_error", (error) => {
+        handleError(error)
+      })
     },
   }))
   .actions((store) => ({
-    setupSocketListeners(socket: Socket) {
-      if (store.socket) {
-        socket.on("connect", () => {
-          console.log("connected to the server")
-        })
-
-        socket.on("disconnect", () => console.log("User Disconnected"))
-
-        socket.on("get-message", (data) => {
-          store.pushMessageToChat({
-            id: data.id,
-            content: data.content,
-            sender_id: data.sender.id,
-            sender_display_name: data.sender.display_name,
-            created_at: data.created_at,
-            event_chat_id: data.event_chat_id,
-          })
-        })
-
-        socket.on("connect_error", (error) => {
-          handleError(error)
-        })
-      } else {
-        handleError("errors:unknown")
-      }
-    },
-  }))
-  .actions((store) => ({
-    connect: flow(function* (authenticationToken: string) {
+    connect: flow(function* () {
       try {
+        const authenticationToken = getRootStore(store).authenticationStore.token
         if (!authenticationToken) return
 
-        const socket = io(api.config.socketUrl, {
-          secure: true,
-          auth: {
-            token: `Bearer ${authenticationToken}`,
-          },
-        })
-
-        store.setSocket(socket)
-        store.setupSocketListeners(socket)
+        store.setupSocketListeners()
       } catch (e) {
         handleError(e)
       }
     }),
     disconnect() {
       try {
-        store.socket?.disconnect()
+        SocketFactory.disconnect()
         return true
       } catch (e) {
         handleError(e)
@@ -167,11 +155,13 @@ export const ChatStoreModel = types
       }
     },
     joinSocketChatRoom(chatRoomId: string) {
-      store.socket!.emit("joinRoom", chatRoomId)
+      const socket = SocketFactory.create(getRootStore(store).authenticationStore.token)
+      socket.emit("joinRoom", chatRoomId)
       store.activeChat = store.getChat(chatRoomId)
     },
     leaveSocketChatRoom(chatRoomId: string) {
-      store.socket!.emit("leaveRoom", chatRoomId)
+      const socket = SocketFactory.create(getRootStore(store).authenticationStore.token)
+      socket.emit("leaveRoom", chatRoomId)
       store.activeChat = undefined
     },
   }))
@@ -189,7 +179,8 @@ export const ChatStoreModel = types
 
         if (error) throw Error(error)
 
-        store.socket!.emit("send-message", {
+        const socket = SocketFactory.create(getRootStore(store).authenticationStore.token)
+        socket.emit("send-message", {
           content: data.content,
           id: data.id,
           event_chat_id: data.event_chat_id,
