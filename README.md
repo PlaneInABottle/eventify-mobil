@@ -6,6 +6,8 @@
 <!--Add about page, will show the version etc check the debug screen from demo-->
 <!--Add sentry to the socket backend-->
 
+<!--Publish to the play store, and app store. Next 2 weeks-->
+
 <!--TODO: Organizer Screens-->
 <!--Login based on the role, organizers will see another screen-->
 <!--Organizer's locations screen, so that they could add event location. First do this-->
@@ -13,6 +15,15 @@
 <!--Organizer's profile, I think we could use the same profile-->
 <!--Organizer's event's chats: They could create chats to their events  -->
 <!--Organizers could remove someone from their event's chat-->
+<!--Total Screens: Events, Edit Events = Like profile page
+    Locations, add/edit locations (this will include map),
+    Organizer Profile, Edit O. Profile,
+    Chats, Add/Remove Chats.
+    Add Remove participants from the chats
+    = 9-10 screens ??????. Not much.
+    We will take most of the functionality from the other screens
+    Probably will take our 2 weeks. Add one screen per 2 days.
+-->
 
 <!-- TODO: In the next 3 months: -->
 <!-- We will add show user's profile.-->
