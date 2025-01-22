@@ -103,6 +103,7 @@ export const ChatStoreModel = types
     setupSocketListeners() {
       const socket = SocketFactory.create(getRootStore(store).authenticationStore.token)
 
+      socket.off("connect")
       socket.off("get-message")
       socket.off("connect_error")
 
