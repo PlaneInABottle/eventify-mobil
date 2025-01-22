@@ -9,6 +9,7 @@ export interface SocketInterface {
 class SocketConnection implements SocketInterface {
   public socket: Socket
   public socketEndpoint = api.config.socketUrl
+  private eventListeners: Map<string, EventListener[]> = new Map() // Store event listeners
 
   // The constructor will initialize the Socket Connection
   constructor(authenticationToken: string) {
@@ -17,10 +18,14 @@ class SocketConnection implements SocketInterface {
       auth: {
         token: `Bearer ${authenticationToken}`,
       },
-
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+    })
+
+    // Reattach event listeners on reconnect
+    this.socket.on("connect", () => {
+      this.reattachEventListeners()
     })
   }
 
@@ -35,6 +40,10 @@ class SocketConnection implements SocketInterface {
 
   // Listen to an event from the server
   public on(event: string, callback: (data: any) => void): void {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, [])
+    }
+    this.eventListeners.get(event)!.push(callback)
     this.socket.on(event, callback)
   }
 
@@ -42,9 +51,26 @@ class SocketConnection implements SocketInterface {
   public off(event: string, callback?: (data: any) => void): void {
     if (callback) {
       this.socket.off(event, callback)
+      const listeners = this.eventListeners.get(event)
+      if (listeners) {
+        this.eventListeners.set(
+          event,
+          listeners.filter((listener) => listener !== callback),
+        )
+      }
     } else {
       this.socket.off(event)
+      this.eventListeners.delete(event)
     }
+  }
+
+  // Reattach all stored event listeners
+  private reattachEventListeners(): void {
+    this.eventListeners.forEach((listeners, event) => {
+      listeners.forEach((callback) => {
+        this.socket.on(event, callback)
+      })
+    })
   }
 
   // Disconnect the socket
