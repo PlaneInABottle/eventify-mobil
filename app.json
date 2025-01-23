@@ -21,10 +21,10 @@
     "jsEngine": "hermes",
     "assetBundlePatterns": ["**/*"],
     "android": {
-      "icon": "./assets/images/app-icon-android-legacy.png",
+      "icon": "./assets/images/TeamWhite.png",
       "package": "com.eventify.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+        "foregroundImage": "./assets/images/TeamColored.png",
         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
       },
       "config": {
@@ -57,7 +57,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/app-icon-android-adaptive-foreground.png",
+          "image": "./assets/images/TeamColored.png",
           "imageWidth": 300,
           "resizeMode": "contain",
           "backgroundColor": "#191015"

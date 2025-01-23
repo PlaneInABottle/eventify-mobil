@@ -1,6 +1,4 @@
 <!--TODO: Until february-->
-<!--Don't show the events that are old  WARN: Well well well, when we don't get the events but get the chats it will send us an error. So either
-we will keep the chat information different or we are fucked a bit.-->
 <!--Show the chats with the event's time, so that users do not confuse it-->
 <!--Email server setup-->
 <!--Change icons-->
@@ -26,6 +24,9 @@ we will keep the chat information different or we are fucked a bit.-->
     We will take most of the functionality from the other screens
     Probably will take our 2 weeks. Add one screen per 2 days.
 -->
+
+<!--TODO: Event time filter. -->
+<!--Don't show the events that are old  -->
 
 <!-- TODO: In the next 3 months: -->
 <!-- We will add show user's profile.-->

@@ -8,7 +8,7 @@ import { $styles, type ThemedStyle } from "@/theme"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 import { useAppTheme } from "@/utils/useAppTheme"
 
-const welcomeLogo = require("../../assets/images/logo.png")
+const welcomeLogo = require("../../assets/images/TeamColored.png")
 const welcomeFace = require("../../assets/images/welcome-face.png")
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
@@ -31,12 +31,14 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
     <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
       <View style={themed($topContainer)}>
         <Image style={themed($welcomeLogo)} source={welcomeLogo} resizeMode="contain" />
-        <Text
+
+        {/* <Text
           testID="welcome-heading"
           style={themed($welcomeHeading)}
           tx="welcomeScreen:welcome"
           preset="heading"
-        />
+        /> */}
+
         <Text tx="welcomeScreen:tagLine" preset="subheading" style={themed($tagLine)} />
         <Image
           style={$welcomeFace}
@@ -99,7 +101,7 @@ const $welcomeFace: ImageStyle = {
   height: 169,
   width: 269,
   position: "absolute",
-  bottom: -47,
+  bottom: -7,
   right: -80,
   transform: [{ scaleX: isRTL ? -1 : 1 }],
 }
