@@ -35,6 +35,7 @@ const en = {
     badData: "Invalid data received from the server.",
     passwordsNotMatch: "Passwords do not match, check again!",
     passwordShort: "Passwords should be at least 6 characters",
+    displayNameShort: "Display Names should be at least 6 characters",
     linkProblem: "There was a problem about the link. Please request a new one!",
     nameRequired: "Display name is required",
     cantBeBlank: "Field can't be blank",
