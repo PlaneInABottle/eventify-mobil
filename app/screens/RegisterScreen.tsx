@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite"
 import { ComponentType, FC, useRef, useState, useMemo } from "react"
-import { TextInput, TextStyle, View, ViewStyle } from "react-native"
+import { Pressable, TextInput, TextStyle, View, ViewStyle } from "react-native"
 import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
 import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
@@ -196,8 +196,23 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
           readOnly={isLoading}
         />
 
+        <Pressable
+          onPress={() => navigate("OrganizerRegister")}
+          style={({ pressed }) => [
+            themed($organizerRegisterContainer),
+            pressed && themed($organizerRegisterPressed),
+          ]}
+          disabled={isLoading}
+        >
+          <Text
+            tx="organizerRegister:wantToOrganizer"
+            size="sm"
+            weight="medium"
+            style={[themed($organizerRegisterText), isLoading && themed($disabledText)]}
+          />
+        </Pressable>
+
         <Button
-          testID="register-button"
           tx={isLoading ? "common:loading" : "registerScreen:tapToSignUp"}
           style={themed($tapButton)}
           preset="reversed"
@@ -241,4 +256,19 @@ const $tapButton: ThemedStyle<ViewStyle> = () => ({
 const $hint: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.error,
   marginBottom: spacing.md,
+})
+const $organizerRegisterContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "flex-end",
+  marginBottom: spacing.xl,
+})
+
+const $organizerRegisterPressed: ThemedStyle<ViewStyle> = () => ({
+  opacity: 0.7,
+})
+const $organizerRegisterText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
+})
+
+const $disabledText: ThemedStyle<TextStyle> = () => ({
+  opacity: 0.5,
 })
