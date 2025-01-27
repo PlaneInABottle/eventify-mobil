@@ -1,4 +1,5 @@
 import demoEn from "./demo-en"
+import organizerEn from "./organizer-en"
 
 const en = {
   common: {
@@ -33,7 +34,7 @@ const en = {
     unknown: "An unexpected error occurred. Please try again.",
     badData: "Invalid data received from the server.",
     passwordsNotMatch: "Passwords do not match, check again!",
-    passwordShort: "Passwords should be longer than 5 characters",
+    passwordShort: "Passwords should be at least 6 characters",
     linkProblem: "There was a problem about the link. Please request a new one!",
     nameRequired: "Display name is required",
     cantBeBlank: "Field can't be blank",
@@ -208,6 +209,7 @@ const en = {
   },
 
   ...demoEn,
+  ...organizerEn,
 }
 
 export default en
