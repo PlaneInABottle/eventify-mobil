@@ -14,3 +14,6 @@ export * from "./EditProfileScreen"
 export * from "./chat/ChatScreen"
 export * from "./ReportScreen"
 export * from "./ResetPasswordScreen"
+
+// Organizer screens
+export * from "./OrganizerScreens/OrganizerRegisterScreen"

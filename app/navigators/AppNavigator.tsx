@@ -45,6 +45,7 @@ export type AppStackParamList = {
   Chat: { eventChatId: string; eventTitle: string }
   Report: { reportedItemId: string; reportType: string; reportContent: string }
   Event: { eventId: string }
+  OrganizerRegister: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
