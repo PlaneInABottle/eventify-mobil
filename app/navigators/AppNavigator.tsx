@@ -65,7 +65,7 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
   const {
-    authenticationStore: { isAuthenticated, createSessionFromUrl },
+    authenticationStore: { isAuthenticated, createSessionFromUrl, authRole },
   } = useStores()
 
   const {
@@ -75,6 +75,7 @@ const AppStack = observer(function AppStack() {
   const url = Linking.useURL()
   if (url) createSessionFromUrl(url)
   console.log("URL: ", url)
+  console.log("Authentication Role: ", authRole)
   return (
     <Stack.Navigator
       screenOptions={{
@@ -86,7 +87,9 @@ const AppStack = observer(function AppStack() {
       }}
       initialRouteName={isAuthenticated ? "Main" : "Welcome"}
     >
-      {isAuthenticated ? (
+      {authRole === "organizer" ? (
+        <Stack.Screen name="ResetPassword" component={Screens.ResetPasswordScreen} />
+      ) : isAuthenticated ? (
         <>
           {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
           <Stack.Screen name="Main" component={MainNavigator} />
@@ -101,8 +104,8 @@ const AppStack = observer(function AppStack() {
           <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+          <Stack.Screen name="OrganizerRegister" component={Screens.OrganizerRegisterScreen} />
           <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />
-          <Stack.Screen name="ResetPassword" component={Screens.ResetPasswordScreen} />
         </>
       )}
 
