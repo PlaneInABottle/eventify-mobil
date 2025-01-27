@@ -6,7 +6,6 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { TxKeyPath, translate } from "@/i18n"
 import { useHeader } from "@/utils/useHeader"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
