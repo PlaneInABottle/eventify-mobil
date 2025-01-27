@@ -51,7 +51,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     if (validationError) return
 
     const success = await login(authEmail, authPassword)
-    if (success) {
+    if (success === true) {
       setIsSubmitted(false)
       setAuthPassword("")
       setAuthEmail("")
