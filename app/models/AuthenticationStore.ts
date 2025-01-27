@@ -8,12 +8,14 @@ import { handleError } from "@/utils/errorHandler"
 import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
+import { withSetPropAction } from "./helpers/withSetPropAction"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
   .props({
     authToken: types.maybe(types.string),
     authEmail: "",
+    authRole: types.optional(types.string, ""),
   })
   .volatile(() => ({
     isLoading: false,
@@ -35,6 +37,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
       return ""
     },
   }))
+  .actions(withSetPropAction)
   .actions((store) => ({
     setLoading(value: boolean): void {
       store.isLoading = value
@@ -76,24 +79,52 @@ export const AuthenticationStoreModel: IAnyModelType = types
   }))
   .actions((store) => ({
     handleSuccessfulAuth: flow(function* (session: Session, userId: string) {
-      try {
-        if (!session?.access_token || !userId) {
-          throw Error("Invalid session data")
-        }
-        store.setAuthToken(session.access_token)
-        store.setAuthEmail(session.user?.email ?? "")
-        store.distributeAuthToken(session.access_token)
+      if (!session?.access_token || !userId) {
+        throw Error("Invalid session data")
+      }
 
-        // Get initial data
-        getRootStore(store).chatStore.connect()
+      store.setProp("authToken", session.access_token)
+      store.setProp("authRole", session.user.user_metadata.role)
+      store.setProp("authEmail", session.user?.email ?? "")
+
+      // Get initial data
+      getRootStore(store).chatStore.connect()
+
+      if (session.user.user_metadata.role !== "organizer")
         getRootStore(store).getInitialData(userId)
 
-        return true
+      return true
+    }),
+  }))
+
+  .actions((store) => ({
+    organizerRegister: flow(function* (email: string, password: string, name: string) {
+      try {
+        const { data, error }: { data: any; error: AuthError } = yield supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: name,
+              role: "organizer",
+            },
+          },
+        })
+
+        if (error) {
+          throw error
+        }
+
+        if (data.session) {
+          yield store.handleSuccessfulAuth(data.session, data.user?.id)
+
+          handleSuccess("success:signUpSuccess")
+          return true
+        }
+
+        throw Error("errors:notFound")
       } catch (error) {
-        handleError(error, { toast: true })
-        return false
-      } finally {
-        store.setLoading(false)
+        return handleError(error).message
       }
     }),
   }))
@@ -118,16 +149,15 @@ export const AuthenticationStoreModel: IAnyModelType = types
         }
 
         if (data.session) {
-          const success = yield store.handleSuccessfulAuth(data.session, data.user?.id)
+          yield store.handleSuccessfulAuth(data.session, data.user?.id)
           handleSuccess("success:loginSuccess")
-          return success
+          return true
         }
 
         throw Error("errors:notFound")
       } catch (error) {
         store.setError(error instanceof Error ? error.message : "An unexpected error occurred")
-        handleError(error)
-        return false
+        return handleError(error).message
       } finally {
         store.setLoading(false)
       }
@@ -144,6 +174,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
           options: {
             data: {
               display_name: name,
+              role: "user",
             },
           },
         })
