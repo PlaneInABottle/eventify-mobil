@@ -3,6 +3,7 @@ import { ScrollView, TextStyle, View, ViewStyle } from "react-native"
 import { Button, Icon, Screen, Text } from "../../components"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
+import { useStores } from "@/models"
 
 export interface ErrorDetailsProps {
   error: Error
@@ -16,6 +17,7 @@ export interface ErrorDetailsProps {
  * @returns {JSX.Element} The rendered `ErrorDetails` component.
  */
 export function ErrorDetails(props: ErrorDetailsProps) {
+  const rootStore = useStores()
   const { themed } = useAppTheme()
   return (
     <Screen
@@ -43,7 +45,10 @@ export function ErrorDetails(props: ErrorDetailsProps) {
       <Button
         preset="reversed"
         style={themed($resetButton)}
-        onPress={props.onReset}
+        onPress={() => {
+          props.onReset()
+          rootStore.resetAllStores()
+        }}
         tx="errorScreen:reset"
       />
     </Screen>
