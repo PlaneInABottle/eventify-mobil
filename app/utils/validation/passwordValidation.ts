@@ -2,7 +2,10 @@ import { TxKeyPath } from "@/i18n"
 
 export default function isValidPassword(
   password: string,
-  confirmPassword?: string,
+  confirmPassword: {
+    isExists: boolean
+    value?: string
+  },
 ): true | TxKeyPath {
   // Trim whitespace and check length
   const trimmedPassword = password.trim()
@@ -12,8 +15,9 @@ export default function isValidPassword(
     return "errors:passwordShort"
   }
 
-  if (confirmPassword) {
-    const trimmedConfirmPassword = password.trim()
+  if (confirmPassword?.isExists) {
+    if (!confirmPassword.value) return "errors:passwordsNotMatch"
+    const trimmedConfirmPassword = confirmPassword.value.trim()
     if (trimmedPassword !== trimmedConfirmPassword) return "errors:passwordsNotMatch"
   }
 
