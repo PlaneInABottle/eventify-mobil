@@ -41,14 +41,17 @@ export const LocationStoreModel = types
         const userId = getRootStore(store).userStore.userId
         if (!userId) throw new Error("errors:userIdNotFound")
 
-        const { data, error } = yield supabase
-          .from("locations")
-          .insert(newLocation)
-          .eq("creator_id", userId)
-          .select()
+        const { data: id, error } = yield supabase.rpc("insert_location", {
+          p_name: newLocation.name,
+          p_address: newLocation.address,
+          p_city: newLocation.city,
+          p_creator_id: userId,
+          p_lat: newLocation.lat,
+          p_long: newLocation.long,
+        })
         if (error) throw error
 
-        store.locations.put(data)
+        store.locations.put({ ...newLocation, creator_id: userId, id })
       } catch (e) {
         handleError(e)
       }
