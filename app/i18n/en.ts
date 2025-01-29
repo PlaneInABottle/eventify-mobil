@@ -46,6 +46,7 @@ const en = {
       deleteFailed: "Failed to delete profile",
       reportFailed: "Failed to submit report",
     },
+    userIdNotFound: "User id not found.",
   },
   success: {
     title: "Success",
