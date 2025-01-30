@@ -17,3 +17,4 @@ export * from "./ResetPasswordScreen"
 
 // Organizer screens
 export * from "./OrganizerScreens/OrganizerRegisterScreen"
+export * from "./OrganizerScreens/OrganizerLocationsScreen"

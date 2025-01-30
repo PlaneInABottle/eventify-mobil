@@ -9,6 +9,7 @@ import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { OrganizerEvent } from "./organizer/OrganizerEventStore"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -76,6 +77,26 @@ export const AuthenticationStoreModel: IAnyModelType = types
         handleError(e)
       }
     }),
+    organizerFirstRequest: flow(function* (userId: string) {
+      const [locationRes, eventsRes, eventChatsRes, profileRes] = yield Promise.all([
+        supabase.from("locations").select("*").eq("creator_id", userId),
+        supabase.from("events").select("*").eq("organizer_id", userId),
+        supabase
+          .from("event_chats")
+          .select("*, event_chats_participants(*), events!inner()")
+          .eq("events.organizer_id", userId),
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+      ])
+
+      if (locationRes.error || eventsRes.error || eventChatsRes.error || profileRes.error) {
+        throw locationRes.error || eventsRes.error || eventChatsRes.error
+      }
+
+      getRootStore(store).locationStore.setLocations(locationRes.data)
+      getRootStore(store).organizerEventStore.setEvents(eventsRes.data)
+      getRootStore(store).organizerChatStore.setChats(eventChatsRes.data)
+      getRootStore(store).userStore.setProp("profile", profileRes.data)
+    }),
   }))
   .actions((store) => ({
     handleSuccessfulAuth: flow(function* (session: Session, userId: string) {
@@ -92,7 +113,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
       if (session.user.user_metadata.role !== "organizer")
         getRootStore(store).getInitialData(userId)
-
+      else {
+        store.organizerFirstRequest(userId)
+      }
       return true
     }),
   }))

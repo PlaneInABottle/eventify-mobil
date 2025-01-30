@@ -1,9 +1,28 @@
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
-import { Location, LocationModel } from "./Location"
-import { flow, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
 import { getRootStore } from "../helpers/getRootStore"
+
+export const LocationModel = types
+  .model("Location")
+  .props({
+    id: types.identifier,
+    name: types.string,
+    address: types.string,
+    city: types.string,
+    creator_id: types.string,
+    lat: types.float,
+    long: types.float,
+  })
+  .views((event) => ({
+    get coordinates(): [number, number] {
+      return [event.lat, event.long]
+    },
+    get formattedAddress(): string | undefined {
+      return `${event.lat}, ${event.long}`
+    },
+  }))
 
 export const LocationStoreModel = types
   .model("LocationStore")
@@ -18,6 +37,17 @@ export const LocationStoreModel = types
     },
   }))
   .actions((store) => ({
+    setLocations: (locations: any) => {
+      locations.forEach((location: any) => {
+        store.locations.put({
+          ...location,
+          lat: location.lat_long.coordinates[1],
+          long: location.lat_long.coordinates[0],
+        })
+      })
+    },
+  }))
+  .actions((store) => ({
     fetchOrganizerLocations: flow(function* (userId) {
       try {
         if (!userId) throw new Error("errors:userIdNotFound")
@@ -29,16 +59,14 @@ export const LocationStoreModel = types
 
         if (error) throw error
 
-        locations.forEach((location: Location) => {
-          store.locations.put(location)
-        })
+        store.setLocations(locations)
       } catch (e) {
         handleError(e)
       }
     }),
     addLocation: flow(function* (newLocation: Omit<Location, "id" | "creator_id">) {
       try {
-        const userId = getRootStore(store).userStore.userId
+        const userId: string | undefined = getRootStore(store).userStore.userId
         if (!userId) throw new Error("errors:userIdNotFound")
 
         const { data: id, error } = yield supabase.rpc("insert_location", {
@@ -65,3 +93,6 @@ export const LocationStoreModel = types
       }
     }),
   }))
+
+export interface Location extends Instance<typeof LocationModel> {}
+export interface LocationStore extends Instance<typeof LocationStoreModel> {}

@@ -46,6 +46,7 @@ export type AppStackParamList = {
   Report: { reportedItemId: string; reportType: string; reportContent: string }
   Event: { eventId: string }
   OrganizerRegister: undefined
+  OrganizerLocations: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -88,7 +89,7 @@ const AppStack = observer(function AppStack() {
       initialRouteName={isAuthenticated ? "Main" : "Welcome"}
     >
       {authRole === "organizer" ? (
-        <Stack.Screen name="ResetPassword" component={Screens.ResetPasswordScreen} />
+        <Stack.Screen name="OrganizerLocations" component={Screens.OrganizerLocationsScreen} />
       ) : isAuthenticated ? (
         <>
           {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}

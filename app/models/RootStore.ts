@@ -1,11 +1,13 @@
 import { Instance, SnapshotOut, flow, types } from "mobx-state-tree"
 import { AuthenticationStoreModel } from "./AuthenticationStore"
-import { EpisodeStoreModel } from "./EpisodeStore"
 import { UserStoreModel } from "./UserStore"
 import { EventStoreModel } from "./EventStore"
 import { ChatStoreModel } from "./ChatStore"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { handleError } from "@/utils/errorHandler"
+import { LocationStoreModel } from "./location/LocationStore"
+import { OrganizerEventStoreModel } from "./organizer/OrganizerEventStore"
+import { OrganizerChatStoreModel } from "./organizer/OrganizerChatStore"
 
 /**
  * A RootStore model.
@@ -15,16 +17,17 @@ export const RootStoreModel = types
   .props({
     authenticationStore: types.optional(AuthenticationStoreModel, {}),
     userStore: types.optional(UserStoreModel, {}),
-    episodeStore: types.optional(EpisodeStoreModel, {}),
     eventStore: types.optional(EventStoreModel, {}),
     chatStore: types.optional(ChatStoreModel, {}),
+    locationStore: types.optional(LocationStoreModel, {}),
+    organizerEventStore: types.optional(OrganizerEventStoreModel, {}),
+    organizerChatStore: types.optional(OrganizerChatStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
     resetAllStores() {
       store.setProp("authenticationStore", undefined)
       store.setProp("userStore", undefined)
-      store.setProp("episodeStore", undefined)
       store.setProp("eventStore", undefined)
       store.setProp("chatStore", undefined)
     },
