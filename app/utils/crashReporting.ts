@@ -21,15 +21,13 @@ import * as Sentry from "@sentry/react-native"
  *  This is where you put your crash reporting service initialization code to call in `./app/app.tsx`
  */
 export const initCrashReporting = () => {
-  if (!__DEV__) {
-    Sentry.init({
-      dsn: "https://1429360a65710ac74d69e003e1c8987c@o4508677653921792.ingest.de.sentry.io/4508677662113872",
-      debug: __DEV__, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
-      tracesSampleRate: 1.0,
-      enableUserInteractionTracing: false,
-      profilesSampleRate: 1.0,
-    })
-  }
+  Sentry.init({
+    dsn: "https://1429360a65710ac74d69e003e1c8987c@o4508677653921792.ingest.de.sentry.io/4508677662113872",
+    debug: __DEV__, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+    tracesSampleRate: 1.0,
+    enableUserInteractionTracing: false,
+    profilesSampleRate: 1.0,
+  })
   // Bugsnag.start("YOUR API KEY")
 }
 
