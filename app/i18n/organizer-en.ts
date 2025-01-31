@@ -7,6 +7,21 @@ const organizerEn = {
     createOrganizer: "Create Organizer Account",
     detailsRegister: "Join as an organizer and create new events!",
   },
+  organizerEventListScreen: {
+    heading: "Your Events",
+  },
+  organizerLocationListScreen: {
+    heading: "Your Locations",
+  },
+  organizerLocationEditScreen: {
+    name: "Location's Name",
+    namePlaceholder: "Enter a descriptive name",
+    address: "Location's Address",
+    addressPlaceholder: "Enter address of the location",
+    header: "{{locationName}}",
+    dragMarker: "Note: Hold and Drag the marker",
+    addLocation: "Add Location",
+  },
 }
 
 export default organizerEn

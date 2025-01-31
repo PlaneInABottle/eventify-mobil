@@ -47,6 +47,8 @@ const en = {
       reportFailed: "Failed to submit report",
     },
     userIdNotFound: "User id not found.",
+    locationNameShort: "Location's name should be at least 6 characters.",
+    locationAddressShort: "Location's address should be at least 16 characters.",
   },
   success: {
     title: "Success",
@@ -66,6 +68,7 @@ const en = {
       "Your report sent to the management. We will take necessary actions in the next 24 hours.",
     // Generic
     default: "Operation completed successfully",
+    locationSaved: "Location saved successfully.",
   },
   errorScreen: {
     title: "Something went wrong!",
