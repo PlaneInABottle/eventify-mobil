@@ -20,6 +20,11 @@ export const OrganizerEventStoreModel = types
   .props({
     events: types.map(OrganizerEventModel),
   })
+  .views((store) => ({
+    get eventsForList() {
+      return Array.from(store.events.values())
+    },
+  }))
   .actions(withSetPropAction)
   .actions((store) => ({
     setEvents: (events: any) => {
