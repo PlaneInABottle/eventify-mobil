@@ -55,14 +55,14 @@ export const OrganizerLocationEditScreen: FC<
       ? {
           latitude: location.lat,
           longitude: location.long,
-          latitudeDelta: 0.25,
-          longitudeDelta: 0.45,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
         }
       : {
           latitude: 39.88825,
           longitude: 32.8324,
-          latitudeDelta: 0.922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: 0.5,
+          longitudeDelta: 0.5,
         },
   )
 
