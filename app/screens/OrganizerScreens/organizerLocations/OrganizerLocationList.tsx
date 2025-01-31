@@ -3,7 +3,7 @@ import { useStores } from "../../../models"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC } from "react"
-import { ListItem, ListView, Screen, Text } from "@/components"
+import { Icon, ListItem, ListView, Screen, Text } from "@/components"
 import { View, ViewStyle } from "react-native"
 import { Location } from "@/models/location/LocationStore"
 import { OrganizerLocationStackScreenProps } from "@/navigators/navigationTypes.ts"
@@ -22,6 +22,15 @@ export const OrganizerLocationListScreen: FC<
         ListHeaderComponent={
           <View style={themed($heading)}>
             <Text preset="heading" tx="organizerLocationListScreen:heading" />
+            <Icon
+              icon="plus"
+              size={24}
+              onPress={() =>
+                navigate("OrganizerLocationEditScreen", {
+                  locationId: undefined,
+                })
+              }
+            />
           </View>
         }
         renderItem={({ item }) => (
@@ -47,4 +56,7 @@ const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
 })
