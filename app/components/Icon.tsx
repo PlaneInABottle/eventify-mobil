@@ -117,6 +117,7 @@ export const iconRegistry = {
   eventMap: require("../../assets/icons/eventMap.png"),
   calendar: require("../../assets/icons/calendar.png"),
   clock: require("../../assets/icons/clock.png"),
+  plus: require("../../assets/icons/plus.png"),
 }
 
 const $imageStyleBase: ImageStyle = {
