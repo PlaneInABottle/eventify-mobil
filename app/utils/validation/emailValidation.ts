@@ -19,18 +19,3 @@ export default function isValidEmail(email: string): boolean {
 
   return emailPattern.test(trimmedEmail)
 }
-
-// Example usage:
-const testEmails = [
-  "user@example.com",
-  "user.name@domain.co.uk",
-  "user+tag@sub.domain.com",
-  "invalid.email",
-  "@missing-local.com",
-  "user@.invalid-domain.com",
-  "user@domain..com",
-]
-
-testEmails.forEach((email) => {
-  console.log(`${email}: ${isValidEmail(email) ? "Valid" : "Invalid"}`)
-})
