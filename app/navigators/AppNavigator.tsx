@@ -18,6 +18,7 @@ import { ComponentProps } from "react"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import * as Linking from "expo-linking"
 import * as Sentry from "@sentry/react-native"
+import { OrganizerNavigator, OrganizerTabParamList } from "./OrganizerNavigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -38,6 +39,7 @@ export type AppStackParamList = {
   Register: undefined
   // Demo: NavigatorScreenParams<DemoTabParamList>
   Main: NavigatorScreenParams<MainTabParamList>
+  Organizer: NavigatorScreenParams<OrganizerTabParamList>
   // 🔥 Your screens go here
   ForgotPassword: undefined
   ResetPassword: undefined
@@ -89,10 +91,9 @@ const AppStack = observer(function AppStack() {
       initialRouteName={isAuthenticated ? "Main" : "Welcome"}
     >
       {authRole === "organizer" ? (
-        <Stack.Screen name="OrganizerLocations" component={Screens.OrganizerLocationsScreen} />
+        <Stack.Screen name="Organizer" component={OrganizerNavigator} />
       ) : isAuthenticated ? (
         <>
-          {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
           <Stack.Screen name="Main" component={MainNavigator} />
           <Stack.Screen name="EditProfile" component={Screens.EditProfileScreen} />
           <Stack.Screen name="Chat" component={Screens.ChatScreen} />
