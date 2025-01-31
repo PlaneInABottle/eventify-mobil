@@ -1,8 +1,8 @@
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
-import { Instance, flow, types } from "mobx-state-tree"
-import { getRootStore } from "../helpers/getRootStore"
+import { handleSuccess } from "@/utils/successHandler"
+import { Instance, SnapshotIn, SnapshotOut, flow, types } from "mobx-state-tree"
 
 export const LocationModel = types
   .model("Location")
@@ -10,7 +10,6 @@ export const LocationModel = types
     id: types.identifier,
     name: types.string,
     address: types.string,
-    city: types.string,
     creator_id: types.string,
     lat: types.float,
     long: types.float,
@@ -29,13 +28,12 @@ export const LocationStoreModel = types
   .props({
     locations: types.map(LocationModel),
   })
-  .volatile(() => ({}))
-  .actions(withSetPropAction)
   .views((store) => ({
     get locationsForList() {
       return Array.from(store.locations.values())
     },
   }))
+  .actions(withSetPropAction)
   .actions((store) => ({
     setLocations: (locations: any) => {
       locations.forEach((location: any) => {
@@ -64,35 +62,40 @@ export const LocationStoreModel = types
         handleError(e)
       }
     }),
-    addLocation: flow(function* (newLocation: Omit<Location, "id" | "creator_id">) {
+    createUpdateLocation: flow(function* (
+      fields: Omit<LocationSnapshotIn, "lat" | "long" | "id"> & { id?: string; lat_long: any },
+    ) {
       try {
-        const userId: string | undefined = getRootStore(store).userStore.userId
-        if (!userId) throw new Error("errors:userIdNotFound")
+        let result
 
-        const { data: id, error } = yield supabase.rpc("insert_location", {
-          p_name: newLocation.name,
-          p_address: newLocation.address,
-          p_city: newLocation.city,
-          p_creator_id: userId,
-          p_lat: newLocation.lat,
-          p_long: newLocation.long,
+        // Check if upsert works? maybe could create uuid here and send it with
+        if (fields.id) {
+          result = yield supabase
+            .from("locations")
+            .update(fields)
+            .eq("id", fields.id)
+            .select()
+            .single()
+        } else {
+          result = yield supabase.from("locations").insert(fields).select().single()
+        }
+        if (result.error) throw result.error
+        console.log(result.data)
+
+        store.locations.set(result.data.id, {
+          ...result.data,
+          lat: result.data.lat_long.coordinates[1],
+          long: result.data.lat_long.coordinates[0],
         })
-        if (error) throw error
 
-        store.locations.put({ ...newLocation, creator_id: userId, id })
+        handleSuccess("success:locationSaved")
+        return true
       } catch (e) {
-        handleError(e)
-      }
-    }),
-    updateLocation: flow(function* (updates: Location) {
-      try {
-        const { error } = yield supabase.from("locations").upsert(updates).eq("id", updates.id)
-        if (error) throw error
-      } catch (e) {
-        handleError(e)
+        return handleError(e).message
       }
     }),
   }))
 
 export interface Location extends Instance<typeof LocationModel> {}
+export interface LocationSnapshotIn extends SnapshotIn<typeof LocationModel> {}
 export interface LocationStore extends Instance<typeof LocationStoreModel> {}
