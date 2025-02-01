@@ -4,7 +4,7 @@ import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC, useRef, useState } from "react"
 import { Button, ButtonAccessoryProps, Screen, Text, TextField } from "@/components"
-import { View, ViewStyle, StyleSheet, ActivityIndicator, PlatformColor } from "react-native"
+import { View, ViewStyle, StyleSheet, ActivityIndicator } from "react-native"
 import { OrganizerLocationStackScreenProps } from "@/navigators/navigationTypes.ts"
 import MapView, { Marker, Region } from "react-native-maps"
 import { useHeader } from "@/utils/useHeader"
@@ -31,7 +31,7 @@ const LoadingIndicator = (props: ButtonAccessoryProps) => {
 
 export const OrganizerLocationEditScreen: FC<
   OrganizerLocationStackScreenProps<"OrganizerLocationEditScreen">
-> = observer(function OrganizerLocationsScreen(_props) {
+> = observer(function OrganizerLocationScreen(_props) {
   const { locationId } = _props.route.params
   const { goBack } = _props.navigation
 
