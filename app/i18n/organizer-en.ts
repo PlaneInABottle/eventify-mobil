@@ -10,6 +10,20 @@ const organizerEn = {
   organizerEventListScreen: {
     heading: "Your Events",
   },
+  organizerEventEditScreen: {
+    header: "{{eventTitle}}",
+    title: "Event's Title",
+    titlePlaceholder: "Enter Event's Title",
+    description: "Event's Description",
+    descriptionPlaceholder: "Enter Event's Description",
+    startTime: "Event's Start Time",
+    startTimePlaceholder: "Choose Event's Start Time",
+    endTime: "Event's End Time",
+    endTimePlacerholder: "Choose Event's End Time",
+    location: "Event's Location",
+    locationPlaceholder: "Choose Event's Location",
+    addEvent: "Add Event",
+  },
   organizerLocationListScreen: {
     heading: "Your Locations",
   },

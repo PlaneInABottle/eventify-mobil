@@ -6,7 +6,7 @@ import { AppStackParamList, AppStackScreenProps } from "."
 export type OrganizerEventStackParamList = {
   OrganizerEventListScreen: undefined
   OrganizerEventDisplayScreen: undefined
-  OrganizerEventEditScreen: undefined
+  OrganizerEventEditScreen: { eventId?: string }
 }
 export type OrganizerLocationStackParamList = {
   OrganizerLocationListScreen: undefined
