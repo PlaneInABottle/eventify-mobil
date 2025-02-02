@@ -2,7 +2,12 @@ import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
 import { handleSuccess } from "@/utils/successHandler"
-import { Instance, SnapshotIn, SnapshotOut, flow, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
+
+const PointModel = types.model("Point", {
+  coordinates: types.refinement(types.array(types.number), (arr) => !!arr && arr.length === 2),
+  type: types.literal("Point"),
+})
 
 export const LocationModel = types
   .model("Location")
@@ -11,17 +16,9 @@ export const LocationModel = types
     name: types.string,
     address: types.string,
     creator_id: types.string,
-    lat: types.float,
-    long: types.float,
+    lat_long: PointModel,
   })
-  .views((event) => ({
-    get coordinates(): [number, number] {
-      return [event.lat, event.long]
-    },
-    get formattedAddress(): string | undefined {
-      return `${event.lat}, ${event.long}`
-    },
-  }))
+  .views((event) => ({}))
 
 export const LocationStoreModel = types
   .model("LocationStore")
@@ -35,13 +32,9 @@ export const LocationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    setLocations: (locations: any) => {
+    setLocationsFromArrayToMap: (locations: any) => {
       locations.forEach((location: any) => {
-        store.locations.put({
-          ...location,
-          lat: location.lat_long.coordinates[1],
-          long: location.lat_long.coordinates[0],
-        })
+        store.locations.put(location)
       })
     },
   }))
@@ -57,13 +50,13 @@ export const LocationStoreModel = types
 
         if (error) throw error
 
-        store.setLocations(locations)
+        store.setLocationsFromArrayToMap(locations)
       } catch (e) {
         handleError(e)
       }
     }),
     createUpdateLocation: flow(function* (
-      fields: Omit<LocationSnapshotIn, "lat" | "long" | "id"> & { id?: string; lat_long: any },
+      fields: Omit<LocationSnapshotIn, "id" | "lat_long"> & { id?: string; lat_long: any },
     ) {
       try {
         let result
@@ -80,13 +73,8 @@ export const LocationStoreModel = types
           result = yield supabase.from("locations").insert(fields).select().single()
         }
         if (result.error) throw result.error
-        console.log(result.data)
 
-        store.locations.set(result.data.id, {
-          ...result.data,
-          lat: result.data.lat_long.coordinates[1],
-          long: result.data.lat_long.coordinates[0],
-        })
+        store.locations.put(result.data)
 
         handleSuccess("success:locationSaved")
         return true

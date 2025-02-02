@@ -53,8 +53,8 @@ export const OrganizerLocationEditScreen: FC<
   const regionRef = useRef<Region>(
     location
       ? {
-          latitude: location.lat,
-          longitude: location.long,
+          latitude: location.lat_long.coordinates[1],
+          longitude: location.lat_long.coordinates[0],
           latitudeDelta: 0.001,
           longitudeDelta: 0.001,
         }

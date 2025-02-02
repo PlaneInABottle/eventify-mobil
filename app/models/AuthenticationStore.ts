@@ -92,7 +92,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
         throw locationRes.error || eventsRes.error || eventChatsRes.error
       }
 
-      getRootStore(store).locationStore.setLocations(locationRes.data)
+      getRootStore(store).locationStore.setLocationsFromArrayToMap(locationRes.data)
       getRootStore(store).organizerEventStore.setEvents(eventsRes.data)
       getRootStore(store).organizerChatStore.setChats(eventChatsRes.data)
       getRootStore(store).userStore.setProp("user", profileRes.data)
@@ -298,7 +298,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
             case "SIGNED_IN":
               console.log("Signed In")
               if (store.authToken) getRootStore(store).chatStore.connect()
-              store.setProp("authToken", session?.access_token)
+              //      store.setProp("authToken", session?.access_token)
               break
             case "SIGNED_OUT":
               console.log("Signed Out")
