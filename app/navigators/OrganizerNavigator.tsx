@@ -13,6 +13,7 @@ import {
   OrganizerTabParamList,
 } from "./navigationTypes.ts"
 import { OrganizerLocationEditScreen } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationEdit"
+import { OrganizerEventEditScreen } from "@/screens/OrganizerScreens/organizerEvents/OrganizerEventEdit"
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>()
 const EventStack = createNativeStackNavigator<OrganizerEventStackParamList>()
@@ -35,6 +36,15 @@ function OrganizerEventsStack() {
       }}
     >
       <EventStack.Screen name="OrganizerEventListScreen" component={OrganizerEventListScreen} />
+      <EventStack.Screen
+        name="OrganizerEventEditScreen"
+        component={OrganizerEventEditScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
     </EventStack.Navigator>
   )
 }
