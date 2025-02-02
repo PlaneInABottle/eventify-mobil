@@ -2,20 +2,24 @@ import { observer } from "mobx-react-lite"
 import { useStores } from "../../../models"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { FC, useRef, useState } from "react"
-import { Button, ButtonAccessoryProps, Screen, Text, TextField } from "@/components"
-import { View, ViewStyle, StyleSheet, ActivityIndicator } from "react-native"
+import { FC, useState } from "react"
+import { Button, ButtonAccessoryProps, Icon, Screen, Text, TextField } from "@/components"
 import {
-  OrganizerEventStackScreenProps,
-  OrganizerLocationStackScreenProps,
-} from "@/navigators/navigationTypes.ts"
-import MapView, { Marker, Region } from "react-native-maps"
+  View,
+  ViewStyle,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
+  ImageStyle,
+  TextStyle,
+} from "react-native"
+import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes.ts"
 import { useHeader } from "@/utils/useHeader"
-import * as Haptics from "expo-haptics"
 import { TxKeyPath, locale, translate } from "@/i18n"
 import DatePicker from "react-native-date-picker"
 import { formatDate } from "@/utils/formatDate"
 import { SelectField } from "@/components/SelectField"
+import { pickSingleImage } from "@/utils/imageFunctions"
 
 type EventFormState = {
   title: string
@@ -24,6 +28,12 @@ type EventFormState = {
   end_time?: string
   location_id: string
   image_url?: string | null
+  image?: {
+    path: string
+    mimeType: string
+    buffer: any
+    uri: string
+  }
   errors: {
     title?: TxKeyPath
     description?: TxKeyPath
@@ -66,7 +76,6 @@ export const OrganizerEventEditScreen: FC<
     onLeftPress: () => goBack(),
   })
 
-  const [date, setDate] = useState(new Date())
   const [open, setOpen] = useState(false)
 
   const [formState, setFormState] = useState<EventFormState>({
@@ -76,11 +85,12 @@ export const OrganizerEventEditScreen: FC<
     end_time: event?.end_time || "",
     location_id: event?.location_id.id || "",
     image_url: event?.image_url || "",
+    image: undefined,
     errors: {},
     isLoading: false,
   })
 
-  const updateField = (field: keyof EventFormState, value: string) => {
+  const updateField = (field: keyof EventFormState, value: string | EventFormState["image"]) => {
     setFormState((prev) => ({
       ...prev,
       [field]: value,
@@ -93,7 +103,7 @@ export const OrganizerEventEditScreen: FC<
       title: formState.title.trim().length < 6 ? ("errors:must6Chars" as TxKeyPath) : undefined,
       start_time: !formState.start_time ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
       location_id:
-        formState.location_id[0].trim() !== "" ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
+        formState.location_id.trim() === "" ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
     }
 
     setFormState((prev) => ({
@@ -104,11 +114,39 @@ export const OrganizerEventEditScreen: FC<
     return !Object.values(newErrors).some(Boolean)
   }
 
-  async function handleSaveLocation() {
+  async function handleSaveEvent() {
     if (!validateForm()) return
 
-    //    setFormState((prev) => ({ ...prev, isLoading: true }))
+    setFormState((prev) => ({ ...prev, isLoading: true }))
+    const result: string | true = await organizerEventStore.createUpdateEvent({
+      id: event?.id,
+      title: formState.title,
+      description: formState.description,
+      start_time: formState.start_time,
+      end_time: formState.end_time,
+      location_id: formState.location_id,
+      image_url: formState.image_url,
+      image: formState.image,
+      organizer_id: userId,
+    })
+    if (result !== true) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { general: result },
+        isLoading: false,
+      }))
+    } else {
+      goBack()
+    }
   }
+
+  async function handlePickImage() {
+    setFormState((prev) => ({ ...prev, isLoading: true }))
+    const image = await pickSingleImage(userId)
+    if (image) updateField("image", image)
+    setFormState((prev) => ({ ...prev, isLoading: false }))
+  }
+
   return (
     <Screen preset="scroll" contentContainerStyle={themed($screenContentContainer)}>
       <TextField
@@ -121,17 +159,23 @@ export const OrganizerEventEditScreen: FC<
         status={formState.errors.title ? "error" : undefined}
         readOnly={formState.isLoading}
       />
-      <TextField
-        value={formatDate(date.toISOString(), "eee, MMM dd, yyyy HH:mm")}
-        labelTx="organizerEventEditScreen:date"
-        editable={false}
-      />
       <>
-        <Button tx="common:selectDate" onPress={() => setOpen(true)} />
+        <TouchableOpacity activeOpacity={1} onPress={() => setOpen(true)}>
+          <View pointerEvents="none">
+            <TextField
+              value={formatDate(
+                new Date(formState.start_time).toISOString(),
+                "eee, MMM dd, yyyy HH:mm",
+              )}
+              labelTx="organizerEventEditScreen:date"
+              RightAccessory={(props) => <Icon icon="caretRight" containerStyle={props.style} />}
+            />
+          </View>
+        </TouchableOpacity>
         <DatePicker
           modal
           open={open}
-          date={date}
+          date={new Date(formState.start_time)}
           title={translate("common:selectDate")}
           confirmText={translate("common:confirm")}
           cancelText={translate("common:cancel")}
@@ -139,7 +183,7 @@ export const OrganizerEventEditScreen: FC<
           theme={themeContext}
           onConfirm={(date) => {
             setOpen(false)
-            setDate(date)
+            updateField("start_time", date.toISOString())
           }}
           onCancel={() => {
             setOpen(false)
@@ -166,12 +210,50 @@ export const OrganizerEventEditScreen: FC<
         status={formState.errors.description ? "error" : undefined}
         readOnly={formState.isLoading}
       />
+      <Text tx="organizerEventEditScreen:image" preset="formLabel" />
+      <>
+        {formState.image || event?.image_url ? (
+          <TouchableOpacity style={$imageWrapper} onPress={handlePickImage}>
+            <Image
+              source={{
+                uri:
+                  formState.image?.uri ??
+                  `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/events/${event?.image_url}`,
+              }}
+              style={themed($eventImage)}
+              accessible
+              accessibilityLabel={translate("organizerEventEditScreen:image")}
+              accessibilityRole="image"
+            />
+            <View style={themed($imageOverlay)}>
+              <Icon icon="refresh" size={28} color="#fff" />
+              <Text tx="organizerEventEditScreen:changeImage" preset="subheading" />
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={themed($emptyImageContainer)}
+            onPress={handlePickImage}
+            accessible
+            accessibilityLabel={translate("organizerEventEditScreen:addImage")}
+            accessibilityRole="button"
+          >
+            <Icon icon="plus" size={42} />
+            <Text
+              tx="organizerEventEditScreen:addImage"
+              preset="subheading"
+              style={themed($placeholderText)}
+            />
+          </TouchableOpacity>
+        )}
+      </>
+
       <Button
         preset="reversed"
         tx={formState.isLoading ? undefined : "common:save"}
         disabledStyle={themed($disabledButton)}
         disabled={formState.isLoading}
-        onPress={handleSaveLocation}
+        onPress={handleSaveEvent}
         RightAccessory={formState.isLoading ? LoadingIndicator : undefined}
       />
     </Screen>
@@ -184,15 +266,49 @@ const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.lg,
 })
 
-const $topContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingTop: spacing.sm,
-})
-const $textFieldContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.lg,
-  gap: spacing.lg,
-})
-
 const $disabledButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral400,
   opacity: 0.7,
+})
+
+const $emptyImageContainer: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  height: 300,
+  backgroundColor: colors.palette.neutral300,
+  borderRadius: 12,
+  borderWidth: 2,
+  borderColor: colors.palette.neutral800,
+  borderStyle: "dashed",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: spacing.lg,
+})
+
+const $eventImage: ThemedStyle<ImageStyle> = ({ colors }) => ({
+  width: "100%",
+  height: 300,
+  borderRadius: 12,
+  backgroundColor: colors.palette.neutral300,
+})
+
+const $imageWrapper: ViewStyle = {
+  position: "relative",
+  borderRadius: 12,
+  overflow: "hidden",
+}
+
+const $imageOverlay: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  right: 0,
+  backgroundColor: "rgba(0,0,0,0.5)",
+  padding: spacing.sm,
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "row",
+  gap: spacing.xs,
+})
+
+const $placeholderText: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginTop: spacing.xs,
 })

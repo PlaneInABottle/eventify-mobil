@@ -1,8 +1,9 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
 import { LocationModel } from "../location/LocationStore"
+import { handleSuccess } from "@/utils/successHandler"
 
 export const OrganizerEventModel = types.model("OrganizerEvent").props({
   id: types.identifier,
@@ -46,6 +47,26 @@ export const OrganizerEventStoreModel = types
         store.events.put(event)
       })
     },
+    uploadEventImage: flow(function* (image: { path: string; mimeType: string; buffer: any }) {
+      const { data, error } = yield supabase.storage
+        .from("events")
+        .upload(image.path, image.buffer, {
+          contentType: image?.mimeType,
+          upsert: true,
+        })
+
+      if (error) throw error
+
+      return data.path
+    }),
+    deleteEventImage: flow(function* (imageIdentifier: string) {
+      try {
+        const { error } = yield supabase.storage.from("events").remove([imageIdentifier])
+        if (error) throw error
+      } catch (e) {
+        handleError(e, { toast: false })
+      }
+    }),
   }))
   .actions((store) => ({
     fetchOrganizerEvents: flow(function* (userId) {
@@ -61,7 +82,51 @@ export const OrganizerEventStoreModel = types
         handleError(e)
       }
     }),
+    createUpdateEvent: flow(function* (
+      fields: Omit<OrganizerEventSnapshotIn, "id"> & {
+        id?: string
+        image?: {
+          path: string
+          mimeType: string
+          buffer: any
+        }
+      },
+    ) {
+      try {
+        let result
+        const { image: newImage, ...eventsFields } = fields
+        // Check if upsert works? maybe could create uuid here and send it with
+        if (fields.id) {
+          if (newImage) {
+            if (fields.image_url) store.deleteEventImage(fields.image_url)
+            eventsFields.image_url = yield store.uploadEventImage(newImage)
+          }
+
+          result = yield supabase
+            .from("events")
+            .update(eventsFields)
+            .eq("id", fields.id)
+            .select()
+            .single()
+        } else {
+          if (newImage) {
+            if (fields.image_url) store.deleteEventImage(fields.image_url)
+            eventsFields.image_url = yield store.uploadEventImage(newImage)
+          }
+          result = yield supabase.from("events").insert(eventsFields).select().single()
+        }
+        if (result.error) throw result.error
+
+        store.events.put(result.data)
+
+        handleSuccess("success:eventSaved")
+        return true
+      } catch (e) {
+        return handleError(e).message
+      }
+    }),
   }))
 
 export interface OrganizerEvent extends Instance<typeof OrganizerEventModel> {}
+export interface OrganizerEventSnapshotIn extends SnapshotIn<typeof OrganizerEventModel> {}
 export interface OrganizerEventStore extends Instance<typeof OrganizerEventStoreModel> {}
