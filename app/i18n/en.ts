@@ -71,6 +71,7 @@ const en = {
     // Generic
     default: "Operation completed successfully",
     locationSaved: "Location saved successfully.",
+    eventSaved: "Event saved successfully.",
   },
   errorScreen: {
     title: "Something went wrong!",
