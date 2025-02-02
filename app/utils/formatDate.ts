@@ -16,6 +16,9 @@ export const loadDateFnsLocale = () => {
     case "en":
       dateFnsLocale = require("date-fns/locale/en-US").default
       break
+    case "tr":
+      dateFnsLocale = require("date-fns/locale/tr").default
+      break
     case "ar":
       dateFnsLocale = require("date-fns/locale/ar").default
       break
