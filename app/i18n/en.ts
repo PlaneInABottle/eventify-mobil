@@ -15,10 +15,12 @@ const en = {
     searching: "Searching...",
     loading: "Loading...",
     delete: "Delete",
+    confirm: "Confirm",
     confirmChanges: "Confirm Changes",
     saveChanges: "Save Changes",
     joinChat: "Join Chat",
     leaveChat: "Leave Chat",
+    selectDate: "Select Date",
   },
   errors: {
     title: "There was an error.",

@@ -26,7 +26,7 @@ const pickSupportedLocale: () => Localization.Locale | undefined = () => {
   return systemLocales.find((locale) => systemTagMatchesSupportedTags(locale.languageTag))
 }
 
-const locale = pickSupportedLocale()
+export const locale = pickSupportedLocale()
 
 export let isRTL = false
 

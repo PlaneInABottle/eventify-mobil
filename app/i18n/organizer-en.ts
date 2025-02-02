@@ -23,6 +23,7 @@ const organizerEn = {
     location: "Event's Location",
     locationPlaceholder: "Choose Event's Location",
     addEvent: "Add Event",
+    date: "Event's Date",
   },
   organizerLocationListScreen: {
     heading: "Your Locations",
