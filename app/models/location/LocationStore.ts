@@ -29,6 +29,11 @@ export const LocationStoreModel = types
     get locationsForList() {
       return Array.from(store.locations.values())
     },
+    get forSelectField() {
+      return Array.from(store.locations.values()).map((val) => {
+        return { label: val.name, value: val.id }
+      })
+    },
   }))
   .actions(withSetPropAction)
   .actions((store) => ({

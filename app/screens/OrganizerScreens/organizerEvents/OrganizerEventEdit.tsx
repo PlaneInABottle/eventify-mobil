@@ -15,6 +15,7 @@ import * as Haptics from "expo-haptics"
 import { TxKeyPath, locale, translate } from "@/i18n"
 import DatePicker from "react-native-date-picker"
 import { formatDate } from "@/utils/formatDate"
+import { SelectField } from "@/components/SelectField"
 
 type EventFormState = {
   title: string
@@ -48,8 +49,12 @@ export const OrganizerEventEditScreen: FC<
   const { eventId } = _props.route.params
   const { goBack } = _props.navigation
 
-  const { organizerEventStore, userStore } = useStores()
-  const { themed, themeContext } = useAppTheme()
+  const { organizerEventStore, userStore, locationStore } = useStores()
+  const {
+    themed,
+    themeContext,
+    theme: { spacing },
+  } = useAppTheme()
 
   const event = eventId ? organizerEventStore.events.get(eventId) : undefined
   const userId = userStore.userId
@@ -87,7 +92,8 @@ export const OrganizerEventEditScreen: FC<
     const newErrors = {
       title: formState.title.trim().length < 6 ? ("errors:must6Chars" as TxKeyPath) : undefined,
       start_time: !formState.start_time ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
-      location_id: !formState.location_id ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
+      location_id:
+        formState.location_id[0].trim() !== "" ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
     }
 
     setFormState((prev) => ({
@@ -103,7 +109,6 @@ export const OrganizerEventEditScreen: FC<
 
     //    setFormState((prev) => ({ ...prev, isLoading: true }))
   }
-
   return (
     <Screen preset="scroll" contentContainerStyle={themed($screenContentContainer)}>
       <TextField
@@ -141,6 +146,15 @@ export const OrganizerEventEditScreen: FC<
           }}
         />
       </>
+      <SelectField
+        labelTx="organizerEventEditScreen:location"
+        placeholderTx="organizerEventEditScreen:locationPlaceholder"
+        value={[formState.location_id]}
+        onSelect={(v) => updateField("location_id", v[0])}
+        options={locationStore.forSelectField}
+        multiple={false}
+        containerStyle={{ marginBottom: spacing.lg }}
+      />
       <TextField
         value={formState.description}
         multiline
