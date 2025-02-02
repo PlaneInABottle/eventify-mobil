@@ -29,7 +29,16 @@ export const OrganizerEventListScreen: FC<
           </View>
         }
         renderItem={({ item }) => (
-          <ListItem text={item.title} bottomSeparator rightIcon="caretRight" />
+          <ListItem
+            text={item.title}
+            bottomSeparator
+            rightIcon="caretRight"
+            onPress={() => {
+              navigate("OrganizerEventEditScreen", {
+                eventId: item.id,
+              })
+            }}
+          />
         )}
       />
     </Screen>
