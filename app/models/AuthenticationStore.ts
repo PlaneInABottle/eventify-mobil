@@ -9,7 +9,6 @@ import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { OrganizerEvent } from "./organizer/OrganizerEventStore"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")

@@ -1,4 +1,4 @@
-import { Instance, flow, getSnapshot, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
