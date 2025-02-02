@@ -12,7 +12,9 @@ import {
 import MapView, { Marker, Region } from "react-native-maps"
 import { useHeader } from "@/utils/useHeader"
 import * as Haptics from "expo-haptics"
-import { TxKeyPath } from "@/i18n"
+import { TxKeyPath, locale, translate } from "@/i18n"
+import DatePicker from "react-native-date-picker"
+import { formatDate } from "@/utils/formatDate"
 
 type EventFormState = {
   title: string
@@ -47,7 +49,7 @@ export const OrganizerEventEditScreen: FC<
   const { goBack } = _props.navigation
 
   const { organizerEventStore, userStore } = useStores()
-  const { themed } = useAppTheme()
+  const { themed, themeContext } = useAppTheme()
 
   const event = eventId ? organizerEventStore.events.get(eventId) : undefined
   const userId = userStore.userId
@@ -58,6 +60,9 @@ export const OrganizerEventEditScreen: FC<
     leftIcon: "back",
     onLeftPress: () => goBack(),
   })
+
+  const [date, setDate] = useState(new Date())
+  const [open, setOpen] = useState(false)
 
   const [formState, setFormState] = useState<EventFormState>({
     title: event?.title || "",
@@ -96,30 +101,11 @@ export const OrganizerEventEditScreen: FC<
   async function handleSaveLocation() {
     if (!validateForm()) return
 
-    setFormState((prev) => ({ ...prev, isLoading: true }))
-    const result: string | true = await locationStore.createUpdateLocation({
-      id: location?.id,
-      name: formState.name,
-      address: formState.address,
-      creator_id: userId,
-      lat_long: `Point(${regionRef.current.longitude} ${regionRef.current.latitude})`,
-    })
-    if (result !== true) {
-      setFormState((prev) => ({
-        ...prev,
-        errors: { general: result },
-        isLoading: false,
-      }))
-    } else {
-      goBack()
-    }
+    //    setFormState((prev) => ({ ...prev, isLoading: true }))
   }
 
   return (
     <Screen preset="scroll" contentContainerStyle={themed($screenContentContainer)}>
-      <View style={themed($topContainer)}>
-        <Text tx="organizerLocationEditScreen:dragMarker" />
-      </View>
       <TextField
         value={formState.title}
         onChangeText={(v) => updateField("title", v)}
@@ -130,6 +116,31 @@ export const OrganizerEventEditScreen: FC<
         status={formState.errors.title ? "error" : undefined}
         readOnly={formState.isLoading}
       />
+      <TextField
+        value={formatDate(date.toISOString(), "eee, MMM dd, yyyy HH:mm")}
+        labelTx="organizerEventEditScreen:date"
+        editable={false}
+      />
+      <>
+        <Button tx="common:selectDate" onPress={() => setOpen(true)} />
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          title={translate("common:selectDate")}
+          confirmText={translate("common:confirm")}
+          cancelText={translate("common:cancel")}
+          locale={locale?.languageCode || undefined}
+          theme={themeContext}
+          onConfirm={(date) => {
+            setOpen(false)
+            setDate(date)
+          }}
+          onCancel={() => {
+            setOpen(false)
+          }}
+        />
+      </>
       <TextField
         value={formState.description}
         multiline
@@ -156,6 +167,7 @@ export const OrganizerEventEditScreen: FC<
 const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.lg,
+  gap: spacing.lg,
 })
 
 const $topContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -166,12 +178,6 @@ const $textFieldContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.lg,
 })
 
-const $mapContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  height: 400,
-})
-const $mapView: ViewStyle = {
-  ...StyleSheet.absoluteFillObject,
-}
 const $disabledButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral400,
   opacity: 0.7,
