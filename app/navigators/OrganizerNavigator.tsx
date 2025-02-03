@@ -8,16 +8,21 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { OrganizerEventListScreen } from "@/screens/OrganizerScreens/organizerEvents/OrganizerEventList"
 import { OrganizerLocationListScreen } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationList"
 import {
+  OrganizerChatStackParamList,
   OrganizerEventStackParamList,
   OrganizerLocationStackParamList,
   OrganizerTabParamList,
 } from "./navigationTypes.ts"
 import { OrganizerLocationEditScreen } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationEdit"
 import { OrganizerEventEditScreen } from "@/screens/OrganizerScreens/organizerEvents/OrganizerEventEdit"
+import { OrganizerChatListScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatList"
+import { OrganizerChatEditScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatEdit"
+import { OrganizerChatParticipantScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatParticipant"
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>()
 const EventStack = createNativeStackNavigator<OrganizerEventStackParamList>()
 const LocationStack = createNativeStackNavigator<OrganizerLocationStackParamList>()
+const ChatStack = createNativeStackNavigator<OrganizerChatStackParamList>()
 
 function OrganizerEventsStack() {
   const {
@@ -81,6 +86,40 @@ function OrganizerLocationStack() {
   )
 }
 
+function OrganizerChatStack() {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+  const { top } = useSafeAreaInsets()
+  return (
+    <ChatStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        navigationBarColor: colors.background,
+        contentStyle: {
+          paddingTop: top + 20,
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <ChatStack.Screen name="OrganizerChatListScreen" component={OrganizerChatListScreen} />
+      <ChatStack.Screen
+        name="OrganizerChatEditScreen"
+        component={OrganizerChatEditScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+      <ChatStack.Screen
+        name="OrganizerChatParticipantScreen"
+        component={OrganizerChatParticipantScreen}
+      />
+    </ChatStack.Navigator>
+  )
+}
+
 export function OrganizerNavigator() {
   const { bottom } = useSafeAreaInsets()
   const {
@@ -117,6 +156,16 @@ export function OrganizerNavigator() {
           tabBarLabel: "Locations",
           tabBarIcon: ({ focused }) => (
             <Icon icon="pin" color={focused ? colors.tint : colors.tintInactive} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Chats"
+        component={OrganizerChatStack}
+        options={{
+          tabBarLabel: "Chats",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="chat" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
         }}
       />

@@ -15,8 +15,8 @@ export type OrganizerLocationStackParamList = {
 }
 export type OrganizerChatStackParamList = {
   OrganizerChatListScreen: undefined
-  OrganizerChatDisplayScreen: undefined
-  OrganizerChatEditScreen: undefined
+  OrganizerChatParticipantScreen: { eventChatId: string }
+  OrganizerChatEditScreen: { eventChatId?: string }
 }
 export type OrganizerProfileStackParamList = {
   OrganizerProfileListScreen: undefined
@@ -40,6 +40,11 @@ export type OrganizerEventStackScreenProps<T extends keyof OrganizerEventStackPa
   CompositeScreenProps<
     NativeStackScreenProps<OrganizerEventStackParamList, T>,
     OrganizerTabScreenProps<"Events">
+  >
+export type OrganizerChatStackScreenProps<T extends keyof OrganizerChatStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<OrganizerChatStackParamList, T>,
+    OrganizerTabScreenProps<"Chats">
   >
 
 export type OrganizerTabScreenProps<T extends keyof OrganizerTabParamList> = CompositeScreenProps<
