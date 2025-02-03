@@ -18,6 +18,7 @@ import { OrganizerEventEditScreen } from "@/screens/OrganizerScreens/organizerEv
 import { OrganizerChatListScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatList"
 import { OrganizerChatEditScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatEdit"
 import { OrganizerChatParticipantScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatParticipant"
+import { OrganizerChatConversationScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatConversation"
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>()
 const EventStack = createNativeStackNavigator<OrganizerEventStackParamList>()
@@ -115,6 +116,10 @@ function OrganizerChatStack() {
       <ChatStack.Screen
         name="OrganizerChatParticipantScreen"
         component={OrganizerChatParticipantScreen}
+      />
+      <ChatStack.Screen
+        name="OrganizerChatConversationScreen"
+        component={OrganizerChatConversationScreen}
       />
     </ChatStack.Navigator>
   )

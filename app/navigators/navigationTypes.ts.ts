@@ -16,6 +16,7 @@ export type OrganizerLocationStackParamList = {
 export type OrganizerChatStackParamList = {
   OrganizerChatListScreen: undefined
   OrganizerChatParticipantScreen: { eventChatId: string }
+  OrganizerChatConversationScreen: { eventChatId: string }
   OrganizerChatEditScreen: { eventChatId?: string }
 }
 export type OrganizerProfileStackParamList = {
