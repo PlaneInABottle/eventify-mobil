@@ -80,10 +80,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
       const [locationRes, eventsRes, eventChatsRes, profileRes] = yield Promise.all([
         supabase.from("locations").select("*").eq("creator_id", userId),
         supabase.from("events").select("*").eq("organizer_id", userId),
-        supabase
-          .from("event_chats")
-          .select("*, event_chats_participants(*), events!inner()")
-          .eq("events.organizer_id", userId),
+        supabase.from("event_chats").select("*,  events!inner()").eq("events.organizer_id", userId),
         supabase.from("profiles").select("*").eq("id", userId).single(),
       ])
 
@@ -93,7 +90,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
 
       getRootStore(store).locationStore.setLocationsFromArrayToMap(locationRes.data)
       getRootStore(store).organizerEventStore.setEventsFromArrayToMap(eventsRes.data)
-      getRootStore(store).organizerChatStore.setChats(eventChatsRes.data)
+      getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChatsRes.data)
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
   }))
