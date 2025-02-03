@@ -6,7 +6,7 @@ import { ChatStoreModel } from "./ChatStore"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { handleError } from "@/utils/errorHandler"
 import { LocationStoreModel } from "./location/LocationStore"
-import { OrganizerEventStoreModel } from "./organizer/OrganizerEventStore"
+import { OrganizerEventStoreModel, OrganizerStoreModel } from "./organizer/OrganizerEventStore"
 import { OrganizerChatStoreModel } from "./organizer/OrganizerChatStore"
 
 /**
@@ -22,6 +22,7 @@ export const RootStoreModel = types
     locationStore: types.optional(LocationStoreModel, {}),
     organizerEventStore: types.optional(OrganizerEventStoreModel, {}),
     organizerChatStore: types.optional(OrganizerChatStoreModel, {}),
+    organizerStore: types.optional(OrganizerStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
@@ -30,6 +31,10 @@ export const RootStoreModel = types
       store.setProp("userStore", undefined)
       store.setProp("eventStore", undefined)
       store.setProp("chatStore", undefined)
+      store.setProp("organizerStore", undefined)
+      store.setProp("organizerEventStore", undefined)
+      store.setProp("organizerChatStore", undefined)
+      store.setProp("locationStore", undefined)
     },
     getInitialData: flow(function* (userId: string) {
       try {
