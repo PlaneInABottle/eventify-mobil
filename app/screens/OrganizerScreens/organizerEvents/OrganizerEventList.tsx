@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC } from "react"
-import { ListItem, ListView, Screen, Text } from "@/components"
+import { Icon, ListItem, ListView, Screen, Text } from "@/components"
 import { View, ViewStyle } from "react-native"
 import { useStores } from "@/models"
 import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes.ts"
@@ -14,8 +14,7 @@ export const OrganizerEventListScreen: FC<
   const { navigation } = _props
   const navigate = navigation.navigate
 
-  const { userStore, organizerEventStore } = useStores()
-  const userId = userStore.userId
+  const { organizerEventStore } = useStores()
 
   const { themed } = useAppTheme()
   return (
@@ -26,6 +25,15 @@ export const OrganizerEventListScreen: FC<
         ListHeaderComponent={
           <View style={themed($heading)}>
             <Text preset="heading" tx="organizerEventListScreen:heading" />
+            <Icon
+              icon="plus"
+              size={24}
+              onPress={() =>
+                navigate("OrganizerEventEditScreen", {
+                  eventId: undefined,
+                })
+              }
+            />
           </View>
         }
         renderItem={({ item }) => (
@@ -52,4 +60,7 @@ const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
 })
