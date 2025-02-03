@@ -9,16 +9,13 @@ const PointModel = types.model("Point", {
   type: types.literal("Point"),
 })
 
-export const LocationModel = types
-  .model("Location")
-  .props({
-    id: types.identifier,
-    name: types.string,
-    address: types.string,
-    creator_id: types.string,
-    lat_long: PointModel,
-  })
-  .views((event) => ({}))
+export const LocationModel = types.model("Location").props({
+  id: types.identifier,
+  name: types.string,
+  address: types.string,
+  creator_id: types.string,
+  lat_long: PointModel,
+})
 
 export const LocationStoreModel = types
   .model("LocationStore")
