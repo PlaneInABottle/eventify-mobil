@@ -92,7 +92,10 @@ const AppStack = observer(function AppStack() {
       initialRouteName={isAuthenticated ? "Main" : "Welcome"}
     >
       {authRole === "organizer" ? (
-        <Stack.Screen name="Organizer" component={OrganizerNavigator} />
+        <>
+          <Stack.Screen name="Organizer" component={OrganizerNavigator} />
+          <Stack.Screen name="Report" component={Screens.ReportScreen} />
+        </>
       ) : isAuthenticated ? (
         <>
           <Stack.Screen name="Main" component={MainNavigator} />
