@@ -22,3 +22,7 @@ export async function pickSingleImage(pathIdentifier: string) {
     uri: image.uri,
   }
 }
+
+export function convertImageURLToSupabaseURL(bucketName: string, imageURL: string) {
+  return `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${bucketName}/${imageURL}`
+}
