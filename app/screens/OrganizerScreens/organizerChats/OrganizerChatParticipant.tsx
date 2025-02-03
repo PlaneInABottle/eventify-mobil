@@ -42,7 +42,7 @@ export const OrganizerChatParticipantScreen: FC<
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         renderItem={({ item }) => (
-          <OrganizerChatListItem
+          <OrganizerChatParticipantListItem
             id={item.id}
             avatarURL={item.avatar_url}
             displayName={item.display_name}
@@ -54,14 +54,14 @@ export const OrganizerChatParticipantScreen: FC<
   )
 })
 
-interface IOrganizerChatListItemProps {
+interface IOrganizerChatParticipantListItemProps {
   id: string
   displayName: string
   avatarURL?: string | null
   onRemoveParticipant: ((participantId: string) => Promise<void>) | undefined
 }
 
-const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
+const OrganizerChatParticipantListItem: FC<IOrganizerChatParticipantListItemProps> = observer(
   function ChatListItem(props) {
     const { id, displayName, avatarURL, onRemoveParticipant } = props
     const { themed } = useAppTheme()
