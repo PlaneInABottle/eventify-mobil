@@ -29,6 +29,9 @@ export const OrganizerChatModel = types
     get participantsAsList() {
       return Array.from(self.event_chats_participants)
     },
+    get messagesAsList() {
+      return Array.from(self.messages)
+    },
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
@@ -57,14 +60,15 @@ export const OrganizerChatModel = types
       try {
         const { data: messages, error } = yield supabase
           .from("messages")
-          .select("*")
+          .select("*, profile:profiles!inner(display_name)")
           .eq("event_chat_id", store.id)
           .range(store.messageOffset, store.messageOffset + 10)
-          .limit(10)
+          .order("created_at", { ascending: false })
 
         if (error) throw error
+        console.log("Messages: ", messages)
 
-        if (store.participantOffset === 0) store.messages.clear()
+        if (store.messageOffset === 0) store.messages.clear()
         store.messageOffset += messages.length
         store.messages.push(...messages)
       } catch (e) {
