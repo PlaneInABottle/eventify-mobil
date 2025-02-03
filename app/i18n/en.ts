@@ -72,6 +72,7 @@ const en = {
     default: "Operation completed successfully",
     locationSaved: "Location saved successfully.",
     eventSaved: "Event saved successfully.",
+    participantRemoved: "Participant removed successfully.",
   },
   errorScreen: {
     title: "Something went wrong!",

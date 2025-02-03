@@ -8,7 +8,7 @@ const organizerEn = {
     detailsRegister: "Join as an organizer and create new events!",
   },
   organizerEventListScreen: {
-    heading: "Your Events",
+    heading: "Events",
   },
   organizerEventEditScreen: {
     header: "{{eventTitle}}",
@@ -29,7 +29,7 @@ const organizerEn = {
     date: "Event's Date",
   },
   organizerLocationListScreen: {
-    heading: "Your Locations",
+    heading: "Locations",
   },
   organizerLocationEditScreen: {
     name: "Location's Name",
@@ -39,6 +39,23 @@ const organizerEn = {
     header: "{{locationName}}",
     dragMarker: "Note: Hold and Drag the marker",
     addLocation: "Add Location",
+  },
+  organizerChatListScreen: {
+    heading: "Chats",
+    title: "{{title}}'s Chat",
+  },
+  organizerChatEditScreen: {
+    name: "Location's Name",
+    namePlaceholder: "Enter a descriptive name",
+    address: "Location's Address",
+    addressPlaceholder: "Enter address of the location",
+    header: "{{eventName}}'s Chat",
+    dragMarker: "Note: Hold and Drag the marker",
+    addChat: "Add Chat",
+  },
+  organizerChatParticipantScreen: {
+    headerTitle: "{{eventName}} Chat's Participants",
+    removeParticipant: "Remove Participant",
   },
 }
 
