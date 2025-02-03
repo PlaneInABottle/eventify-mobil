@@ -163,10 +163,7 @@ export const OrganizerEventEditScreen: FC<
         <TouchableOpacity activeOpacity={1} onPress={() => setOpen(true)}>
           <View pointerEvents="none">
             <TextField
-              value={formatDate(
-                new Date(formState.start_time).toISOString(),
-                "eee, MMM dd, yyyy HH:mm",
-              )}
+              value={formatDate(formState.start_time, "eee, MMM dd, yyyy HH:mm")}
               labelTx="organizerEventEditScreen:date"
               RightAccessory={(props) => <Icon icon="caretRight" containerStyle={props.style} />}
             />
