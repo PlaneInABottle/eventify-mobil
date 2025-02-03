@@ -33,7 +33,7 @@ export const OrganizerEventModel = types
     title: types.string,
     description: types.optional(types.string, ""),
     start_time: types.string,
-    end_time: types.optional(types.string, ""),
+    end_time: types.maybeNull(types.string),
     location_id: types.reference(LocationModel),
     image_url: types.maybeNull(types.string),
     organizer_profile: types.maybe(types.reference(OrganizerModel)),

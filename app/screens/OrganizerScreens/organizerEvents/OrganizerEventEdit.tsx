@@ -25,7 +25,7 @@ type EventFormState = {
   title: string
   description?: string
   start_time: string
-  end_time?: string
+  end_time: string | null
   location_id: string
   image_url?: string | null
   image?: {
@@ -81,8 +81,8 @@ export const OrganizerEventEditScreen: FC<
   const [formState, setFormState] = useState<EventFormState>({
     title: event?.title || "",
     description: event?.description || "",
-    start_time: event?.start_time || "",
-    end_time: event?.end_time || "",
+    start_time: event?.start_time || new Date().toISOString(),
+    end_time: event?.end_time || null,
     location_id: event?.location_id.id || "",
     image_url: event?.image_url || "",
     image: undefined,
