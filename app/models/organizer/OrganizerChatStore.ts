@@ -1,12 +1,16 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { IAnyModelType, Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { OrganizerEventModel } from "./OrganizerEventStore"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
+import { OrganizerChatMessageModel } from "./OrganizerChatMessageModel"
+import { handleSuccess } from "@/utils/successHandler"
+import { TxKeyPath } from "@/i18n"
 
-export const OrganizerChatParticipantsModel = types.model("OrganizerChatParticipants").props({
+export const OrganizerChatParticipantModel = types.model("OrganizerChatParticipant").props({
   id: types.identifier,
-  user_id: types.string,
+  avatar_url: types.maybeNull(types.string),
+  display_name: types.string,
 })
 
 export const OrganizerChatModel = types
@@ -14,22 +18,74 @@ export const OrganizerChatModel = types
   .props({
     id: types.identifier, // Event chat idd
     event_id: types.reference(OrganizerEventModel),
-    participants: types.array(OrganizerChatParticipantsModel),
-    // Messages ?
+    event_chats_participants: types.array(OrganizerChatParticipantModel),
+    messages: types.array(types.late((): IAnyModelType => OrganizerChatMessageModel)),
   })
+  .volatile(() => ({
+    messageOffset: 0,
+    participantOffset: 0,
+  }))
+  .views((self) => ({
+    get participantsAsList() {
+      return Array.from(self.event_chats_participants)
+    },
+  }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    removeAParticipant: flow(function* (userId) {
+    fetchParticipants: flow(function* () {
+      try {
+        const { data: participants, error } = yield supabase
+          .from("profiles")
+          .select("id, avatar_url, display_name, event_chats_participants!inner()")
+          .eq("event_chats_participants.event_chat_id", store.id)
+          .eq("event_chats_participants.status", "joined")
+          .range(store.participantOffset, store.participantOffset + 10)
+          .limit(10)
+
+        if (error) throw error
+        console.log("pariticipants: ", participants)
+
+        if (store.participantOffset === 0) store.event_chats_participants.clear()
+
+        store.participantOffset += participants.length
+        store.event_chats_participants.push(...participants)
+      } catch (e) {
+        handleError(e)
+      }
+    }),
+    fetchMessages: flow(function* () {
+      try {
+        const { data: messages, error } = yield supabase
+          .from("messages")
+          .select("*")
+          .eq("event_chat_id", store.id)
+          .range(store.messageOffset, store.messageOffset + 10)
+          .limit(10)
+
+        if (error) throw error
+
+        if (store.participantOffset === 0) store.messages.clear()
+        store.messageOffset += messages.length
+        store.messages.push(...messages)
+      } catch (e) {
+        handleError(e)
+      }
+    }),
+    removeParticipant: flow(function* (participantId: string) {
       try {
         const { error } = yield supabase
           .from("event_chats_participants")
-          .delete()
-          .eq("user_id", userId)
+          .update({ status: "removed" })
+          .eq("user_id", participantId)
           .eq("event_chat_id", store.id)
 
         if (error) throw error
 
-        store.participants.filter((participant) => participant.user_id !== userId)
+        store.setProp(
+          "event_chats_participants",
+          store.event_chats_participants.filter((participant) => participant.id !== participantId),
+        )
+        handleSuccess("success:participantRemoved" as TxKeyPath)
       } catch (e) {
         handleError(e)
       }
@@ -43,17 +99,14 @@ export const OrganizerChatStoreModel = types
   })
   .views((store) => ({
     get chatsAsList() {
-      return store.chats.keys()
+      return Array.from(store.chats.values())
     },
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    setChats: (chats: any) => {
+    setChatsFromArrayToMap: (chats: any) => {
       chats.forEach((eventChat: any) => {
-        store.chats.put({
-          ...eventChat,
-          participants: eventChat.event_chats_participants,
-        })
+        store.chats.put(eventChat)
       })
     },
   }))
@@ -62,22 +115,22 @@ export const OrganizerChatStoreModel = types
       try {
         const { data: eventChats, error } = yield supabase
           .from("event_chats")
-          .select("*, event_chats_participants(*), events!inner()")
+          .select("*,  events!inner()")
           .eq("events.organizer_id", userId)
 
         if (error) throw error
-
-        store.setChats(eventChats)
+        store.setChatsFromArrayToMap(eventChats)
       } catch (e) {
         handleError(e)
       }
     }),
     addNewChat: (eventId: string, chat: any) => {
       const chatInstance = OrganizerChatModel.create(chat)
-      store.chats_by_event_id.set(eventId, chatInstance)
       store.chats.put(chatInstance)
     },
   }))
 
+export interface IOrganizerChatParticipant extends Instance<typeof OrganizerChatParticipantModel> {}
 export interface IOrganizerChat extends Instance<typeof OrganizerChatModel> {}
+export interface IOrganizerChatSnapshotIn extends SnapshotIn<typeof OrganizerChatModel> {}
 export interface IOrganizerChatStore extends Instance<typeof OrganizerChatStoreModel> {}
