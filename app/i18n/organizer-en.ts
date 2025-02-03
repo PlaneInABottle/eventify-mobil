@@ -43,6 +43,8 @@ const organizerEn = {
   organizerChatListScreen: {
     heading: "Chats",
     title: "{{title}}'s Chat",
+    participants: "Participants",
+    conversation: "Conversation",
   },
   organizerChatEditScreen: {
     name: "Location's Name",
@@ -56,6 +58,9 @@ const organizerEn = {
   organizerChatParticipantScreen: {
     headerTitle: "{{eventName}} Chat's Participants",
     removeParticipant: "Remove Participant",
+  },
+  organizerChatConversationScreen: {
+    headerTitle: "{{eventName}}'s Chat",
   },
 }
 
