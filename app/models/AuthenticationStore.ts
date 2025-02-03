@@ -92,7 +92,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
       }
 
       getRootStore(store).locationStore.setLocationsFromArrayToMap(locationRes.data)
-      getRootStore(store).organizerEventStore.setEvents(eventsRes.data)
+      getRootStore(store).organizerEventStore.setEventsFromArrayToMap(eventsRes.data)
       getRootStore(store).organizerChatStore.setChats(eventChatsRes.data)
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
