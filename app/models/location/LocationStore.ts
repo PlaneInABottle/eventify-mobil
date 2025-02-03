@@ -44,6 +44,10 @@ export const LocationStoreModel = types
     },
   }))
   .actions((store) => ({
+    clearAndSet: (locations: LocationSnapshotIn[]) => {
+      store.locations.clear()
+      store.setLocationsFromArrayToMap(locations)
+    },
     fetchOrganizerLocations: flow(function* (userId) {
       try {
         if (!userId) throw new Error("errors:userIdNotFound")
