@@ -54,6 +54,7 @@ const ChatModel = types
       store.offset = store.offset + 1
     },
   }))
+
 export const ChatStoreModel = types
   .model("ChatStore")
   .props({

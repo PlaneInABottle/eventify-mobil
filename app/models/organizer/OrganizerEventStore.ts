@@ -83,6 +83,7 @@ export const OrganizerEventStoreModel = types
       })
     },
     uploadEventImage: flow(function* (image: { path: string; mimeType: string; buffer: any }) {
+      // We catch error on top.
       const { data, error } = yield supabase.storage
         .from("events")
         .upload(image.path, image.buffer, {
