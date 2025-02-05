@@ -32,11 +32,23 @@ export const OrganizerEventDateLocationModel = types
 export const OrganizerEventDateLocationStoreModel = types
   .model("OrganizerEventDateLocation")
   .props({
-    datesLocations: types.array(OrganizerEventDateLocationModel),
+    datesLocations: types.map(OrganizerEventDateLocationModel),
   })
   .views((self) => ({
     get datesLocationsAsList() {
-      return Array.from(self.datesLocations)
+      return Array.from(self.datesLocations.values())
+    },
+    get eventsDatesByEventId() {
+      const eventDateMap = new Map()
+      self.datesLocations.forEach((eventDate) => {
+        const eventId = eventDate.event_id.id
+        if (!eventDateMap.has(eventId)) {
+          eventDateMap.set(eventId, [eventDate])
+        } else {
+          eventDateMap.get(eventId).push(eventDate)
+        }
+      })
+      return eventDateMap
     },
     get eventsDatesByLocationId() {
       const dateLocationMap = new Map()
@@ -52,6 +64,24 @@ export const OrganizerEventDateLocationStoreModel = types
     },
   }))
   .actions(withSetPropAction)
+  .actions((store) => ({
+    clearOldDates: (oldIds: string[]) => {
+      oldIds.forEach((oldID: string) => {
+        store.datesLocations.delete(oldID)
+      })
+    },
+    setDatesLocationsFromArrayToMap: (datesLocations: any) => {
+      datesLocations.forEach((dl: any) => {
+        store.datesLocations.put(dl)
+      })
+    },
+  }))
+  .actions((store) => ({
+    clearAndSet: (datesLocations: OrganizerEventDateLocationSnapshotIn[]) => {
+      store.datesLocations.clear()
+      store.setDatesLocationsFromArrayToMap(datesLocations)
+    },
+  }))
 
 export interface OrganizerEventDateLocationSnapshotIn
   extends SnapshotIn<typeof OrganizerEventDateLocationModel> {}
