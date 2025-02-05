@@ -72,6 +72,34 @@ export const OrganizerEventStoreModel = types
         handleError(e, { toast: false })
       }
     }),
+    uploadDatesLocations: flow(function* (
+      eventId: string,
+      datesLocations: Array<{ start_time: string; end_time: string | null; location_id: string }>,
+    ) {
+      const newDatesLocations = datesLocations.map((dl) => {
+        return {
+          event_id: eventId,
+          ...dl,
+        }
+      })
+      // We catch error on top.
+      const { data, error } = yield supabase.rpc("upsert_events_dates_locations", {
+        p_event_id: eventId,
+        data: newDatesLocations,
+      })
+
+      if (error) throw error
+
+      return data.map((newDL: any) => {
+        return {
+          id: newDL.r_id,
+          event_id: newDL.r_event_id,
+          start_time: newDL.r_start_time,
+          end_time: newDL.r_end_time,
+          location_id: newDL.r_location_id,
+        }
+      })
+    }),
   }))
   .actions((store) => ({
     clearAndSet: (events: OrganizerEventSnapshotIn[]) => {
@@ -127,10 +155,7 @@ export const OrganizerEventStoreModel = types
         store.clearAndSet(events)
         getRootStore(store).locationStore.clearAndSet(locations)
         getRootStore(store).organizerStore.setProp("organizers", organizers)
-        getRootStore(store).organizerEventDateLocationStore.setProp(
-          "datesLocations",
-          datesLocations,
-        )
+        getRootStore(store).organizerEventDateLocationStore.clearAndSet(datesLocations)
       } catch (e) {
         handleError(e)
       }
@@ -156,11 +181,13 @@ export const OrganizerEventStoreModel = types
           mimeType: string
           buffer: any
         }
+        datesLocations: Array<{ start_time: string; end_time: string | null; location_id: string }>
+        oldDateLocationIds: string[]
       },
     ) {
       try {
         let result
-        const { image: newImage, ...eventsFields } = fields
+        const { image: newImage, datesLocations, oldDateLocationIds, ...eventsFields } = fields
         const isUpdate = !!fields.id
 
         if (newImage) {
@@ -178,10 +205,18 @@ export const OrganizerEventStoreModel = types
         } else {
           result = yield supabase.from("events").insert(eventsFields).select().single()
         }
+
         if (result.error) throw result.error
 
+        // Here we upload dates and locations
+        const newDatesLocations = yield store.uploadDatesLocations(result.data.id, datesLocations)
         store.events.put(result.data)
 
+        getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
+          newDatesLocations,
+        )
+
+        getRootStore(store).organizerEventDateLocationStore.clearOldDates(oldDateLocationIds)
         handleSuccess("success:eventSaved")
         return true
       } catch (e) {
