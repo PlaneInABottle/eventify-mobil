@@ -77,20 +77,42 @@ export const AuthenticationStoreModel: IAnyModelType = types
       }
     }),
     organizerFirstRequest: flow(function* (userId: string) {
-      const [locationRes, eventsRes, eventChatsRes, profileRes] = yield Promise.all([
-        supabase.from("locations").select("*").eq("creator_id", userId),
-        supabase.from("events").select("*").eq("organizer_id", userId),
-        supabase.from("event_chats").select("*,  events!inner()").eq("events.organizer_id", userId),
-        supabase.from("profiles").select("*").eq("id", userId).single(),
-      ])
+      const [locationRes, eventsRes, eventChatsRes, profileRes, eventsDatesLocationsRes] =
+        yield Promise.all([
+          supabase.from("locations").select("*").eq("creator_id", userId),
+          supabase.from("events").select("*").eq("organizer_id", userId),
+          supabase
+            .from("event_chats")
+            .select("*,  events!inner()")
+            .eq("events.organizer_id", userId),
+          supabase.from("profiles").select("*").eq("id", userId).single(),
+          supabase
+            .from("events_dates_locations")
+            .select("*,  events!inner()")
+            .eq("events.organizer_id", userId),
+        ])
 
-      if (locationRes.error || eventsRes.error || eventChatsRes.error || profileRes.error) {
-        throw locationRes.error || eventsRes.error || eventChatsRes.error
+      if (
+        locationRes.error ||
+        eventsRes.error ||
+        eventChatsRes.error ||
+        profileRes.error ||
+        eventsDatesLocationsRes.error
+      ) {
+        throw (
+          locationRes.error ||
+          eventsRes.error ||
+          eventChatsRes.error ||
+          eventsDatesLocationsRes.error
+        )
       }
 
       getRootStore(store).locationStore.setLocationsFromArrayToMap(locationRes.data)
       getRootStore(store).organizerEventStore.setEventsFromArrayToMap(eventsRes.data)
       getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChatsRes.data)
+      getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
+        eventsDatesLocationsRes.data,
+      )
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
   }))
