@@ -27,6 +27,8 @@ const organizerEn = {
     changeImage: "Change Event's Image",
     addEvent: "Add Event",
     date: "Event's Date",
+    multipleDatesAndLocations: "Multiple Dates and Locations",
+    addDateLocation: "Add New Date-Location",
   },
   organizerLocationListScreen: {
     heading: "Locations",
