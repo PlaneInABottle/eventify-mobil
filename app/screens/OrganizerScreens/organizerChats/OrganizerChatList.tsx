@@ -42,6 +42,7 @@ export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"Organize
             <OrganizerChatListItem
               title={item.events_dates_locations_id.event_id.title}
               date={item.events_dates_locations_id.dateFormatted.textLabel}
+              time={item.events_dates_locations_id.timeFormatted.textLabel}
               eventChatId={item.id}
             />
           )}
@@ -54,11 +55,12 @@ interface IOrganizerChatListItemProps {
   title: string
   eventChatId: string
   date: string
+  time: string
 }
 
 const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
   function ChatListItem(props) {
-    const { title, eventChatId, date } = props
+    const { title, eventChatId, date, time } = props
     const { themed } = useAppTheme()
     const sheet = useRef<BottomSheetModal>(null)
     const navigation = useNavigation<NavigationProp<OrganizerChatStackParamList>>()
@@ -82,13 +84,17 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
         >
           <Text
             tx="organizerChatListScreen:title"
-            preset="formLabel"
             txOptions={{
               title,
             }}
           />
           {"\n"}
-          <Text weight="light" size="xs" text={date} />
+          <Text
+            weight="light"
+            size="xxs"
+            tx="organizerChatListScreen:dateTime"
+            txOptions={{ date, time }}
+          />
         </ListItem>
         <BottomSheetModal
           ref={sheet}

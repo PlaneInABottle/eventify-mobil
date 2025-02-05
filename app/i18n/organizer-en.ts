@@ -45,6 +45,7 @@ const organizerEn = {
   organizerChatListScreen: {
     heading: "Chats",
     title: "{{title}}'s Chat",
+    dateTime: "{{date}}, {{time}}",
     participants: "Participants",
     conversation: "Conversation",
   },
