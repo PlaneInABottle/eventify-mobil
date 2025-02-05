@@ -20,26 +20,37 @@ import DatePicker from "react-native-date-picker"
 import { formatDate } from "@/utils/formatDate"
 import { SelectField } from "@/components/SelectField"
 import { pickSingleImage } from "@/utils/imageFunctions"
+import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
+import { OrganizerEvent } from "@/models/organizer/OrganizerEventStore"
+
+type DateLocationEntry = {
+  id?: string
+  start_time: string
+  end_time: string | null
+  location_id: string
+}
+
+type ImageFormEntry = {
+  path: string
+  mimeType: string
+  buffer: any
+  uri: string
+}
 
 type EventFormState = {
   title: string
   description?: string
-  start_time: string
-  end_time: string | null
-  location_id: string
+  datesLocations: DateLocationEntry[]
+  image?: ImageFormEntry
   image_url?: string | null
-  image?: {
-    path: string
-    mimeType: string
-    buffer: any
-    uri: string
-  }
   errors: {
     title?: TxKeyPath
     description?: TxKeyPath
-    start_time?: TxKeyPath
-    end_time?: TxKeyPath
-    location_id?: TxKeyPath
+    datesLocations?: Array<{
+      start_time?: TxKeyPath
+      end_time?: TxKeyPath
+      location_id?: TxKeyPath
+    }>
     image_url?: TxKeyPath
     general?: TxKeyPath | string
   }
@@ -59,14 +70,17 @@ export const OrganizerEventEditScreen: FC<
   const { eventId } = _props.route.params
   const { goBack } = _props.navigation
 
-  const { organizerEventStore, userStore, locationStore } = useStores()
+  const { organizerEventStore, userStore, locationStore, organizerEventDateLocationStore } =
+    useStores()
   const {
     themed,
     themeContext,
     theme: { spacing },
   } = useAppTheme()
 
-  const event = eventId ? organizerEventStore.events.get(eventId) : undefined
+  const eventDates: OrganizerEventDateLocation[] | undefined =
+    organizerEventDateLocationStore.eventsDatesByEventId.get(eventId)
+  const event: OrganizerEvent | undefined = organizerEventStore.events.get(eventId || "")
   const userId = userStore.userId
 
   useHeader({
@@ -77,20 +91,28 @@ export const OrganizerEventEditScreen: FC<
   })
 
   const [open, setOpen] = useState(false)
+  const [oldDateLocationIds, setOldDateLocationIds] = useState<string[]>([])
 
   const [formState, setFormState] = useState<EventFormState>({
     title: event?.title || "",
     description: event?.description || "",
-    start_time: event?.start_time || new Date().toISOString(),
-    end_time: event?.end_time || null,
-    location_id: event?.location_id.id || "",
+    datesLocations: eventDates
+      ? eventDates.map((eventDate) => {
+          return {
+            id: eventDate.id,
+            start_time: eventDate.start_time,
+            end_time: eventDate.end_time,
+            location_id: eventDate.location_id.id,
+          }
+        })
+      : [{ start_time: new Date().toISOString(), end_time: null, location_id: "" }],
     image_url: event?.image_url || "",
     image: undefined,
     errors: {},
     isLoading: false,
   })
 
-  const updateField = (field: keyof EventFormState, value: string | EventFormState["image"]) => {
+  const updateField = (field: keyof EventFormState, value: any) => {
     setFormState((prev) => ({
       ...prev,
       [field]: value,
@@ -101,9 +123,10 @@ export const OrganizerEventEditScreen: FC<
   const validateForm = () => {
     const newErrors = {
       title: formState.title.trim().length < 6 ? ("errors:must6Chars" as TxKeyPath) : undefined,
-      start_time: !formState.start_time ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
-      location_id:
-        formState.location_id.trim() === "" ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
+      datesLocations: formState.datesLocations.map((dl) => ({
+        start_time: !dl.start_time ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
+        location_id: !dl.location_id ? ("errors:cantBeBlank" as TxKeyPath) : undefined,
+      })),
     }
 
     setFormState((prev) => ({
@@ -111,10 +134,14 @@ export const OrganizerEventEditScreen: FC<
       errors: newErrors,
     }))
 
-    return !Object.values(newErrors).some(Boolean)
+    return (
+      !newErrors.title &&
+      newErrors.datesLocations.every((err) => !err.start_time && !err.location_id)
+    )
   }
 
   async function handleSaveEvent() {
+    console.log("here1")
     if (!validateForm()) return
 
     setFormState((prev) => ({ ...prev, isLoading: true }))
@@ -122,12 +149,11 @@ export const OrganizerEventEditScreen: FC<
       id: event?.id,
       title: formState.title,
       description: formState.description,
-      start_time: formState.start_time,
-      end_time: formState.end_time,
-      location_id: formState.location_id,
       image_url: formState.image_url,
       image: formState.image,
+      datesLocations: formState.datesLocations,
       organizer_id: userId,
+      oldDateLocationIds,
     })
     if (result !== true) {
       setFormState((prev) => ({
@@ -146,7 +172,32 @@ export const OrganizerEventEditScreen: FC<
     if (image) updateField("image", image)
     setFormState((prev) => ({ ...prev, isLoading: false }))
   }
+  // Helper functions:
+  const updateDateLocation = (index: number, field: keyof DateLocationEntry, value: any) => {
+    const newDates = [...formState.datesLocations]
+    newDates[index] = { ...newDates[index], [field]: value }
+    updateField("datesLocations", newDates)
+  }
 
+  const addDateLocation = () => {
+    updateField("datesLocations", [
+      ...formState.datesLocations,
+      { start_time: new Date().toISOString(), end_time: null, location_id: "" },
+    ])
+  }
+
+  const removeDateLocation = (index: number) => {
+    const removed = formState.datesLocations[index]
+    if (removed?.id) {
+      // Add id if it's not already in our oldDateLocationIds list.
+      setOldDateLocationIds((prev) => (prev.includes(removed.id!) ? prev : [...prev, removed.id!]))
+    }
+    const newDates = formState.datesLocations.filter((_, i) => i !== index)
+    updateField("datesLocations", newDates)
+  }
+
+  // Track which dateLocation index's datepicker is open; null means none
+  const [openDateIndex, setOpenDateIndex] = useState<number | null>(null)
   return (
     <Screen preset="scroll" contentContainerStyle={themed($screenContentContainer)}>
       <TextField
@@ -159,43 +210,7 @@ export const OrganizerEventEditScreen: FC<
         status={formState.errors.title ? "error" : undefined}
         readOnly={formState.isLoading}
       />
-      <>
-        <TouchableOpacity activeOpacity={1} onPress={() => setOpen(true)}>
-          <View pointerEvents="none">
-            <TextField
-              value={formatDate(formState.start_time, "eee, MMM dd, yyyy HH:mm")}
-              labelTx="organizerEventEditScreen:date"
-              RightAccessory={(props) => <Icon icon="caretRight" containerStyle={props.style} />}
-            />
-          </View>
-        </TouchableOpacity>
-        <DatePicker
-          modal
-          open={open}
-          date={new Date(formState.start_time)}
-          title={translate("common:selectDate")}
-          confirmText={translate("common:confirm")}
-          cancelText={translate("common:cancel")}
-          locale={locale?.languageCode || undefined}
-          theme={themeContext}
-          onConfirm={(date) => {
-            setOpen(false)
-            updateField("start_time", date.toISOString())
-          }}
-          onCancel={() => {
-            setOpen(false)
-          }}
-        />
-      </>
-      <SelectField
-        labelTx="organizerEventEditScreen:location"
-        placeholderTx="organizerEventEditScreen:locationPlaceholder"
-        value={[formState.location_id]}
-        onSelect={(v) => updateField("location_id", v[0])}
-        options={locationStore.forSelectField}
-        multiple={false}
-        containerStyle={{ marginBottom: spacing.lg }}
-      />
+
       <TextField
         value={formState.description}
         multiline
@@ -207,8 +222,84 @@ export const OrganizerEventEditScreen: FC<
         status={formState.errors.description ? "error" : undefined}
         readOnly={formState.isLoading}
       />
-      <Text tx="organizerEventEditScreen:image" preset="formLabel" />
+
+      {/*
+    DATE LOCATION SECTION
+            */}
       <>
+        <Text tx="organizerEventEditScreen:multipleDatesAndLocations" preset="formLabel" />
+        {formState.datesLocations.map((dl, index) => (
+          <View key={index} style={themed($dateLocationContainer)}>
+            {formState.datesLocations.length > 1 && (
+              <Icon
+                icon="x"
+                size={32}
+                style={themed($removeButton)}
+                onPress={() => {
+                  removeDateLocation(index)
+                }}
+              />
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                setOpen(true)
+                setOpenDateIndex(index)
+              }}
+            >
+              <View pointerEvents="none">
+                <TextField
+                  readOnly
+                  value={formatDate(dl.start_time, "eee, MMM dd, yyyy HH:mm")}
+                  labelTx="organizerEventEditScreen:date"
+                  RightAccessory={(props) => (
+                    <Icon icon="caretRight" containerStyle={props.style} />
+                  )}
+                />
+              </View>
+            </TouchableOpacity>
+            <SelectField
+              labelTx="organizerEventEditScreen:location"
+              placeholderTx="organizerEventEditScreen:locationPlaceholder"
+              value={[dl.location_id]}
+              onSelect={(v) => updateDateLocation(index, "location_id", v[0])}
+              options={locationStore.forSelectField}
+              multiple={false}
+            />
+          </View>
+        ))}
+
+        <Button
+          tx="organizerEventEditScreen:addDateLocation"
+          onPress={addDateLocation}
+          LeftAccessory={() => <Icon icon="plus" size={24} style={themed($addIconStyle)} />}
+          preset="filled"
+        />
+        <DatePicker
+          modal
+          open={open}
+          date={new Date()}
+          title={translate("common:selectDate")}
+          confirmText={translate("common:confirm")}
+          cancelText={translate("common:cancel")}
+          locale={locale?.languageCode || undefined}
+          theme={themeContext}
+          onConfirm={(date) => {
+            setOpen(false)
+            if (openDateIndex !== null)
+              updateDateLocation(openDateIndex, "start_time", date.toISOString())
+          }}
+          onCancel={() => {
+            setOpen(false)
+            setOpenDateIndex(null)
+          }}
+        />
+      </>
+
+      {/*
+    IMAGE SECTION
+            */}
+      <>
+        <Text tx="organizerEventEditScreen:image" preset="formLabel" />
         {formState.image || event?.image_url ? (
           <TouchableOpacity style={$imageWrapper} onPress={handlePickImage}>
             <Image
@@ -244,7 +335,6 @@ export const OrganizerEventEditScreen: FC<
           </TouchableOpacity>
         )}
       </>
-
       <Button
         preset="reversed"
         tx={formState.isLoading ? undefined : "common:save"}
@@ -308,4 +398,25 @@ const $imageOverlay: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $placeholderText: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
+})
+
+const $dateLocationContainer: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  position: "relative",
+
+  marginBottom: spacing.xs,
+  gap: spacing.xs,
+  padding: spacing.md,
+  borderWidth: 4,
+  borderColor: colors.palette.neutral400,
+  borderRadius: 8,
+  backgroundColor: colors.background,
+  borderStyle: "dotted",
+})
+
+const $removeButton: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  alignSelf: "flex-end",
+})
+
+const $addIconStyle: ThemedStyle<ImageStyle> = ({ spacing, colors }) => ({
+  marginHorizontal: spacing.xs,
 })
