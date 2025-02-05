@@ -251,6 +251,10 @@ export const OrganizerEventEditScreen: FC<
                   readOnly
                   value={formatDate(dl.start_time, "eee, MMM dd, yyyy HH:mm")}
                   labelTx="organizerEventEditScreen:date"
+                  helperTx={formState.errors.datesLocations?.at(index)?.start_time}
+                  status={
+                    formState.errors.datesLocations?.at(index)?.start_time ? "error" : undefined
+                  }
                   RightAccessory={(props) => (
                     <Icon icon="caretRight" containerStyle={props.style} />
                   )}
@@ -263,6 +267,8 @@ export const OrganizerEventEditScreen: FC<
               value={[dl.location_id]}
               onSelect={(v) => updateDateLocation(index, "location_id", v[0])}
               options={locationStore.forSelectField}
+              helperTx={formState.errors.datesLocations?.at(index)?.location_id}
+              status={formState.errors.datesLocations?.at(index)?.location_id ? "error" : undefined}
               multiple={false}
             />
           </View>

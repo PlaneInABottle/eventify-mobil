@@ -25,7 +25,7 @@ export const OrganizerChatParticipantScreen: FC<
 
   useHeader({
     titleTx: "organizerChatParticipantScreen:headerTitle",
-    titleTxOptions: { eventName: eventChat?.event_id.title },
+    titleTxOptions: { eventName: eventChat?.events_dates_locations_id.event_id.title },
     leftIcon: "back",
     onLeftPress: () => goBack(),
   })
@@ -97,8 +97,7 @@ const OrganizerChatParticipantListItem: FC<IOrganizerChatParticipantListItemProp
           ref={sheet}
           backgroundStyle={themed($bottomSheetBackground)}
           stackBehavior="replace"
-          snapPoints={["20%"]}
-          // enableDynamicSizing
+          enableDynamicSizing
           handleIndicatorStyle={themed($handleIndicator)}
           enableDismissOnClose
           backdropComponent={(props) => (

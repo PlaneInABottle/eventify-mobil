@@ -1,11 +1,11 @@
 import { IAnyModelType, Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
-import { OrganizerEventModel } from "./OrganizerEventStore"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
 import { OrganizerChatMessageModel } from "./OrganizerChatMessageModel"
 import { handleSuccess } from "@/utils/successHandler"
 import { TxKeyPath } from "@/i18n"
+import { OrganizerEventDateLocationModel } from "./OrganizerEventDateModel"
 
 export const OrganizerChatParticipantModel = types.model("OrganizerChatParticipant").props({
   id: types.identifier,
@@ -17,7 +17,7 @@ export const OrganizerChatModel = types
   .model("OrganizerChat")
   .props({
     id: types.identifier, // Event chat idd
-    event_id: types.reference(OrganizerEventModel),
+    events_dates_locations_id: types.reference(OrganizerEventDateLocationModel),
     event_chats_participants: types.array(OrganizerChatParticipantModel),
     messages: types.array(types.late((): IAnyModelType => OrganizerChatMessageModel)),
   })

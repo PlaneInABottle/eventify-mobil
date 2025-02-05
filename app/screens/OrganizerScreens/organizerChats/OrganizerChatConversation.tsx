@@ -30,7 +30,7 @@ export const OrganizerChatConversationScreen: FC<
 
   useHeader({
     titleTx: "organizerChatConversationScreen:headerTitle",
-    titleTxOptions: { eventName: eventChat?.event_id.title },
+    titleTxOptions: { eventName: eventChat?.events_dates_locations_id.event_id.title },
     leftIcon: "back",
     onLeftPress: () => navigation.goBack(),
   })

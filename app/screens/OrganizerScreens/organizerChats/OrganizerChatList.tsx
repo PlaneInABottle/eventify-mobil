@@ -12,6 +12,7 @@ import {
 import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
+import { formatDate } from "@/utils/formatDate"
 
 export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"OrganizerChatListScreen">> =
   observer(function OrganizerChatListScreen(_props) {
@@ -38,7 +39,11 @@ export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"Organize
             </View>
           }
           renderItem={({ item }) => (
-            <OrganizerChatListItem title={item.event_id.title} eventChatId={item.id} />
+            <OrganizerChatListItem
+              title={item.events_dates_locations_id.event_id.title}
+              date={item.events_dates_locations_id.dateFormatted.textLabel}
+              eventChatId={item.id}
+            />
           )}
         />
       </Screen>
@@ -48,11 +53,12 @@ export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"Organize
 interface IOrganizerChatListItemProps {
   title: string
   eventChatId: string
+  date: string
 }
 
 const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
   function ChatListItem(props) {
-    const { title, eventChatId } = props
+    const { title, eventChatId, date } = props
     const { themed } = useAppTheme()
     const sheet = useRef<BottomSheetModal>(null)
     const navigation = useNavigation<NavigationProp<OrganizerChatStackParamList>>()
@@ -68,22 +74,27 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
     return (
       <>
         <ListItem
-          tx="organizerChatListScreen:title"
-          txOptions={{
-            title,
-          }}
           bottomSeparator
           rightIcon="caretRight"
           onPress={() => {
             presentOptions()
           }}
-        />
-
+        >
+          <Text
+            tx="organizerChatListScreen:title"
+            preset="formLabel"
+            txOptions={{
+              title,
+            }}
+          />
+          {"\n"}
+          <Text weight="light" size="xs" text={date} />
+        </ListItem>
         <BottomSheetModal
           ref={sheet}
           backgroundStyle={themed($bottomSheetBackground)}
           stackBehavior="replace"
-          snapPoints={["20%"]}
+          enableDynamicSizing
           handleIndicatorStyle={themed($handleIndicator)}
           enableDismissOnClose
           backdropComponent={(props) => (
@@ -94,6 +105,7 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
             <ListItem
               tx="organizerChatListScreen:participants"
               rightIcon="caretRight"
+              bottomSeparator
               onPress={() => {
                 navigation.navigate("OrganizerChatParticipantScreen", {
                   eventChatId,
