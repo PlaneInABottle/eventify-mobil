@@ -50,7 +50,10 @@ const organizerEn = {
     conversation: "Conversation",
   },
   organizerChatEditScreen: {
-    name: "Location's Name",
+    chooseEvent: "Choose an Event",
+    chooseEventPlaceholder: "Please choose one of your events",
+    chooseDateLocation: "Date - Location",
+    chooseDateLocationPlaceholder: "Event's Date - Location",
     namePlaceholder: "Enter a descriptive name",
     address: "Location's Address",
     addressPlaceholder: "Enter address of the location",

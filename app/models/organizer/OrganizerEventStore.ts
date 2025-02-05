@@ -44,6 +44,13 @@ export const OrganizerEventStoreModel = types
       return Array.from(self.events.values())
     },
   }))
+  .views((self) => ({
+    get forSelectField() {
+      return Array.from(self.events.values()).map((val) => {
+        return { label: val.title, value: val.id }
+      })
+    },
+  }))
   .actions(withSetPropAction)
   .actions((store) => ({
     setEventsFromArrayToMap: (events: any) => {

@@ -63,6 +63,15 @@ export const OrganizerEventDateLocationStoreModel = types
       return dateLocationMap
     },
   }))
+  .views((self) => ({
+    forSelectFieldForAnEvent(eventId: string): Array<{ label: string; value: string }> {
+      const eventDates = self.eventsDatesByEventId.get(eventId) || []
+      return eventDates.map((val: OrganizerEventDateLocation) => ({
+        label: `${val.dateFormatted.textLabel} - ${val.timeFormatted.textLabel}\n${val.location_id.name}`,
+        value: val.id,
+      }))
+    },
+  }))
   .actions(withSetPropAction)
   .actions((store) => ({
     clearOldDates: (oldIds: string[]) => {
