@@ -8,6 +8,7 @@ import { handleError } from "@/utils/errorHandler"
 import { LocationStoreModel } from "./location/LocationStore"
 import { OrganizerEventStoreModel, OrganizerStoreModel } from "./organizer/OrganizerEventStore"
 import { OrganizerChatStoreModel } from "./organizer/OrganizerChatStore"
+import { OrganizerEventDateLocationStoreModel } from "./organizer/OrganizerEventDateModel"
 
 /**
  * A RootStore model.
@@ -23,6 +24,7 @@ export const RootStoreModel = types
     organizerEventStore: types.optional(OrganizerEventStoreModel, {}),
     organizerChatStore: types.optional(OrganizerChatStoreModel, {}),
     organizerStore: types.optional(OrganizerStoreModel, {}),
+    organizerEventDateLocationStore: types.optional(OrganizerEventDateLocationStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({

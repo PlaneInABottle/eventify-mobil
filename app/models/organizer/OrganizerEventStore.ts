@@ -2,12 +2,12 @@ import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
-import { LocationModel, LocationSnapshotIn } from "../location/LocationStore"
+import { LocationSnapshotIn } from "../location/LocationStore"
 import { handleSuccess } from "@/utils/successHandler"
 import { transformRegionForSupabase } from "@/utils/regionFunctions"
 import { Region } from "react-native-maps"
 import { getRootStore } from "../helpers/getRootStore"
-import { formatDate } from "@/utils/formatDate"
+import { OrganizerEventDateLocationSnapshotIn } from "./OrganizerEventDateModel"
 
 const OrganizerModel = types.model("Organizer").props({
   id: types.identifier,
@@ -25,33 +25,14 @@ export const OrganizerStoreModel = types
   })
   .actions(withSetPropAction)
 
-export const OrganizerEventModel = types
-  .model("OrganizerEvent")
-  .props({
-    id: types.identifier,
-    organizer_id: types.string,
-    title: types.string,
-    description: types.optional(types.string, ""),
-    start_time: types.string,
-    end_time: types.maybeNull(types.string),
-    location_id: types.reference(LocationModel),
-    image_url: types.maybeNull(types.string),
-    organizer_profile: types.maybe(types.reference(OrganizerModel)),
-  })
-  .views((event) => ({
-    get dateFormatted() {
-      const formatted = formatDate(event.start_time, "MMM dd, yyyy")
-      return {
-        textLabel: formatted,
-      }
-    },
-    get timeFormatted() {
-      const formatted = formatDate(event.start_time, "hh:mm a")
-      return {
-        textLabel: formatted,
-      }
-    },
-  }))
+export const OrganizerEventModel = types.model("OrganizerEvent").props({
+  id: types.identifier,
+  organizer_id: types.string,
+  title: types.string,
+  description: types.optional(types.string, ""),
+  image_url: types.maybeNull(types.string),
+  organizer_profile: types.maybe(types.reference(OrganizerModel)),
+})
 
 export const OrganizerEventStoreModel = types
   .model("OrganizerEventStore")
@@ -61,18 +42,6 @@ export const OrganizerEventStoreModel = types
   .views((self) => ({
     get eventsForList() {
       return Array.from(self.events.values())
-    },
-    get eventsByLocationId() {
-      const eventMap = new Map()
-      self.events.forEach((event) => {
-        const locationId = event.location_id.id
-        if (!eventMap.has(locationId)) {
-          eventMap.set(locationId, [event])
-        } else {
-          eventMap.get(locationId).push(event)
-        }
-      })
-      return eventMap
     },
   }))
   .actions(withSetPropAction)
@@ -116,16 +85,22 @@ export const OrganizerEventStoreModel = types
         const regionForSupabase = transformRegionForSupabase(bounds)
         const { data, error } = yield supabase.rpc("events_in_sight", regionForSupabase)
 
-        const { events, locations, organizers } = data.reduce(
+        const { datesLocations, events, locations, organizers } = data.reduce(
           (
             acc: any,
             item: {
               event: OrganizerEventSnapshotIn
               location: LocationSnapshotIn
               organizer: OrganizerSnapshotIn
+              dates_location: OrganizerEventDateLocationSnapshotIn
             },
           ) => {
-            acc.events.push({ ...item.event, organizer_profile: item.organizer.id })
+            acc.datesLocations.push(item.dates_location)
+            if (!acc.eventIds.has(item.event.id)) {
+              acc.events.push({ ...item.event, organizer_profile: item.organizer.id })
+              acc.eventIds.add(item.event.id)
+            }
+
             if (!acc.organizerIds.has(item.organizer.id)) {
               acc.organizers.push(item.organizer)
               acc.organizerIds.add(item.organizer.id)
@@ -138,11 +113,13 @@ export const OrganizerEventStoreModel = types
             return acc
           },
           {
+            datesLocations: [],
             events: [],
             locations: [],
             organizers: [],
             locationIds: new Set(),
             organizerIds: new Set(),
+            eventIds: new Set(),
           },
         )
         if (error) throw error
@@ -150,6 +127,10 @@ export const OrganizerEventStoreModel = types
         store.clearAndSet(events)
         getRootStore(store).locationStore.clearAndSet(locations)
         getRootStore(store).organizerStore.setProp("organizers", organizers)
+        getRootStore(store).organizerEventDateLocationStore.setProp(
+          "datesLocations",
+          datesLocations,
+        )
       } catch (e) {
         handleError(e)
       }
