@@ -3,6 +3,7 @@ import { OrganizerEventModel } from "./OrganizerEventStore"
 import { LocationModel } from "../location/LocationStore"
 import { formatDate } from "@/utils/formatDate"
 import { withSetPropAction } from "../helpers/withSetPropAction"
+import { getRootStore } from "../helpers/getRootStore"
 
 export const OrganizerEventDateLocationModel = types
   .model("OrganizerEventDate")
@@ -16,13 +17,13 @@ export const OrganizerEventDateLocationModel = types
   .actions(withSetPropAction)
   .views((self) => ({
     get dateFormatted() {
-      const formatted = formatDate(self.start_time, "MMM dd, yyyy")
+      const formatted = formatDate(self.start_time, "eee, MMM dd, yyyy")
       return {
         textLabel: formatted,
       }
     },
     get timeFormatted() {
-      const formatted = formatDate(self.start_time, "hh:mm a")
+      const formatted = formatDate(self.start_time, "HH:mm")
       return {
         textLabel: formatted,
       }
@@ -75,6 +76,14 @@ export const OrganizerEventDateLocationStoreModel = types
   .actions(withSetPropAction)
   .actions((store) => ({
     clearOldDates: (oldIds: string[]) => {
+      const rootStore = getRootStore(store)
+      const chats = rootStore.organizerChatStore.chatsAsList
+
+      const willDeletedChatIds = chats
+        .filter((chat) => oldIds.includes(chat.events_dates_locations_id.id))
+        .map((chat) => chat.id)
+
+      rootStore.organizerChatStore.deleteChat(willDeletedChatIds)
       oldIds.forEach((oldID: string) => {
         store.datesLocations.delete(oldID)
       })

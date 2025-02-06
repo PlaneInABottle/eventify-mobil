@@ -80,16 +80,16 @@ export const AuthenticationStoreModel: IAnyModelType = types
       const [locationRes, eventsRes, eventChatsRes, profileRes, eventsDatesLocationsRes] =
         yield Promise.all([
           supabase.from("locations").select("*").eq("creator_id", userId),
-          supabase.from("events").select("*").eq("organizer_id", userId),
+          supabase.from("events").select("*").eq("publisher_id", userId),
           supabase
             .from("event_chats")
             .select("*, events_dates_locations!inner(events())")
-            .eq("events_dates_locations.events.organizer_id", userId),
+            .eq("events_dates_locations.events.publisher_id", userId),
           supabase.from("profiles").select("*").eq("id", userId).single(),
           supabase
             .from("events_dates_locations")
             .select("*,  events!inner()")
-            .eq("events.organizer_id", userId),
+            .eq("events.publisher_id", userId),
         ])
 
       if (

@@ -27,7 +27,7 @@ export const OrganizerStoreModel = types
 
 export const OrganizerEventModel = types.model("OrganizerEvent").props({
   id: types.identifier,
-  organizer_id: types.string,
+  publisher_id: types.string,
   title: types.string,
   description: types.optional(types.string, ""),
   image_url: types.maybeNull(types.string),
@@ -172,7 +172,7 @@ export const OrganizerEventStoreModel = types
         const { data: events, error } = yield supabase
           .from("events")
           .select()
-          .eq("organizer_id", userId)
+          .eq("publisher_id", userId)
 
         if (error) throw error
         store.setEventsFromArrayToMap(events)

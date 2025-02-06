@@ -108,6 +108,9 @@ export const OrganizerChatStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
+    deleteChat: (eventChatIds: string[]) => {
+      eventChatIds.forEach((id) => store.chats.delete(id))
+    },
     setChatsFromArrayToMap: (chats: any) => {
       chats.forEach((eventChat: any) => {
         store.chats.put(eventChat)
@@ -120,7 +123,7 @@ export const OrganizerChatStoreModel = types
         const { data: eventChats, error } = yield supabase
           .from("event_chats")
           .select("*,  events!inner()")
-          .eq("events.organizer_id", userId)
+          .eq("events.publisher_id", userId)
 
         if (error) throw error
         store.setChatsFromArrayToMap(eventChats)
