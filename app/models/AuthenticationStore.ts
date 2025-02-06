@@ -76,6 +76,17 @@ export const AuthenticationStoreModel: IAnyModelType = types
         handleError(e)
       }
     }),
+    userFirstRequest: flow(function* (userId: string) {
+      const [profileRes] = yield Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+      ])
+
+      if (profileRes.error) {
+        throw profileRes.error
+      }
+
+      getRootStore(store).userStore.setProp("user", profileRes.data)
+    }),
     organizerFirstRequest: flow(function* (userId: string) {
       const [locationRes, eventsRes, eventChatsRes, profileRes, eventsDatesLocationsRes] =
         yield Promise.all([
@@ -103,6 +114,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
           locationRes.error ||
           eventsRes.error ||
           eventChatsRes.error ||
+          profileRes.error ||
           eventsDatesLocationsRes.error
         )
       }
@@ -129,8 +141,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
       // Get initial data
       getRootStore(store).chatStore.connect()
 
-      if (session.user.user_metadata.role !== "organizer")
-        getRootStore(store).getInitialData(userId)
+      if (session.user.user_metadata.role !== "organizer") store.userFirstRequest(userId)
       else {
         store.organizerFirstRequest(userId)
       }

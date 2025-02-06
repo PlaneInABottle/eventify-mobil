@@ -9,7 +9,7 @@ import { Region } from "react-native-maps"
 import { getRootStore } from "../helpers/getRootStore"
 import { OrganizerEventDateLocationSnapshotIn } from "./OrganizerEventDateModel"
 
-const OrganizerModel = types.model("Organizer").props({
+const PublisherModel = types.model("Publisher").props({
   id: types.identifier,
   email: types.string,
   about: types.maybeNull(types.string),
@@ -18,10 +18,10 @@ const OrganizerModel = types.model("Organizer").props({
   display_name: types.string,
 })
 
-export const OrganizerStoreModel = types
-  .model("OrganizerStore")
+export const PublisherStoreModel = types
+  .model("PublisherStore")
   .props({
-    organizers: types.array(OrganizerModel),
+    publishers: types.array(PublisherModel),
   })
   .actions(withSetPropAction)
 
@@ -31,7 +31,7 @@ export const OrganizerEventModel = types.model("OrganizerEvent").props({
   title: types.string,
   description: types.optional(types.string, ""),
   image_url: types.maybeNull(types.string),
-  organizer_profile: types.maybe(types.reference(OrganizerModel)),
+  publisher_profile: types.maybe(types.reference(PublisherModel)),
 })
 
 export const OrganizerEventStoreModel = types
@@ -120,25 +120,27 @@ export const OrganizerEventStoreModel = types
         const regionForSupabase = transformRegionForSupabase(bounds)
         const { data, error } = yield supabase.rpc("events_in_sight", regionForSupabase)
 
-        const { datesLocations, events, locations, organizers } = data.reduce(
+        console.log("DATA: ", data)
+        console.log("Error: ", error)
+        const { datesLocations, events, locations, publishers } = data.reduce(
           (
             acc: any,
             item: {
               event: OrganizerEventSnapshotIn
               location: LocationSnapshotIn
-              organizer: OrganizerSnapshotIn
+              publisher: IPublisherSnapshotIn
               dates_location: OrganizerEventDateLocationSnapshotIn
             },
           ) => {
             acc.datesLocations.push(item.dates_location)
             if (!acc.eventIds.has(item.event.id)) {
-              acc.events.push({ ...item.event, organizer_profile: item.organizer.id })
+              acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
               acc.eventIds.add(item.event.id)
             }
 
-            if (!acc.organizerIds.has(item.organizer.id)) {
-              acc.organizers.push(item.organizer)
-              acc.organizerIds.add(item.organizer.id)
+            if (!acc.publisherIds.has(item.publisher.id)) {
+              acc.publishers.push(item.publisher)
+              acc.publisherIds.add(item.publisher.id)
             }
 
             if (!acc.locationIds.has(item.location.id)) {
@@ -151,9 +153,9 @@ export const OrganizerEventStoreModel = types
             datesLocations: [],
             events: [],
             locations: [],
-            organizers: [],
+            publishers: [],
             locationIds: new Set(),
-            organizerIds: new Set(),
+            publisherIds: new Set(),
             eventIds: new Set(),
           },
         )
@@ -161,7 +163,7 @@ export const OrganizerEventStoreModel = types
 
         store.clearAndSet(events)
         getRootStore(store).locationStore.clearAndSet(locations)
-        getRootStore(store).organizerStore.setProp("organizers", organizers)
+        getRootStore(store).publisherStore.setProp("publishers", publishers)
         getRootStore(store).organizerEventDateLocationStore.clearAndSet(datesLocations)
       } catch (e) {
         handleError(e)
@@ -232,8 +234,8 @@ export const OrganizerEventStoreModel = types
     }),
   }))
 
-export interface OrganizerStore extends Instance<typeof OrganizerStoreModel> {}
-export interface OrganizerSnapshotIn extends SnapshotIn<typeof OrganizerModel> {}
+export interface IPublisherStore extends Instance<typeof PublisherStoreModel> {}
+export interface IPublisherSnapshotIn extends SnapshotIn<typeof PublisherModel> {}
 export interface OrganizerEvent extends Instance<typeof OrganizerEventModel> {}
 export interface OrganizerEventSnapshotIn extends SnapshotIn<typeof OrganizerEventModel> {}
 export interface OrganizerEventStore extends Instance<typeof OrganizerEventStoreModel> {}

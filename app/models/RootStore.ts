@@ -6,7 +6,7 @@ import { ChatStoreModel } from "./ChatStore"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { handleError } from "@/utils/errorHandler"
 import { LocationStoreModel } from "./location/LocationStore"
-import { OrganizerEventStoreModel, OrganizerStoreModel } from "./organizer/OrganizerEventStore"
+import { OrganizerEventStoreModel, PublisherStoreModel } from "./organizer/OrganizerEventStore"
 import { OrganizerChatStoreModel } from "./organizer/OrganizerChatStore"
 import { OrganizerEventDateLocationStoreModel } from "./organizer/OrganizerEventDateModel"
 
@@ -23,7 +23,7 @@ export const RootStoreModel = types
     locationStore: types.optional(LocationStoreModel, {}),
     organizerEventStore: types.optional(OrganizerEventStoreModel, {}),
     organizerChatStore: types.optional(OrganizerChatStoreModel, {}),
-    organizerStore: types.optional(OrganizerStoreModel, {}),
+    publisherStore: types.optional(PublisherStoreModel, {}),
     organizerEventDateLocationStore: types.optional(OrganizerEventDateLocationStoreModel, {}),
   })
   .actions(withSetPropAction)
@@ -33,7 +33,7 @@ export const RootStoreModel = types
       store.setProp("userStore", undefined)
       store.setProp("eventStore", undefined)
       store.setProp("chatStore", undefined)
-      store.setProp("organizerStore", undefined)
+      store.setProp("publisherStore", undefined)
       store.setProp("organizerEventStore", undefined)
       store.setProp("organizerChatStore", undefined)
       store.setProp("locationStore", undefined)
@@ -42,7 +42,7 @@ export const RootStoreModel = types
       try {
         store.userStore.fetchProfile(userId)
         yield store.eventStore.fetchInitialEvents(userId)
-        store.chatStore.fetchUserChats(userId)
+        // store.chatStore.fetchUserChats(userId)
       } catch (e) {
         handleError(e)
       }

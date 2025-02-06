@@ -1,4 +1,4 @@
-import { FC, forwardRef, useCallback, useImperativeHandle, useRef } from "react"
+import { FC, forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react"
 import { ViewStyle, StyleSheet, ActivityIndicator, ImageStyle, View, TextStyle } from "react-native"
 import { AutoImage, Button, Icon, Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -8,22 +8,28 @@ import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
 import { ButtonAccessoryProps } from "@/components/Button"
 import { $styles, ThemedStyle } from "@/theme"
-import { Event } from "@/models/Event"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
+import { LocationSnapshotIn } from "@/models/location/LocationStore"
+import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
 
 interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
 
 export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMapScreen(_props) {
   const {
-    eventStore: { eventsInBounds, fetchEventsInBounds, isSearching },
+    organizerEventDateLocationStore: { eventsDatesByLocationId },
+    organizerEventStore: { fetchEventsInSight },
+    locationStore: { locationsForList },
   } = useStores()
   const { themed } = useAppTheme()
 
   const regionRef = useRef<Region | null>(null)
+  const [isSearching, setIsSearching] = useState<boolean>(false)
 
-  const handleSearchThisArea = () => {
+  const handleSearchThisArea = async () => {
     if (regionRef.current) {
-      fetchEventsInBounds(regionRef.current)
+      setIsSearching(true)
+      await fetchEventsInSight(regionRef.current)
+      setIsSearching(false)
     }
   }
 
@@ -41,19 +47,17 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
           longitudeDelta: 0.0421,
         }}
       >
-        {eventsInBounds.map(
-          (event) =>
-            event && (
-              <MarkerField
-                key={event.id}
-                event={event}
-                coordinate={{
-                  latitude: event.lat,
-                  longitude: event.long,
-                }}
-              />
-            ),
-        )}
+        {locationsForList.map((location) => (
+          <NewMarkerField
+            key={location.id}
+            location={location}
+            eventsDateLocations={eventsDatesByLocationId.get(location.id)}
+            coordinate={{
+              longitude: location.lat_long.coordinates[0],
+              latitude: location.lat_long.coordinates[1],
+            }}
+          />
+        ))}
       </MapView>
 
       <Button
@@ -69,8 +73,9 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
   )
 })
 
-interface MarkerFieldProps extends Omit<MapMarkerProps, "ref"> {
-  event: Event
+interface IMarkerFieldProps extends Omit<MapMarkerProps, "ref"> {
+  eventsDateLocations: OrganizerEventDateLocation[]
+  location: LocationSnapshotIn
 }
 
 export interface MarkerFieldRef {
@@ -78,17 +83,14 @@ export interface MarkerFieldRef {
   dismissOptions: () => void
 }
 
-const MarkerField = observer(
-  forwardRef(function MarkerField(props: MarkerFieldProps, ref: React.Ref<MarkerFieldRef>) {
-    const { event, ...MapMarkerProps } = props
+const NewMarkerField = observer(
+  forwardRef(function MarkerField(props: IMarkerFieldProps, ref: React.Ref<MarkerFieldRef>) {
+    const { eventsDateLocations, location, ...MapMarkerProps } = props
     const sheet = useRef<BottomSheetModal>(null)
     const {
       themed,
       theme: { colors },
     } = useAppTheme()
-    const {
-      chatStore: { toggleChat, hasJoinedChat, isLoading },
-    } = useStores()
 
     useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }))
 
@@ -102,7 +104,12 @@ const MarkerField = observer(
 
     return (
       <>
-        <Marker key={event.id} onPress={presentOptions} title={event.title} {...MapMarkerProps} />
+        <Marker
+          key={location.id}
+          onPress={presentOptions}
+          title={location.name}
+          {...MapMarkerProps}
+        />
         <BottomSheetModal
           ref={sheet}
           backgroundStyle={themed($bottomSheetBackground)}
@@ -115,73 +122,81 @@ const MarkerField = observer(
           )}
         >
           <BottomSheetScrollView contentContainerStyle={themed([$bottomSheetContent])}>
-            {event.image_url && (
-              <AutoImage
-                source={{
-                  uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${event.image_url}`,
-                }}
-                style={themed($image)}
-              />
-            )}
+            {eventsDateLocations.map((dateLocation) => (
+              <View key={dateLocation.id} style={themed($eventContainer)}>
+                {/* Event Image */}
+                {dateLocation.event_id.image_url && (
+                  <AutoImage
+                    source={{
+                      uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/events/${dateLocation.event_id.image_url}`,
+                    }}
+                    style={themed($image)}
+                  />
+                )}
 
-            <View style={themed($headerContainer)}>
-              <Text preset="heading" text={event.title} style={themed($title)} />
-              <View style={themed($dateTimeContainer)}>
-                <View style={themed($iconTextContainer)}>
-                  <Icon icon="calendar" size={20} color={colors.palette.primary500} />
+                {/* Event Header */}
+                <View style={themed($headerContainer)}>
                   <Text
-                    text={event.dateFormatted.textLabel}
-                    style={themed($dateTimeText)}
-                    size="xxs"
+                    preset="heading"
+                    text={dateLocation.event_id.title}
+                    style={themed($title)}
                   />
+                  <View style={themed($dateTimeContainer)}>
+                    <View style={themed($iconTextContainer)}>
+                      <Icon icon="calendar" size={20} color={colors.palette.primary500} />
+                      <Text
+                        text={dateLocation.dateFormatted.textLabel}
+                        style={themed($dateTimeText)}
+                        size="xxs"
+                      />
+                    </View>
+                    <View style={themed($iconTextContainer)}>
+                      <Icon icon="clock" size={20} color={colors.palette.primary500} />
+                      <Text
+                        text={dateLocation.timeFormatted.textLabel}
+                        style={themed($dateTimeText)}
+                        size="xxs"
+                      />
+                    </View>
+                  </View>
                 </View>
-                <View style={themed($iconTextContainer)}>
-                  <Icon icon="clock" size={20} color={colors.palette.primary500} />
-                  <Text
-                    text={event.timeFormatted.textLabel}
-                    style={themed($dateTimeText)}
-                    size="xxs"
-                  />
+
+                {/* Event Description */}
+                {dateLocation.event_id.description && (
+                  <View style={themed($descriptionContainer)}>
+                    <Text preset="subheading" text="About" style={themed($sectionTitle)} />
+                    <Text text={dateLocation.event_id.description} />
+                  </View>
+                )}
+
+                {/* 
+                  Organizer Info 
+                    */}
+                <View style={themed($organizerContainer)}>
+                  <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
+                  <Text text={dateLocation.event_id.publisher_profile?.display_name} />
                 </View>
+
+                {/* Chat Button 
+        {event.hasChat && event.event_chat_id && (
+          <Button
+            tx={
+              isLoading
+                ? "common:loading"
+                : hasJoinedChat(event.event_chat_id)
+                  ? "common:leaveChat"
+                  : "common:joinChat"
+            }
+            onPress={() => toggleChat(event.event_chat_id as string, event.id)}
+            disabled={isLoading}
+            disabledStyle={themed($disabledButton)}
+            RightAccessory={isLoading ? LoadingIndicator : undefined}
+            style={themed($chatButton)}
+          />
+        )}
+*/}
               </View>
-            </View>
-
-            <View style={themed($descriptionContainer)}>
-              <Text preset="subheading" text="About" style={themed($sectionTitle)} />
-              <Text
-                tx={
-                  event.description
-                    ? "eventMapScreen:eventDescription"
-                    : "eventMapScreen:noDescription"
-                }
-                txOptions={{
-                  description: event.description,
-                }}
-              />
-            </View>
-
-            <View style={themed($organizerContainer)}>
-              <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
-              <Text text={event.organizer_name} />
-            </View>
-
-            {event.hasChat && event.event_chat_id && (
-              <Button
-                tx={
-                  isLoading
-                    ? "common:loading"
-                    : hasJoinedChat(event.event_chat_id)
-                      ? "common:leaveChat"
-                      : "common:joinChat"
-                }
-                onPress={() => {
-                  toggleChat(event.event_chat_id as string, event.id)
-                }}
-                disabled={isLoading}
-                disabledStyle={themed($disabledButton)}
-                RightAccessory={isLoading ? LoadingIndicator : undefined}
-              />
-            )}
+            ))}
           </BottomSheetScrollView>
         </BottomSheetModal>
       </>
@@ -268,4 +283,25 @@ const $image: ThemedStyle<ImageStyle> = ({ spacing }) => ({
   alignSelf: "center",
   marginBottom: spacing.md,
   borderRadius: 16,
+})
+const $eventContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.lg,
+  paddingBottom: spacing.lg,
+  borderBottomWidth: 1,
+  borderBottomColor: colors.separator,
+})
+
+const $separator: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  height: 1,
+  backgroundColor: colors.separator,
+  marginVertical: spacing.lg,
+})
+
+const $noEventsText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  textAlign: "center",
+})
+
+const $chatButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
 })
