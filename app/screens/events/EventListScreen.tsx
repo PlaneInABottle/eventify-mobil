@@ -1,29 +1,18 @@
-import { ComponentType, FC, useCallback, useMemo } from "react"
+import { ComponentType, FC, useCallback, useMemo, useState } from "react"
+import { ViewStyle, View, TextStyle, ImageStyle, StyleSheet } from "react-native"
 import {
-  ViewStyle,
-  View,
-  TextStyle,
-  Platform,
-  AccessibilityProps,
-  ImageStyle,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native"
-import {
-  EmptyState,
   Card,
   Icon,
   ListView,
-  Switch,
   Screen,
   Text,
   Button,
   ButtonAccessoryProps,
+  AutoImage,
 } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { EventTabScreenProps } from "@/navigators/MainNavigator"
 import { observer } from "mobx-react-lite"
-import { Event } from "@/models/Event"
 import Animated, {
   Extrapolation,
   interpolate,
@@ -31,26 +20,27 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated"
-import { isRTL, translate } from "@/i18n"
+import { translate } from "@/i18n"
 import { $styles, ThemedStyle } from "@/theme"
 import { ContentStyle } from "@shopify/flash-list"
 import { useStores } from "@/models"
+import { convertImageURLToSupabaseURL } from "@/utils/imageFunctions"
+import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
 
 const ICON_SIZE = 14
 
 interface EventListScreenProps extends EventTabScreenProps<"EventListScreen"> {}
 
 export const EventListScreen: FC<EventListScreenProps> = observer(function EventListScreen(_props) {
-  const { eventStore, chatStore } = useStores()
+  const { organizerEventDateLocationStore, organizerChatStore } = useStores()
   const { themed } = useAppTheme()
-
   return (
     <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-      <ListView<Event>
+      <ListView<OrganizerEventDateLocation>
         contentContainerStyle={themed([$styles.container, $listContentContainer])}
-        data={eventStore.eventsForList.slice() as Event[]}
-        extraData={chatStore.chats.size + eventStore.favorites.length + eventStore.events.size}
+        data={organizerEventDateLocationStore.datesLocationsAsList}
         estimatedItemSize={177}
+        /*
         ListEmptyComponent={
           eventStore.isLoading || chatStore.isLoading ? (
             <ActivityIndicator />
@@ -74,6 +64,7 @@ export const EventListScreen: FC<EventListScreenProps> = observer(function Event
             />
           )
         }
+        
         ListHeaderComponent={
           <View style={themed($heading)}>
             <Text preset="heading" tx="eventListScreen:title" />
@@ -93,40 +84,31 @@ export const EventListScreen: FC<EventListScreenProps> = observer(function Event
             )}
           </View>
         }
-        renderItem={({ item }) => (
-          <EventCard
-            event={item}
-            isFavorite={eventStore.hasFavorite(item)}
-            onPressFavorite={() => eventStore.toggleFavorite(item)}
-            onPressChat={() => chatStore.toggleChat(item.event_chat_id, item.id)}
-          />
-        )}
+        */
+        renderItem={({ item }) => <EventCard eventDateLocation={item} />}
       />
     </Screen>
   )
 })
 
 const EventCard = observer(function EventCard({
-  event,
-  isFavorite,
-  onPressFavorite,
-  onPressChat,
+  eventDateLocation,
 }: {
-  event: Event
-  isFavorite: boolean
-  onPressFavorite: () => void
-  onPressChat: () => void
+  eventDateLocation: OrganizerEventDateLocation
 }) {
   const {
     theme: { colors },
     themed,
   } = useAppTheme()
 
-  const {
-    chatStore: { hasJoinedChat, isLoading },
-  } = useStores()
-  const isChatJoined = !!event.event_chat_id && hasJoinedChat(event.event_chat_id)
+  const { organizerChatStore, userStore } = useStores()
+  const eventChat = organizerChatStore.chatsByDateLocationId.get(eventDateLocation.id)
 
+  const userId = userStore.userId
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const [isChatJoined, setIsChatJoined] = useState<boolean>(!!eventChat)
+  const [isFavorite, setIsFavorite] = useState<boolean>(false)
   const liked = useSharedValue(isFavorite ? 1 : 0)
   const chatJoined = useSharedValue(isChatJoined ? 1 : 0)
 
@@ -170,45 +152,30 @@ const EventCard = observer(function EventCard({
     }
   })
 
-  const handlePressFavorite = useCallback(() => {
-    onPressFavorite()
+  const handlePressFavorite = () => {
+    setIsLoading(true)
     liked.value = withSpring(liked.value ? 0 : 1)
-  }, [liked, onPressFavorite])
+    setIsLoading(false)
+  }
 
-  const handlePressChat = useCallback(() => {
-    onPressChat()
+  const handlePressChat = async () => {
+    setIsLoading(true)
     chatJoined.value = withSpring(chatJoined.value ? 0 : 1)
-  }, [chatJoined, onPressChat])
-
-  const accessibilityHintProps = useMemo(
-    () =>
-      Platform.select<AccessibilityProps>({
-        ios: {
-          accessibilityLabel: event.title,
-          accessibilityHint: translate("eventListScreen:accessibility.cardHint", {
-            action: isFavorite ? "unfavorite" : "favorite",
-          }),
-        },
-        android: {
-          accessibilityLabel: event.title,
-          accessibilityActions: [
-            {
-              name: "longpress",
-              label: translate("eventListScreen:accessibility.favoriteAction"),
-            },
-          ],
-          onAccessibilityAction: ({ nativeEvent }) => {
-            if (nativeEvent.actionName === "longpress") {
-              handlePressFavorite()
-            }
-          },
-        },
-      }),
-    [event.title, isFavorite, handlePressFavorite],
-  )
+    setIsChatJoined(!isChatJoined)
+    const result: true | string = await organizerChatStore.toggleChatParticipation(
+      userId,
+      eventDateLocation.event_chat_id,
+      !!eventChat,
+    )
+    if (result !== true) {
+      setIsChatJoined(!isChatJoined)
+      chatJoined.value = withSpring(chatJoined.value ? 0 : 1)
+    }
+    setIsLoading(false)
+  }
 
   const handlePressCard = () => {
-    console.log("handlePressCard", event.title)
+    console.log("handlePressCard", eventDateLocation.event_id.title)
   }
 
   const ButtonLeftAccessory: ComponentType<ButtonAccessoryProps> = useMemo(
@@ -286,29 +253,27 @@ const EventCard = observer(function EventCard({
       onLongPress={handlePressFavorite}
       HeadingComponent={
         <View style={[$styles.row, themed($metadata)]}>
-          <Text
-            style={themed($metadataText)}
-            size="xxs"
-            accessibilityLabel={event.dateFormatted.accessibilityLabel}
-          >
-            {event.dateFormatted.textLabel}
+          <Text style={themed($metadataText)} size="xxs">
+            {eventDateLocation.dateFormatted.textLabel}
           </Text>
-          <Text
-            style={themed($metadataText)}
-            size="xxs"
-            accessibilityLabel={event.timeFormatted.accessibilityLabel}
-          >
-            {event.timeFormatted.textLabel}
+          <Text style={themed($metadataText)} size="xxs">
+            {eventDateLocation.timeFormatted.textLabel}
           </Text>
         </View>
       }
-      content={event.title}
-      {...accessibilityHintProps}
-      // RightComponent={
-      //   imageSource ? (
-      //     <AutoImage source={imageSource} style={themed($itemThumbnail)} maxWidth={80} />
-      //   ) : undefined
-      // }
+      content={eventDateLocation.event_id.title}
+      RightComponent={
+        eventDateLocation.event_id.image_url ? (
+          <AutoImage
+            source={{
+              uri: convertImageURLToSupabaseURL("events", eventDateLocation.event_id.image_url),
+            }}
+            style={themed($itemThumbnail)}
+            maxWidth={80}
+            maxHeight={80}
+          />
+        ) : undefined
+      }
       FooterComponent={
         <View style={$styles.row}>
           <Button
@@ -324,29 +289,23 @@ const EventCard = observer(function EventCard({
           >
             <Text
               size="xxs"
-              accessibilityLabel={event.timeFormatted.accessibilityLabel}
               weight="medium"
               tx={
                 isFavorite ? "eventListScreen:unfavoriteButton" : "eventListScreen:favoriteButton"
               }
             />
           </Button>
-          {event.hasChat && (
+
+          {!!eventDateLocation.event_chat_id && (
             <Button
               onPress={handlePressChat}
               onLongPress={handlePressChat}
               style={themed([$favoriteButton, isChatJoined && $unFavoriteButton])}
-              accessibilityLabel={
-                isChatJoined
-                  ? translate("eventListScreen:quitChat")
-                  : translate("eventListScreen:joinChat")
-              }
               LeftAccessory={ChatButtonLeftAccessory}
               disabled={isLoading}
             >
               <Text
                 size="xxs"
-                accessibilityLabel={event.timeFormatted.accessibilityLabel}
                 weight="medium"
                 tx={isChatJoined ? "eventListScreen:quitChat" : "eventListScreen:joinChat"}
               />
@@ -375,19 +334,11 @@ const $item: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
 })
 
-// const $itemThumbnail: ThemedStyle<ImageStyle> = ({ spacing }) => ({
-//   marginTop: spacing.sm,
-//   borderRadius: 50,
-//   alignSelf: "flex-start",
-// })
-
-const $toggle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.md,
+const $itemThumbnail: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
+  borderRadius: spacing.sm,
+  alignSelf: "flex-start",
 })
-
-const $labelStyle: TextStyle = {
-  textAlign: "left",
-}
 
 const $iconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   height: ICON_SIZE,
@@ -424,12 +375,3 @@ const $unFavoriteButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderColor: colors.palette.primary100,
   backgroundColor: colors.palette.primary100,
 })
-
-const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.xxl,
-})
-
-const $emptyStateImage: ImageStyle = {
-  transform: [{ scaleX: isRTL ? -1 : 1 }],
-}
-// #endregion

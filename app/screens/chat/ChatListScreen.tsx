@@ -1,23 +1,25 @@
 import { $styles, ThemedStyle } from "@/theme"
 import { observer } from "mobx-react-lite"
-import { FC, useCallback, useEffect, useRef, useState } from "react"
-import { Alert, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
-import { AutoImage, Card, ListItem, ListView, Screen, Text } from "@/components"
+import { FC, useCallback, useRef } from "react"
+import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import { AutoImage, ListItem, ListView, Screen, Text } from "@/components"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
-import { Chat } from "@/models/ChatStore"
 import { ContentStyle } from "@shopify/flash-list"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { handleError } from "@/utils/errorHandler"
+import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
+import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
+import { convertImageURLToSupabaseURL } from "@/utils/imageFunctions"
 
 export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   function ChatListScreen(_props) {
     const { navigation } = _props
     const { themed } = useAppTheme()
-    const { chatStore, eventStore } = useStores()
+    const { organizerChatStore, chatStore } = useStores()
     const handlePressChat = (chatId: string, eventTitle: string | undefined) => {
       if (eventTitle === undefined) {
         handleError("errors:unknown")
@@ -29,9 +31,8 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
     }
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-        <ListView<Chat>
-          data={Array.from(chatStore.chats.values())}
-          extraData={chatStore.chats.size}
+        <ListView<IOrganizerChat>
+          data={organizerChatStore.chatsAsList}
           estimatedItemSize={100}
           contentContainerStyle={themed([$listContentContainer, $styles.container])}
           ListHeaderComponent={
@@ -40,14 +41,13 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
             </View>
           }
           renderItem={({ item }) => {
-            const event = eventStore.events.get(item.event_id)
-            if (!event) return null
             return (
               <ChatListItem
-                title={event.title}
-                handlePressChat={() => handlePressChat(item.id, event.title)}
-                imageUrl={event.image_url}
                 chatId={item.id}
+                handlePressChat={() =>
+                  handlePressChat(item.id, item.events_dates_locations_id.event_id.title)
+                }
+                eventsDatesLocations={item.events_dates_locations_id}
               />
             )
           }}
@@ -57,13 +57,12 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   },
 )
 interface ChatListItemProps {
-  title: string
   chatId: string
+  eventsDatesLocations: OrganizerEventDateLocation
   handlePressChat: () => void
-  imageUrl: string | undefined | null
 }
 const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props) {
-  const { title, imageUrl, handlePressChat, chatId } = props
+  const { chatId, eventsDatesLocations, handlePressChat } = props
   const { themed } = useAppTheme()
   const navigation = useNavigation<NavigationProp<AppStackParamList>>()
   const {
@@ -82,24 +81,45 @@ const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props
   return (
     <>
       <ListItem
-        text={title}
-        TextProps={{ preset: "subheading" }}
         textStyle={themed($listItemText)}
         containerStyle={themed($listItem)}
         bottomSeparator
         onPress={handlePressChat}
         onLongPress={presentOptions}
         LeftComponent={
-          imageUrl ? (
+          eventsDatesLocations.event_id.image_url ? (
             <AutoImage
               source={{
-                uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${imageUrl}`,
+                uri: convertImageURLToSupabaseURL(
+                  "events",
+                  eventsDatesLocations.event_id.image_url,
+                ),
               }}
               style={$itemThumbnail}
             />
-          ) : undefined
+          ) : (
+            <View style={$itemThumbnail} />
+          )
         }
-      />
+      >
+        <Text
+          tx="organizerChatListScreen:title"
+          preset="subheading"
+          txOptions={{
+            title: eventsDatesLocations.event_id.title,
+          }}
+        />
+        {"\n"}
+        <Text
+          weight="light"
+          size="xxs"
+          tx="organizerChatListScreen:dateTime"
+          txOptions={{
+            date: eventsDatesLocations.dateFormatted.textLabel,
+            time: eventsDatesLocations.timeFormatted.textLabel,
+          }}
+        />
+      </ListItem>
       <BottomSheetModal
         ref={sheet}
         backgroundStyle={themed($bottomSheetBackground)}
@@ -127,7 +147,7 @@ const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props
               navigation.navigate("Report", {
                 reportedItemId: chatId,
                 reportType: "chat",
-                reportContent: title,
+                reportContent: eventsDatesLocations.event_id.title,
               })
             }}
             rightIcon="caretRight"

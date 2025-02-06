@@ -9,6 +9,10 @@ import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { IPublisherSnapshotIn, OrganizerEventSnapshotIn } from "./organizer/OrganizerEventStore"
+import { LocationSnapshotIn } from "./location/LocationStore"
+import { OrganizerEventDateLocationSnapshotIn } from "./organizer/OrganizerEventDateModel"
+import { IOrganizerChatSnapshotIn } from "./organizer/OrganizerChatStore"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -77,14 +81,75 @@ export const AuthenticationStoreModel: IAnyModelType = types
       }
     }),
     userFirstRequest: flow(function* (userId: string) {
-      const [profileRes] = yield Promise.all([
+      /*
+        supabase
+          .from("event_chats")
+          .select("*,event_chats_participants!inner()")
+          .eq("event_chats_participants.user_id", userId)
+          .eq("event_chats_participants.status", "joined"),
+            */
+      const [profileRes, eventChatsRes] = yield Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase.rpc("get_user_chat_events", {
+          _user_id: userId,
+        }),
       ])
 
-      if (profileRes.error) {
-        throw profileRes.error
+      if (profileRes.error || eventChatsRes.error) {
+        throw profileRes.error || eventChatsRes.error
       }
 
+      const { datesLocations, events, locations, publishers, eventChats } =
+        eventChatsRes.data.reduce(
+          (
+            acc: any,
+            item: {
+              event: OrganizerEventSnapshotIn
+              location: LocationSnapshotIn
+              publisher: IPublisherSnapshotIn
+              dates_location: OrganizerEventDateLocationSnapshotIn
+              event_chat: IOrganizerChatSnapshotIn
+            },
+          ) => {
+            acc.eventChats.push(item.event_chat)
+            acc.datesLocations.push(item.dates_location)
+
+            if (!acc.eventIds.has(item.event.id)) {
+              acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
+              acc.eventIds.add(item.event.id)
+            }
+
+            if (!acc.publisherIds.has(item.publisher.id)) {
+              acc.publishers.push(item.publisher)
+              acc.publisherIds.add(item.publisher.id)
+            }
+
+            if (!acc.locationIds.has(item.location.id)) {
+              acc.locations.push(item.location)
+              acc.locationIds.add(item.location.id)
+            }
+
+            return acc
+          },
+          {
+            datesLocations: [],
+            eventChats: [],
+            events: [],
+            locations: [],
+            publishers: [],
+            locationIds: new Set(),
+            publisherIds: new Set(),
+            eventIds: new Set(),
+          },
+        )
+
+      getRootStore(store).organizerEventStore.setEventsFromArrayToMap(events)
+      getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChats)
+      getRootStore(store).locationStore.setLocationsFromArrayToMap(locations)
+      getRootStore(store).publisherStore.setPublishersFromArrayToMap(publishers)
+      getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
+        datesLocations,
+      )
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
     organizerFirstRequest: flow(function* (userId: string) {

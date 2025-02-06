@@ -13,6 +13,7 @@ export const OrganizerEventDateLocationModel = types
     location_id: types.reference(LocationModel),
     start_time: types.string,
     end_time: types.maybeNull(types.string),
+    event_chat_id: types.maybeNull(types.string),
   })
   .views((self) => ({
     get dateFormatted() {
@@ -35,9 +36,22 @@ export const OrganizerEventDateLocationStoreModel = types
   .props({
     datesLocations: types.map(OrganizerEventDateLocationModel),
   })
+  .volatile(() => ({
+    datesLocationIdsInsight: new Set<string>() as Set<string>,
+  }))
   .views((self) => ({
+    // TODO: Refactor in the future, didn't like it very much
+    get datesLocationsAsListInSight() {
+      const arr: OrganizerEventDateLocation[] = []
+      self.datesLocationIdsInsight.forEach((dateLocId) =>
+        arr.push(self.datesLocations.get(dateLocId)!),
+      )
+      return arr.sort((a, b) => a.start_time.localeCompare(b.start_time))
+    },
     get datesLocationsAsList() {
-      return Array.from(self.datesLocations.values())
+      return Array.from(self.datesLocations.values()).sort((a, b) =>
+        a.start_time.localeCompare(b.start_time),
+      )
     },
     get eventsDatesByEventId() {
       const eventDateMap = new Map()
@@ -55,11 +69,19 @@ export const OrganizerEventDateLocationStoreModel = types
       const dateLocationMap = new Map()
       self.datesLocations.forEach((dateLocation) => {
         const locationId = dateLocation.location_id.id
-        if (!dateLocationMap.has(locationId)) {
-          dateLocationMap.set(locationId, [dateLocation])
+        const list = dateLocationMap.get(locationId) || []
+
+        // Insert in sorted order (binary search insertion could be used for better performance)
+        const index = list.findIndex(
+          (item: OrganizerEventDateLocationSnapshotIn) => item.start_time > dateLocation.start_time,
+        )
+        if (index === -1) {
+          list.push(dateLocation)
         } else {
-          dateLocationMap.get(locationId).push(dateLocation)
+          list.splice(index, 0, dateLocation)
         }
+
+        dateLocationMap.set(locationId, list)
       })
       return dateLocationMap
     },
@@ -67,7 +89,7 @@ export const OrganizerEventDateLocationStoreModel = types
   .views((self) => ({
     forSelectFieldForAnEvent(eventId: string): Array<{ label: string; value: string }> {
       const rootStore = getRootStore(self)
-      const chatsDatesLocationIds = rootStore.organizerChatStore.dateLocationIdsAsList
+      const chatsDatesLocationIds = rootStore.organizerChatStore.chatsByDateLocationId
 
       const eventDates = (self.eventsDatesByEventId.get(eventId) || []).filter(
         (date: OrganizerEventDateLocationSnapshotIn) => !chatsDatesLocationIds.has(date.id),
@@ -80,6 +102,9 @@ export const OrganizerEventDateLocationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
+    setDatesLocationIdsInSight(datesLocationIds: Set<string>) {
+      store.datesLocationIdsInsight = datesLocationIds
+    },
     clearOldDates: (oldIds: string[]) => {
       const rootStore = getRootStore(store)
       const chats = rootStore.organizerChatStore.chatsAsList

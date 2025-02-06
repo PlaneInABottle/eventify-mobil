@@ -46,7 +46,6 @@ export const OrganizerChatModel = types
           .limit(10)
 
         if (error) throw error
-        console.log("pariticipants: ", participants)
 
         if (store.participantOffset === 0) store.event_chats_participants.clear()
 
@@ -107,11 +106,42 @@ export const OrganizerChatStoreModel = types
     },
   }))
   .views((self) => ({
-    get dateLocationIdsAsList() {
-      return new Set(self.chatsAsList.map((chat) => chat.events_dates_locations_id.id))
+    get chatsByDateLocationId() {
+      const chatDateLocationMap = new Map()
+      self.chats.forEach((chat) => {
+        const dateLocationId = chat.events_dates_locations_id.id
+        if (!chatDateLocationMap.has(dateLocationId)) chatDateLocationMap.set(dateLocationId, chat)
+        else chatDateLocationMap.get(dateLocationId).put(chat)
+      })
+
+      return chatDateLocationMap
     },
   }))
   .actions(withSetPropAction)
+  .actions((store) => ({
+    toggleChatParticipation: flow(function* (
+      userId: string,
+      eventChatId: string | null,
+      isJoined: boolean,
+    ) {
+      try {
+        if (!eventChatId) throw new Error("errors:unknown" as TxKeyPath)
+        const { data, error } = yield supabase.rpc("toggle_chat_participation", {
+          participant_id: userId,
+          chat_id: eventChatId,
+        })
+        if (error) throw error
+        console.log("data: ", data)
+
+        if (isJoined) store.chats.delete(data.id)
+        else store.chats.put(data)
+
+        return true
+      } catch (e) {
+        return handleError(e).message
+      }
+    }),
+  }))
   .actions((store) => ({
     deleteChat: (eventChatIds: string[]) => {
       eventChatIds.forEach((id) => store.chats.delete(id))

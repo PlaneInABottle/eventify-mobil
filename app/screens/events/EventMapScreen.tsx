@@ -18,7 +18,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
   const {
     organizerEventDateLocationStore: { eventsDatesByLocationId },
     organizerEventStore: { fetchEventsInSight },
-    locationStore: { locationsForList },
+    locationStore: { locationsForListInSight },
   } = useStores()
   const { themed } = useAppTheme()
 
@@ -47,7 +47,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
           longitudeDelta: 0.0421,
         }}
       >
-        {locationsForList.map((location) => (
+        {locationsForListInSight.map((location) => (
           <NewMarkerField
             key={location.id}
             location={location}

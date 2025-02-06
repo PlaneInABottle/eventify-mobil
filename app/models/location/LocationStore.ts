@@ -22,7 +22,15 @@ export const LocationStoreModel = types
   .props({
     locations: types.map(LocationModel),
   })
+  .volatile(() => ({
+    locationIdsInSight: new Set<string>() as Set<string>,
+  }))
   .views((store) => ({
+    get locationsForListInSight() {
+      const arr: Location[] = []
+      store.locationIdsInSight.forEach((locId) => arr.push(store.locations.get(locId)!))
+      return arr
+    },
     get locationsForList() {
       return Array.from(store.locations.values())
     },
@@ -34,6 +42,9 @@ export const LocationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
+    setLocationIdsInSight(locationIds: Set<string>) {
+      store.locationIdsInSight = locationIds
+    },
     setLocationsFromArrayToMap: (locations: any) => {
       locations.forEach((location: any) => {
         store.locations.put(location)
@@ -42,7 +53,6 @@ export const LocationStoreModel = types
   }))
   .actions((store) => ({
     clearAndSet: (locations: LocationSnapshotIn[]) => {
-      store.locations.clear()
       store.setLocationsFromArrayToMap(locations)
     },
     fetchOrganizerLocations: flow(function* (userId) {
