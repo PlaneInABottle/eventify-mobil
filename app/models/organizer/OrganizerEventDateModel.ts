@@ -14,7 +14,6 @@ export const OrganizerEventDateLocationModel = types
     start_time: types.string,
     end_time: types.maybeNull(types.string),
   })
-  .actions(withSetPropAction)
   .views((self) => ({
     get dateFormatted() {
       const formatted = formatDate(self.start_time, "eee, MMM dd, yyyy")
@@ -29,6 +28,7 @@ export const OrganizerEventDateLocationModel = types
       }
     },
   }))
+  .actions(withSetPropAction)
 
 export const OrganizerEventDateLocationStoreModel = types
   .model("OrganizerEventDateLocation")
@@ -66,7 +66,12 @@ export const OrganizerEventDateLocationStoreModel = types
   }))
   .views((self) => ({
     forSelectFieldForAnEvent(eventId: string): Array<{ label: string; value: string }> {
-      const eventDates = self.eventsDatesByEventId.get(eventId) || []
+      const rootStore = getRootStore(self)
+      const chatsDatesLocationIds = rootStore.organizerChatStore.dateLocationIdsAsList
+
+      const eventDates = (self.eventsDatesByEventId.get(eventId) || []).filter(
+        (date: OrganizerEventDateLocationSnapshotIn) => !chatsDatesLocationIds.has(date.id),
+      )
       return eventDates.map((val: OrganizerEventDateLocation) => ({
         label: `${val.dateFormatted.textLabel} - ${val.timeFormatted.textLabel}\n${val.location_id.name}`,
         value: val.id,

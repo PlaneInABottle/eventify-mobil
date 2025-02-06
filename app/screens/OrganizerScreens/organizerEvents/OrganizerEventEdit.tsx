@@ -72,11 +72,7 @@ export const OrganizerEventEditScreen: FC<
 
   const { organizerEventStore, userStore, locationStore, organizerEventDateLocationStore } =
     useStores()
-  const {
-    themed,
-    themeContext,
-    theme: { spacing },
-  } = useAppTheme()
+  const { themed, themeContext } = useAppTheme()
 
   const eventDates: OrganizerEventDateLocation[] | undefined =
     organizerEventDateLocationStore.eventsDatesByEventId.get(eventId)

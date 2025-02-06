@@ -106,6 +106,11 @@ export const OrganizerChatStoreModel = types
       return Array.from(store.chats.values())
     },
   }))
+  .views((self) => ({
+    get dateLocationIdsAsList() {
+      return new Set(self.chatsAsList.map((chat) => chat.events_dates_locations_id.id))
+    },
+  }))
   .actions(withSetPropAction)
   .actions((store) => ({
     deleteChat: (eventChatIds: string[]) => {
@@ -135,6 +140,33 @@ export const OrganizerChatStoreModel = types
       const chatInstance = OrganizerChatModel.create(chat)
       store.chats.put(chatInstance)
     },
+  }))
+  .actions((store) => ({
+    createUpdateChat: flow(function* (
+      fields: Omit<IOrganizerChatSnapshotIn, "id" | "event_chats_participants" | "messages"> & {
+        id?: string
+      },
+    ) {
+      try {
+        let result
+        if (fields.id) {
+          result = yield supabase
+            .from("event_chats")
+            .update(fields)
+            .eq("id", fields.id)
+            .select()
+            .single()
+        } else {
+          result = yield supabase.from("event_chats").insert(fields).select().single()
+        }
+
+        if (result.error) throw result.error
+        store.chats.put(result.data)
+        return handleSuccess("success:chatSaved" as TxKeyPath).success
+      } catch (e) {
+        return handleError(e).message
+      }
+    }),
   }))
 
 export interface IOrganizerChatParticipant extends Instance<typeof OrganizerChatParticipantModel> {}

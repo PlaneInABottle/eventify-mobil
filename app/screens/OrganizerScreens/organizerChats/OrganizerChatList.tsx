@@ -12,7 +12,6 @@ import {
 import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { formatDate } from "@/utils/formatDate"
 
 export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"OrganizerChatListScreen">> =
   observer(function OrganizerChatListScreen(_props) {

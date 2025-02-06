@@ -16,7 +16,10 @@ const defaultConfig: ToastConfig = {
 /**
  * Handles success scenarios with optional toast message
  */
-export function handleSuccess(message: string | TxKeyPath, config: ToastConfig = defaultConfig) {
+export function handleSuccess(
+  message: string | TxKeyPath,
+  config: ToastConfig = defaultConfig,
+): { success: true; message: string } {
   if (!config.silent) {
     Toast.show({
       type: "success",
