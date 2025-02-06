@@ -73,6 +73,7 @@ const en = {
     locationSaved: "Location saved successfully.",
     eventSaved: "Event saved successfully.",
     participantRemoved: "Participant removed successfully.",
+    chatSaved: "Chat saved successfully.",
   },
   errorScreen: {
     title: "Something went wrong!",

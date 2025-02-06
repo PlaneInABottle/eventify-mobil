@@ -9,7 +9,7 @@
  *
  * @refresh reset
  */
-import { applySnapshot, IDisposer, onSnapshot } from "mobx-state-tree"
+import { addMiddleware, applySnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree"
 import { RootStore, RootStoreSnapshot } from "../RootStore"
 import * as storage from "../../utils/storage"
 import { handleError } from "@/utils/errorHandler"
@@ -30,6 +30,9 @@ export async function setupRootStore(rootStore: RootStore) {
     // load the last known state from AsyncStorage
     restoredState = ((await storage.load(ROOT_STATE_STORAGE_KEY)) ?? {}) as RootStoreSnapshot
     applySnapshot(rootStore, restoredState)
+    onPatch(rootStore, (patch) => {
+      console.log("patch", patch)
+    })
   } catch (e) {
     // if there's any problems loading, then inform the dev what happened
     if (__DEV__) {
