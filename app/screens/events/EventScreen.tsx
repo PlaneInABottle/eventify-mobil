@@ -51,7 +51,7 @@ export const EventScreen: FC<AppStackScreenProps<"Event">> = observer(function E
 
       <View style={themed($organizerContainer)}>
         <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
-        <Text text={event.organizer_id} />
+        <Text text={event.publisher_id} />
       </View>
 
       {event.hasChat && event.event_chat_id && (

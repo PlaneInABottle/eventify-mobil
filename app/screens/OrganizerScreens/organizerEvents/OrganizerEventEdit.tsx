@@ -141,7 +141,6 @@ export const OrganizerEventEditScreen: FC<
   }
 
   async function handleSaveEvent() {
-    console.log("here1")
     if (!validateForm()) return
 
     setFormState((prev) => ({ ...prev, isLoading: true }))
@@ -152,7 +151,7 @@ export const OrganizerEventEditScreen: FC<
       image_url: formState.image_url,
       image: formState.image,
       datesLocations: formState.datesLocations,
-      organizer_id: userId,
+      publisher_id: userId,
       oldDateLocationIds,
     })
     if (result !== true) {
