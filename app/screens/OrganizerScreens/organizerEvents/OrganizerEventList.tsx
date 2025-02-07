@@ -20,7 +20,7 @@ export const OrganizerEventListScreen: FC<
   return (
     <Screen preset="auto" contentContainerStyle={themed($screenContentContainer)}>
       <ListView<OrganizerEvent>
-        data={organizerEventStore.eventsForList}
+        data={organizerEventStore.eventsAsList}
         estimatedItemSize={10}
         ListHeaderComponent={
           <View style={themed($heading)}>

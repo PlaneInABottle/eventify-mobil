@@ -20,7 +20,7 @@ export const OrganizerChatModel = types
     events_dates_locations_id: types.reference(OrganizerEventDateLocationModel),
     event_chats_participants: types.array(OrganizerChatParticipantModel),
     messages: types.array(types.late((): IAnyModelType => OrganizerChatMessageModel)),
-    is_user_joined: types.boolean,
+    is_user_joined: types.optional(types.boolean, true), // change later this is for organizers
   })
   .volatile(() => ({
     messageOffset: 0,

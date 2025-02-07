@@ -9,7 +9,7 @@ import {
   OrganizerChatStackParamList,
   OrganizerChatStackScreenProps,
 } from "@/navigators/navigationTypes.ts"
-import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
+import { IOrganizerChat, IOrganizerChatSnapshotIn } from "@/models/organizer/OrganizerChatStore"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
@@ -37,29 +37,19 @@ export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"Organize
               />
             </View>
           }
-          renderItem={({ item }) => (
-            <OrganizerChatListItem
-              title={item.events_dates_locations_id.event_id.title}
-              date={item.events_dates_locations_id.dateFormatted.textLabel}
-              time={item.events_dates_locations_id.timeFormatted.textLabel}
-              eventChatId={item.id}
-            />
-          )}
+          renderItem={({ item }) => <OrganizerChatListItem eventChat={item} />}
         />
       </Screen>
     )
   })
 
 interface IOrganizerChatListItemProps {
-  title: string
-  eventChatId: string
-  date: string
-  time: string
+  eventChat: IOrganizerChat
 }
 
 const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
   function ChatListItem(props) {
-    const { title, eventChatId, date, time } = props
+    const { eventChat } = props
     const { themed } = useAppTheme()
     const sheet = useRef<BottomSheetModal>(null)
     const navigation = useNavigation<NavigationProp<OrganizerChatStackParamList>>()
@@ -84,7 +74,7 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
           <Text
             tx="organizerChatListScreen:title"
             txOptions={{
-              title,
+              title: eventChat.events_dates_locations_id.event_id.title,
             }}
           />
           {"\n"}
@@ -92,7 +82,10 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
             weight="light"
             size="xxs"
             tx="organizerChatListScreen:dateTime"
-            txOptions={{ date, time }}
+            txOptions={{
+              date: eventChat.events_dates_locations_id.dateFormatted.textLabel,
+              time: eventChat.events_dates_locations_id.timeFormatted.textLabel,
+            }}
           />
         </ListItem>
         <BottomSheetModal
@@ -113,7 +106,7 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
               bottomSeparator
               onPress={() => {
                 navigation.navigate("OrganizerChatParticipantScreen", {
-                  eventChatId,
+                  eventChatId: eventChat.id,
                 })
                 dismissOptions()
               }}
@@ -123,7 +116,7 @@ const OrganizerChatListItem: FC<IOrganizerChatListItemProps> = observer(
               rightIcon="caretRight"
               onPress={() => {
                 navigation.navigate("OrganizerChatConversationScreen", {
-                  eventChatId,
+                  eventChatId: eventChat.id,
                 })
                 dismissOptions()
               }}

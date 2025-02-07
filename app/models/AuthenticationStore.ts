@@ -189,6 +189,13 @@ export const AuthenticationStoreModel: IAnyModelType = types
         )
       }
 
+      console.log(
+        locationRes,
+        eventsRes,
+        eventChatsRes,
+        profileRes.error,
+        eventsDatesLocationsRes.error,
+      )
       getRootStore(store).locationStore.setLocationsFromArrayToMap(locationRes.data)
       getRootStore(store).organizerEventStore.setEventsFromArrayToMap(eventsRes.data)
       getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChatsRes.data)

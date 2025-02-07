@@ -56,6 +56,9 @@ export const OrganizerEventStoreModel = types
     events: types.map(OrganizerEventModel),
   })
   .views((self) => ({
+    get eventsAsList() {
+      return Array.from(self.events.values())
+    },
     get forSelectField() {
       return Array.from(self.events.values()).map((val) => {
         return { label: val.title, value: val.id }
@@ -138,9 +141,7 @@ export const OrganizerEventStoreModel = types
           _user_id: userId,
         })
         if (error) throw error
-        console.log("DATAAA: ", data)
 
-        // WARN: If you put multiple of the event chats calculate into set
         const {
           datesLocations,
           events,
