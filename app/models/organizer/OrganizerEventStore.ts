@@ -8,6 +8,7 @@ import { transformRegionForSupabase } from "@/utils/regionFunctions"
 import { Region } from "react-native-maps"
 import { getRootStore } from "../helpers/getRootStore"
 import { OrganizerEventDateLocationSnapshotIn } from "./OrganizerEventDateModel"
+import { IOrganizerChat } from "./OrganizerChatStore"
 
 const PublisherModel = types.model("Publisher").props({
   id: types.identifier,
@@ -32,8 +33,10 @@ export const PublisherStoreModel = types
     },
   }))
   .actions((store) => ({
-    clearAndSet: (publishers: IPublisherSnapshotIn[]) => {
-      store.publishers.clear()
+    clearAndSet: (publishers: IPublisherSnapshotIn[], newPublisherIds: Set<string>) => {
+      for (const key of store.publishers.keys()) {
+        if (!newPublisherIds.has(key)) store.publishers.delete(key)
+      }
       store.setPublishersFromArrayToMap(publishers)
     },
   }))
@@ -68,8 +71,10 @@ export const OrganizerEventStoreModel = types
     },
   }))
   .actions((store) => ({
-    clearAndSet: (events: OrganizerEventSnapshotIn[]) => {
-      store.events.clear()
+    clearAndSet: (events: OrganizerEventSnapshotIn[], newEventIds: Set<string>) => {
+      for (const key of store.events.keys()) {
+        if (!newEventIds.has(key)) store.events.delete(key)
+      }
       store.setEventsFromArrayToMap(events)
     },
   }))
@@ -125,12 +130,29 @@ export const OrganizerEventStoreModel = types
     }),
   }))
   .actions((store) => ({
-    fetchEventsInSight: flow(function* (bounds: Region) {
+    fetchEventsInSight: flow(function* (bounds: Region, userId: string) {
       try {
         const regionForSupabase = transformRegionForSupabase(bounds)
-        const { data, error } = yield supabase.rpc("events_in_sight", regionForSupabase)
+        const { data, error } = yield supabase.rpc("events_in_sight", {
+          ...regionForSupabase,
+          _user_id: userId,
+        })
+        if (error) throw error
+        console.log("DATAAA: ", data)
 
-        const { datesLocations, events, locations, publishers } = data.reduce(
+        // WARN: If you put multiple of the event chats calculate into set
+        const {
+          datesLocations,
+          events,
+          locations,
+          publishers,
+          eventChats,
+          eventChatIds,
+          datesLocationsIds,
+          locationIds,
+          publisherIds,
+          eventIds,
+        } = data.reduce(
           (
             acc: any,
             item: {
@@ -138,10 +160,17 @@ export const OrganizerEventStoreModel = types
               location: LocationSnapshotIn
               publisher: IPublisherSnapshotIn
               dates_location: OrganizerEventDateLocationSnapshotIn
-              event_chat_id: string | null
+              event_chat: IOrganizerChat
+              is_user_joined: boolean
             },
           ) => {
-            acc.datesLocations.push({ ...item.dates_location, event_chat_id: item.event_chat_id })
+            if (item.event_chat) {
+              acc.eventChats.push({ ...item.event_chat, is_user_joined: item.is_user_joined })
+              acc.eventChatIds.add(item.event_chat.id)
+            }
+
+            acc.datesLocations.push(item.dates_location)
+            acc.datesLocationsIds.add(item.dates_location.id)
 
             if (!acc.eventIds.has(item.event.id)) {
               acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
@@ -164,6 +193,9 @@ export const OrganizerEventStoreModel = types
             events: [],
             locations: [],
             publishers: [],
+            eventChats: [],
+            datesLocationsIds: new Set(),
+            eventChatIds: new Set(),
             locationIds: new Set(),
             publisherIds: new Set(),
             eventIds: new Set(),
@@ -171,10 +203,14 @@ export const OrganizerEventStoreModel = types
         )
         if (error) throw error
 
-        store.clearAndSet(events)
-        getRootStore(store).locationStore.clearAndSet(locations)
-        getRootStore(store).publisherStore.clearAndSet(publishers)
-        getRootStore(store).organizerEventDateLocationStore.clearAndSet(datesLocations)
+        store.clearAndSet(events, eventIds)
+        getRootStore(store).locationStore.clearAndSet(locations, locationIds)
+        getRootStore(store).publisherStore.clearAndSet(publishers, publisherIds)
+        getRootStore(store).organizerChatStore.clearAndSet(eventChats, eventChatIds)
+        getRootStore(store).organizerEventDateLocationStore.clearAndSet(
+          datesLocations,
+          datesLocationsIds,
+        )
       } catch (e) {
         handleError(e)
       }

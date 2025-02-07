@@ -13,7 +13,6 @@ export const OrganizerEventDateLocationModel = types
     location_id: types.reference(LocationModel),
     start_time: types.string,
     end_time: types.maybeNull(types.string),
-    event_chat_id: types.maybeNull(types.string),
   })
   .views((self) => ({
     get dateFormatted() {
@@ -38,17 +37,19 @@ export const OrganizerEventDateLocationStoreModel = types
   })
   .views((self) => ({
     // TODO: Refactor in the future, didn't like it very much
+    get datesLocationsAsList() {
+      return Array.from(self.datesLocations.values()).sort((a, b) =>
+        a.start_time.localeCompare(b.start_time),
+      )
+    },
     get eventsDatesByEventId() {
-      const eventDateMap = new Map()
+      const map = new Map()
       self.datesLocations.forEach((dateLoc) => {
         const eventId = dateLoc.event_id.id
-        if (!eventDateMap.has(eventId)) {
-          eventDateMap.set(eventId, [dateLoc])
-        } else {
-          eventDateMap.get(eventId).push(dateLoc)
-        }
+        if (!map.has(eventId)) map.set(eventId, [dateLoc])
+        else map.get(eventId).push(dateLoc)
       })
-      return eventDateMap
+      return map
     },
     get eventsDatesByLocationId() {
       const dateLocationMap = new Map()
@@ -108,8 +109,13 @@ export const OrganizerEventDateLocationStoreModel = types
     },
   }))
   .actions((store) => ({
-    clearAndSet: (datesLocations: OrganizerEventDateLocationSnapshotIn[]) => {
-      store.datesLocations.clear()
+    clearAndSet: (
+      datesLocations: OrganizerEventDateLocationSnapshotIn[],
+      newDatesLocationsIds: Set<string>,
+    ) => {
+      for (const key of store.datesLocations.keys()) {
+        if (!newDatesLocationsIds.has(key)) store.datesLocations.delete(key)
+      }
       store.setDatesLocationsFromArrayToMap(datesLocations)
     },
   }))

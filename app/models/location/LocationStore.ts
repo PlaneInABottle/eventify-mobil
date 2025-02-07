@@ -41,8 +41,10 @@ export const LocationStoreModel = types
     },
   }))
   .actions((store) => ({
-    clearAndSet: (locations: LocationSnapshotIn[]) => {
-      store.locations.clear()
+    clearAndSet: (locations: LocationSnapshotIn[], newLocationIds: Set<string>) => {
+      for (const key of store.locations.keys()) {
+        if (!newLocationIds.has(key)) store.locations.delete(key)
+      }
       store.setLocationsFromArrayToMap(locations)
     },
   }))

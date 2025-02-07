@@ -107,10 +107,10 @@ const EventCard = observer(function EventCard({
   const userId = userStore.userId
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const [isChatJoined, setIsChatJoined] = useState<boolean>(!!eventChat)
+  console.log("EVENT CHAT: ", eventChat?.is_user_joined)
   const [isFavorite, setIsFavorite] = useState<boolean>(false)
   const liked = useSharedValue(isFavorite ? 1 : 0)
-  const chatJoined = useSharedValue(isChatJoined ? 1 : 0)
+  const chatJoined = useSharedValue(eventChat?.is_user_joined ? 1 : 0)
 
   // Grey heart
   const animatedLikeButtonStyles = useAnimatedStyle(() => {
@@ -161,14 +161,14 @@ const EventCard = observer(function EventCard({
   const handlePressChat = async () => {
     setIsLoading(true)
     chatJoined.value = withSpring(chatJoined.value ? 0 : 1)
-    setIsChatJoined(!isChatJoined)
+    // setIsChatJoined(!isChatJoined)
     const result: true | string = await organizerChatStore.toggleChatParticipation(
       userId,
-      eventDateLocation.event_chat_id,
-      !!eventChat,
+      eventChat.id,
+      eventChat.is_user_joined,
     )
     if (result !== true) {
-      setIsChatJoined(!isChatJoined)
+      // setIsChatJoined(!isChatJoined)
       chatJoined.value = withSpring(chatJoined.value ? 0 : 1)
     }
     setIsLoading(false)
@@ -296,18 +296,22 @@ const EventCard = observer(function EventCard({
             />
           </Button>
 
-          {!!eventDateLocation.event_chat_id && (
+          {!!eventChat && (
             <Button
               onPress={handlePressChat}
               onLongPress={handlePressChat}
-              style={themed([$favoriteButton, isChatJoined && $unFavoriteButton])}
+              style={themed([$favoriteButton, eventChat?.is_user_joined && $unFavoriteButton])}
               LeftAccessory={ChatButtonLeftAccessory}
               disabled={isLoading}
             >
               <Text
                 size="xxs"
                 weight="medium"
-                tx={isChatJoined ? "eventListScreen:quitChat" : "eventListScreen:joinChat"}
+                tx={
+                  eventChat?.is_user_joined
+                    ? "eventListScreen:quitChat"
+                    : "eventListScreen:joinChat"
+                }
               />
             </Button>
           )}

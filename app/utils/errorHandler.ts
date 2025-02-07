@@ -75,11 +75,13 @@ export function handleError(error: unknown, config: ErrorConfig = defaultConfig)
     console.error("[Error Details]:", {
       message,
       error: normalizedError,
-      //     stack: normalizedError.stack,
+      //     stack:normalizedError.stack,
       // Log all properties
+      /*
       properties: Object.fromEntries(
         Object.entries(normalizedError).filter(([key]) => !["message", "stack"].includes(key)),
       ),
+            */
     })
   }
 

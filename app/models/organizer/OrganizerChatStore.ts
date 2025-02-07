@@ -6,7 +6,6 @@ import { OrganizerChatMessageModel } from "./OrganizerChatMessageModel"
 import { handleSuccess } from "@/utils/successHandler"
 import { TxKeyPath } from "@/i18n"
 import { OrganizerEventDateLocationModel } from "./OrganizerEventDateModel"
-import { getRootStore } from "../helpers/getRootStore"
 
 export const OrganizerChatParticipantModel = types.model("OrganizerChatParticipant").props({
   id: types.identifier,
@@ -21,6 +20,7 @@ export const OrganizerChatModel = types
     events_dates_locations_id: types.reference(OrganizerEventDateLocationModel),
     event_chats_participants: types.array(OrganizerChatParticipantModel),
     messages: types.array(types.late((): IAnyModelType => OrganizerChatMessageModel)),
+    is_user_joined: types.boolean,
   })
   .volatile(() => ({
     messageOffset: 0,
@@ -103,19 +103,18 @@ export const OrganizerChatStoreModel = types
   })
   .views((store) => ({
     get chatsAsList() {
-      return Array.from(store.chats.values())
+      return Array.from(store.chats.values()).filter((chat) => chat.is_user_joined)
     },
   }))
   .views((self) => ({
     get chatsByDateLocationId() {
-      const chatDateLocationMap = new Map()
+      const map = new Map()
       self.chats.forEach((chat) => {
         const dateLocationId = chat.events_dates_locations_id.id
-        if (!chatDateLocationMap.has(dateLocationId)) chatDateLocationMap.set(dateLocationId, chat)
-        else chatDateLocationMap.get(dateLocationId).put(chat)
+        if (!map.has(dateLocationId)) map.set(dateLocationId, chat)
+        else map.get(dateLocationId).put(chat)
       })
-
-      return chatDateLocationMap
+      return map
     },
   }))
   .actions(withSetPropAction)
@@ -134,8 +133,8 @@ export const OrganizerChatStoreModel = types
         if (error) throw error
 
         if (isJoined) {
-          store.chats.delete(data.id)
-        } else store.chats.put(data)
+          store.chats.put({ ...data, is_user_joined: false })
+        } else store.chats.put({ ...data, is_user_joined: true })
 
         return true
       } catch (e) {
@@ -147,10 +146,19 @@ export const OrganizerChatStoreModel = types
     deleteChat: (eventChatIds: string[]) => {
       eventChatIds.forEach((id) => store.chats.delete(id))
     },
-    setChatsFromArrayToMap: (chats: any) => {
-      chats.forEach((eventChat: any) => {
-        store.chats.put(eventChat)
+
+    setChatsFromArrayToMap: (chats: IOrganizerChatSnapshotIn[]) => {
+      chats.forEach((chat) => {
+        if (!store.chats.has(chat.id)) store.chats.put(chat)
       })
+    },
+  }))
+  .actions((store) => ({
+    clearAndSet: (chats: IOrganizerChatSnapshotIn[], newChatIds: Set<string>) => {
+      for (const key of store.chats.keys()) {
+        if (!newChatIds.has(key)) store.chats.delete(key)
+      }
+      store.setChatsFromArrayToMap(chats)
     },
   }))
   .actions((store) => ({

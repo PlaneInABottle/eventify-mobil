@@ -19,6 +19,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
     organizerEventDateLocationStore: { eventsDatesByLocationId },
     organizerEventStore: { fetchEventsInSight },
     locationStore: { locationsForList },
+    userStore: { userId },
   } = useStores()
   const { themed } = useAppTheme()
 
@@ -28,7 +29,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
   const handleSearchThisArea = async () => {
     if (regionRef.current) {
       setIsSearching(true)
-      await fetchEventsInSight(regionRef.current)
+      await fetchEventsInSight(regionRef.current, userId)
       setIsSearching(false)
     }
   }

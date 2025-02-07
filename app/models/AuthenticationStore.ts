@@ -111,8 +111,11 @@ export const AuthenticationStoreModel: IAnyModelType = types
               event_chat: IOrganizerChatSnapshotIn
             },
           ) => {
-            acc.eventChats.push(item.event_chat)
+            acc.eventChats.push({ ...item.event_chat, is_user_joined: true })
+            acc.eventChatIds.add(item.event_chat.id)
+
             acc.datesLocations.push(item.dates_location)
+            acc.datesLocationsIds.add(item.dates_location.id)
 
             if (!acc.eventIds.has(item.event.id)) {
               acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
@@ -137,21 +140,21 @@ export const AuthenticationStoreModel: IAnyModelType = types
             events: [],
             locations: [],
             publishers: [],
+            datesLocationsIds: new Set(),
+            eventChatIds: new Set(),
             locationIds: new Set(),
             publisherIds: new Set(),
             eventIds: new Set(),
           },
         )
 
-      /*
       getRootStore(store).organizerEventStore.setEventsFromArrayToMap(events)
       getRootStore(store).locationStore.setLocationsFromArrayToMap(locations)
       getRootStore(store).publisherStore.setPublishersFromArrayToMap(publishers)
       getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
         datesLocations,
       )
-        */
-      // getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChats)
+      getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChats)
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
     organizerFirstRequest: flow(function* (userId: string) {

@@ -35,6 +35,7 @@ export const RootStoreModel = types
       store.setProp("chatStore", undefined)
       store.setProp("publisherStore", undefined)
       store.setProp("organizerEventStore", undefined)
+      store.setProp("organizerEventDateLocationStore", undefined)
       store.setProp("organizerChatStore", undefined)
       store.setProp("locationStore", undefined)
     },
