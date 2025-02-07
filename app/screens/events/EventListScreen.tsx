@@ -32,7 +32,7 @@ const ICON_SIZE = 14
 interface EventListScreenProps extends EventTabScreenProps<"EventListScreen"> {}
 
 export const EventListScreen: FC<EventListScreenProps> = observer(function EventListScreen(_props) {
-  const { organizerEventDateLocationStore, organizerChatStore } = useStores()
+  const { organizerEventDateLocationStore } = useStores()
   const { themed } = useAppTheme()
   return (
     <Screen preset="fixed" contentContainerStyle={$styles.flex1}>

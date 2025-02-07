@@ -22,15 +22,7 @@ export const LocationStoreModel = types
   .props({
     locations: types.map(LocationModel),
   })
-  .volatile(() => ({
-    locationIdsInSight: new Set<string>() as Set<string>,
-  }))
   .views((store) => ({
-    get locationsForListInSight() {
-      const arr: Location[] = []
-      store.locationIdsInSight.forEach((locId) => arr.push(store.locations.get(locId)!))
-      return arr
-    },
     get locationsForList() {
       return Array.from(store.locations.values())
     },
@@ -42,19 +34,19 @@ export const LocationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    setLocationIdsInSight(locationIds: Set<string>) {
-      store.locationIdsInSight = locationIds
-    },
-    setLocationsFromArrayToMap: (locations: any) => {
-      locations.forEach((location: any) => {
+    setLocationsFromArrayToMap: (locations: LocationSnapshotIn[]) => {
+      locations.forEach((location) => {
         store.locations.put(location)
       })
     },
   }))
   .actions((store) => ({
     clearAndSet: (locations: LocationSnapshotIn[]) => {
+      store.locations.clear()
       store.setLocationsFromArrayToMap(locations)
     },
+  }))
+  .actions((store) => ({
     fetchOrganizerLocations: flow(function* (userId) {
       try {
         if (!userId) throw new Error("errors:userIdNotFound")

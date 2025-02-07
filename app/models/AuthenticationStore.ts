@@ -143,13 +143,15 @@ export const AuthenticationStoreModel: IAnyModelType = types
           },
         )
 
+      /*
       getRootStore(store).organizerEventStore.setEventsFromArrayToMap(events)
-      getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChats)
       getRootStore(store).locationStore.setLocationsFromArrayToMap(locations)
       getRootStore(store).publisherStore.setPublishersFromArrayToMap(publishers)
       getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
         datesLocations,
       )
+        */
+      // getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChats)
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
     organizerFirstRequest: flow(function* (userId: string) {

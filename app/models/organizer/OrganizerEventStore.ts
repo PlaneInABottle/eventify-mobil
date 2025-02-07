@@ -1,4 +1,4 @@
-import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, detach, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
@@ -25,10 +25,16 @@ export const PublisherStoreModel = types
   })
   .actions(withSetPropAction)
   .actions((store) => ({
-    setPublishersFromArrayToMap: (publishers: any) => {
-      publishers.forEach((publisher: any) => {
+    setPublishersFromArrayToMap: (publishers: IPublisherSnapshotIn[]) => {
+      publishers.forEach((publisher) => {
         store.publishers.put(publisher)
       })
+    },
+  }))
+  .actions((store) => ({
+    clearAndSet: (publishers: IPublisherSnapshotIn[]) => {
+      store.publishers.clear()
+      store.setPublishersFromArrayToMap(publishers)
     },
   }))
 
@@ -47,11 +53,6 @@ export const OrganizerEventStoreModel = types
     events: types.map(OrganizerEventModel),
   })
   .views((self) => ({
-    get eventsForList() {
-      return Array.from(self.events.values())
-    },
-  }))
-  .views((self) => ({
     get forSelectField() {
       return Array.from(self.events.values()).map((val) => {
         return { label: val.title, value: val.id }
@@ -60,11 +61,19 @@ export const OrganizerEventStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    setEventsFromArrayToMap: (events: any) => {
-      events.forEach((event: any) => {
+    setEventsFromArrayToMap: (events: OrganizerEventSnapshotIn[]) => {
+      events.forEach((event) => {
         store.events.put(event)
       })
     },
+  }))
+  .actions((store) => ({
+    clearAndSet: (events: OrganizerEventSnapshotIn[]) => {
+      store.events.clear()
+      store.setEventsFromArrayToMap(events)
+    },
+  }))
+  .actions(() => ({
     uploadEventImage: flow(function* (image: { path: string; mimeType: string; buffer: any }) {
       // We catch error on top.
       const { data, error } = yield supabase.storage
@@ -116,26 +125,12 @@ export const OrganizerEventStoreModel = types
     }),
   }))
   .actions((store) => ({
-    clearAndSet: (events: OrganizerEventSnapshotIn[]) => {
-      store.events.clear()
-      store.setEventsFromArrayToMap(events)
-    },
-  }))
-  .actions((store) => ({
     fetchEventsInSight: flow(function* (bounds: Region) {
       try {
         const regionForSupabase = transformRegionForSupabase(bounds)
         const { data, error } = yield supabase.rpc("events_in_sight", regionForSupabase)
 
-        const {
-          datesLocations,
-          events,
-          locations,
-          publishers,
-          eventIds,
-          locationIds,
-          datesLocationsIds,
-        } = data.reduce(
+        const { datesLocations, events, locations, publishers } = data.reduce(
           (
             acc: any,
             item: {
@@ -147,7 +142,6 @@ export const OrganizerEventStoreModel = types
             },
           ) => {
             acc.datesLocations.push({ ...item.dates_location, event_chat_id: item.event_chat_id })
-            acc.datesLocationsIds.add(item.dates_location.id)
 
             if (!acc.eventIds.has(item.event.id)) {
               acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
@@ -172,22 +166,15 @@ export const OrganizerEventStoreModel = types
             publishers: [],
             locationIds: new Set(),
             publisherIds: new Set(),
-            datesLocationsIds: new Set(),
             eventIds: new Set(),
           },
         )
         if (error) throw error
 
-        store.setEventsFromArrayToMap(events)
-        getRootStore(store).locationStore.setLocationIdsInSight(locationIds)
-        getRootStore(store).locationStore.setLocationsFromArrayToMap(locations)
-        getRootStore(store).publisherStore.setPublishersFromArrayToMap(publishers)
-        getRootStore(store).organizerEventDateLocationStore.setDatesLocationIdsInSight(
-          datesLocationsIds,
-        )
-        getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
-          datesLocations,
-        )
+        store.clearAndSet(events)
+        getRootStore(store).locationStore.clearAndSet(locations)
+        getRootStore(store).publisherStore.clearAndSet(publishers)
+        getRootStore(store).organizerEventDateLocationStore.clearAndSet(datesLocations)
       } catch (e) {
         handleError(e)
       }

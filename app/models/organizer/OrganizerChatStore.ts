@@ -6,6 +6,7 @@ import { OrganizerChatMessageModel } from "./OrganizerChatMessageModel"
 import { handleSuccess } from "@/utils/successHandler"
 import { TxKeyPath } from "@/i18n"
 import { OrganizerEventDateLocationModel } from "./OrganizerEventDateModel"
+import { getRootStore } from "../helpers/getRootStore"
 
 export const OrganizerChatParticipantModel = types.model("OrganizerChatParticipant").props({
   id: types.identifier,
@@ -131,10 +132,10 @@ export const OrganizerChatStoreModel = types
           chat_id: eventChatId,
         })
         if (error) throw error
-        console.log("data: ", data)
 
-        if (isJoined) store.chats.delete(data.id)
-        else store.chats.put(data)
+        if (isJoined) {
+          store.chats.delete(data.id)
+        } else store.chats.put(data)
 
         return true
       } catch (e) {
