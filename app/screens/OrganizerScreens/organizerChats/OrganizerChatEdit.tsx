@@ -36,8 +36,7 @@ export const OrganizerChatEditScreen: FC<OrganizerChatStackScreenProps<"Organize
     const { organizerChatStore, organizerEventStore, organizerEventDateLocationStore } = useStores()
     const { themed } = useAppTheme()
 
-    const eventChat = eventChatId ? organizerChatStore.chats.get(eventChatId) : undefined
-
+    const eventChat = organizerChatStore.chatById(eventChatId)
     useHeader({
       titleTx: eventChatId ? "organizerChatEditScreen:header" : "organizerChatEditScreen:addChat",
       titleTxOptions: { eventName: eventChat?.events_dates_locations_id.event_id.title },

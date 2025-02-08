@@ -1,4 +1,4 @@
-import { Instance, SnapshotIn, detach, flow, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
@@ -22,24 +22,9 @@ const PublisherModel = types.model("Publisher").props({
 export const PublisherStoreModel = types
   .model("PublisherStore")
   .props({
-    publishers: types.map(PublisherModel),
+    publishers: types.array(PublisherModel),
   })
   .actions(withSetPropAction)
-  .actions((store) => ({
-    setPublishersFromArrayToMap: (publishers: IPublisherSnapshotIn[]) => {
-      publishers.forEach((publisher) => {
-        store.publishers.put(publisher)
-      })
-    },
-  }))
-  .actions((store) => ({
-    clearAndSet: (publishers: IPublisherSnapshotIn[], newPublisherIds: Set<string>) => {
-      for (const key of store.publishers.keys()) {
-        if (!newPublisherIds.has(key)) store.publishers.delete(key)
-      }
-      store.setPublishersFromArrayToMap(publishers)
-    },
-  }))
 
 export const OrganizerEventModel = types.model("OrganizerEvent").props({
   id: types.identifier,
@@ -53,34 +38,22 @@ export const OrganizerEventModel = types.model("OrganizerEvent").props({
 export const OrganizerEventStoreModel = types
   .model("OrganizerEventStore")
   .props({
-    events: types.map(OrganizerEventModel),
+    events: types.array(OrganizerEventModel),
   })
   .views((self) => ({
     get eventsAsList() {
-      return Array.from(self.events.values())
+      return self.events.slice()
     },
     get forSelectField() {
-      return Array.from(self.events.values()).map((val) => {
+      return self.events.map((val) => {
         return { label: val.title, value: val.id }
       })
     },
+    eventById(eventId: string | undefined) {
+      return self.events.find((event) => event.id === eventId)
+    },
   }))
   .actions(withSetPropAction)
-  .actions((store) => ({
-    setEventsFromArrayToMap: (events: OrganizerEventSnapshotIn[]) => {
-      events.forEach((event) => {
-        store.events.put(event)
-      })
-    },
-  }))
-  .actions((store) => ({
-    clearAndSet: (events: OrganizerEventSnapshotIn[], newEventIds: Set<string>) => {
-      for (const key of store.events.keys()) {
-        if (!newEventIds.has(key)) store.events.delete(key)
-      }
-      store.setEventsFromArrayToMap(events)
-    },
-  }))
   .actions(() => ({
     uploadEventImage: flow(function* (image: { path: string; mimeType: string; buffer: any }) {
       // We catch error on top.
@@ -142,18 +115,7 @@ export const OrganizerEventStoreModel = types
         })
         if (error) throw error
 
-        const {
-          datesLocations,
-          events,
-          locations,
-          publishers,
-          eventChats,
-          eventChatIds,
-          datesLocationsIds,
-          locationIds,
-          publisherIds,
-          eventIds,
-        } = data.reduce(
+        const { datesLocations, events, locations, publishers, eventChats } = data.reduce(
           (
             acc: any,
             item: {
@@ -208,13 +170,13 @@ export const OrganizerEventStoreModel = types
         )
         if (error) throw error
 
-        store.clearAndSet(events, eventIds)
-        getRootStore(store).locationStore.clearAndSet(locations, locationIds)
-        getRootStore(store).publisherStore.clearAndSet(publishers, publisherIds)
-        getRootStore(store).organizerChatStore.clearAndSet(eventChats, eventChatIds)
-        getRootStore(store).organizerEventDateLocationStore.clearAndSet(
+        store.setProp("events", events)
+        getRootStore(store).locationStore.setProp("locations", locations)
+        getRootStore(store).publisherStore.setProp("publishers", publishers)
+        getRootStore(store).organizerChatStore.setProp("chats", eventChats)
+        getRootStore(store).organizerEventDateLocationStore.setProp(
+          "datesLocations",
           datesLocations,
-          datesLocationsIds,
         )
       } catch (e) {
         handleError(e)
@@ -228,7 +190,7 @@ export const OrganizerEventStoreModel = types
           .eq("publisher_id", userId)
 
         if (error) throw error
-        store.setEventsFromArrayToMap(events)
+        store.events.replace(events)
       } catch (e) {
         handleError(e)
       }
@@ -270,13 +232,10 @@ export const OrganizerEventStoreModel = types
 
         // Here we upload dates and locations
         const newDatesLocations = yield store.uploadDatesLocations(result.data.id, datesLocations)
-        store.events.put(result.data)
+        getRootStore(store).authenticationStore.organizerFirstRequest(eventsFields.publisher_id)
+        // store.events.push(result.data)
 
-        getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
-          newDatesLocations,
-        )
-
-        getRootStore(store).organizerEventDateLocationStore.clearOldDates(oldDateLocationIds)
+        // getRootStore(store).organizerEventDateLocationStore.clearOldDates(oldDateLocationIds)
         handleSuccess("success:eventSaved")
         return true
       } catch (e) {

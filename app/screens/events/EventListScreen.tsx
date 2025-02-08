@@ -103,7 +103,9 @@ const EventCard = observer(function EventCard({
 
   const { organizerChatStore, userStore, organizerEventDateLocationStore } = useStores()
   const eventChat = organizerChatStore.chatsByDateLocationId.get(eventDateLocation.id)
-  const isFavorite = organizerEventDateLocationStore.favorites.has(eventDateLocation.id)
+  const isFavorite = organizerEventDateLocationStore.datesLocationsAsList.find(
+    (dl) => dl.id === eventDateLocation.id,
+  )?.is_user_favorite
 
   const userId = userStore.userId
   const [isLoading, setIsLoading] = useState<boolean>(false)

@@ -38,7 +38,7 @@ export const OrganizerLocationEditScreen: FC<
   const { locationStore, userStore } = useStores()
   const { themed } = useAppTheme()
 
-  const location = locationId ? locationStore.locations.get(locationId) : undefined
+  const location = locationStore.locationById(locationId)
   const userId = userStore.userId
 
   useHeader({

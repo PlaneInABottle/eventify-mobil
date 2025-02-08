@@ -1,4 +1,4 @@
-import { observer } from "mobx-react-lite"
+import { Observer, observer } from "mobx-react-lite"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC } from "react"
@@ -37,16 +37,20 @@ export const OrganizerEventListScreen: FC<
           </View>
         }
         renderItem={({ item }) => (
-          <ListItem
-            text={item.title}
-            bottomSeparator
-            rightIcon="caretRight"
-            onPress={() => {
-              navigate("OrganizerEventEditScreen", {
-                eventId: item.id,
-              })
-            }}
-          />
+          <Observer>
+            {() => (
+              <ListItem
+                text={item.title}
+                bottomSeparator
+                rightIcon="caretRight"
+                onPress={() => {
+                  navigate("OrganizerEventEditScreen", {
+                    eventId: item.id,
+                  })
+                }}
+              />
+            )}
+          </Observer>
         )}
       />
     </Screen>

@@ -21,7 +21,7 @@ export const OrganizerChatParticipantScreen: FC<
   const { goBack } = _props.navigation
   const { themed } = useAppTheme()
 
-  const eventChat = organizerChatStore.chats.get(eventChatId)
+  const eventChat = organizerChatStore.chatById(eventChatId)
 
   useHeader({
     titleTx: "organizerChatParticipantScreen:headerTitle",

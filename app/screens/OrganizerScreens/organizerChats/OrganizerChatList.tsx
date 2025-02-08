@@ -1,4 +1,4 @@
-import { observer } from "mobx-react-lite"
+import { Observer, observer } from "mobx-react-lite"
 import { useStores } from "../../../models"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -9,7 +9,7 @@ import {
   OrganizerChatStackParamList,
   OrganizerChatStackScreenProps,
 } from "@/navigators/navigationTypes.ts"
-import { IOrganizerChat, IOrganizerChatSnapshotIn } from "@/models/organizer/OrganizerChatStore"
+import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
@@ -37,7 +37,9 @@ export const OrganizerChatListScreen: FC<OrganizerChatStackScreenProps<"Organize
               />
             </View>
           }
-          renderItem={({ item }) => <OrganizerChatListItem eventChat={item} />}
+          renderItem={({ item }) => (
+            <Observer>{() => <OrganizerChatListItem eventChat={item} />}</Observer>
+          )}
         />
       </Screen>
     )

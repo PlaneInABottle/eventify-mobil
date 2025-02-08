@@ -148,13 +148,11 @@ export const AuthenticationStoreModel: IAnyModelType = types
           },
         )
 
-      getRootStore(store).organizerEventStore.setEventsFromArrayToMap(events)
-      getRootStore(store).locationStore.setLocationsFromArrayToMap(locations)
-      getRootStore(store).publisherStore.setPublishersFromArrayToMap(publishers)
-      getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
-        datesLocations,
-      )
-      getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChats)
+      getRootStore(store).organizerEventStore.setProp("events", events)
+      getRootStore(store).locationStore.setProp("locations", locations)
+      getRootStore(store).publisherStore.setProp("publishers", publishers)
+      getRootStore(store).organizerEventDateLocationStore.setProp("datesLocations", datesLocations)
+      getRootStore(store).organizerChatStore.setProp("chats", eventChats)
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
     organizerFirstRequest: flow(function* (userId: string) {
@@ -189,17 +187,11 @@ export const AuthenticationStoreModel: IAnyModelType = types
         )
       }
 
-      console.log(
-        locationRes,
-        eventsRes,
-        eventChatsRes,
-        profileRes.error,
-        eventsDatesLocationsRes.error,
-      )
-      getRootStore(store).locationStore.setLocationsFromArrayToMap(locationRes.data)
-      getRootStore(store).organizerEventStore.setEventsFromArrayToMap(eventsRes.data)
-      getRootStore(store).organizerChatStore.setChatsFromArrayToMap(eventChatsRes.data)
-      getRootStore(store).organizerEventDateLocationStore.setDatesLocationsFromArrayToMap(
+      getRootStore(store).locationStore.setProp("locations", locationRes.data)
+      getRootStore(store).organizerEventStore.setProp("events", eventsRes.data)
+      getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data)
+      getRootStore(store).organizerEventDateLocationStore.setProp(
+        "datesLocations",
         eventsDatesLocationsRes.data,
       )
       getRootStore(store).userStore.setProp("user", profileRes.data)

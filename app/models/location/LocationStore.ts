@@ -20,34 +20,24 @@ export const LocationModel = types.model("Location").props({
 export const LocationStoreModel = types
   .model("LocationStore")
   .props({
-    locations: types.map(LocationModel),
+    locations: types.array(LocationModel),
   })
   .views((store) => ({
     get locationsForList() {
-      return Array.from(store.locations.values())
+      return store.locations.slice()
     },
     get forSelectField() {
-      return Array.from(store.locations.values()).map((val) => {
-        return { label: val.name, value: val.id }
-      })
+      return store.locations
+        .map((val) => {
+          return { label: val.name, value: val.id }
+        })
+        .slice()
+    },
+    locationById(locationId: string | undefined) {
+      return store.locations.find((loc) => loc.id === locationId)
     },
   }))
   .actions(withSetPropAction)
-  .actions((store) => ({
-    setLocationsFromArrayToMap: (locations: LocationSnapshotIn[]) => {
-      locations.forEach((location) => {
-        store.locations.put(location)
-      })
-    },
-  }))
-  .actions((store) => ({
-    clearAndSet: (locations: LocationSnapshotIn[], newLocationIds: Set<string>) => {
-      for (const key of store.locations.keys()) {
-        if (!newLocationIds.has(key)) store.locations.delete(key)
-      }
-      store.setLocationsFromArrayToMap(locations)
-    },
-  }))
   .actions((store) => ({
     fetchOrganizerLocations: flow(function* (userId) {
       try {
@@ -60,7 +50,7 @@ export const LocationStoreModel = types
 
         if (error) throw error
 
-        store.setLocationsFromArrayToMap(locations)
+        store.setProp("locations", locations)
       } catch (e) {
         handleError(e)
       }
@@ -84,7 +74,10 @@ export const LocationStoreModel = types
         }
         if (result.error) throw result.error
 
-        store.locations.put(result.data)
+        const oldLocation = store.locations.find(
+          (loc) => loc.id === (result!.data as LocationSnapshotIn).id,
+        )!
+        Object.assign(oldLocation, result.data)
 
         handleSuccess("success:locationSaved")
         return true

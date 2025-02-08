@@ -76,7 +76,7 @@ export const OrganizerEventEditScreen: FC<
 
   const eventDates: OrganizerEventDateLocation[] | undefined =
     organizerEventDateLocationStore.eventsDatesByEventId.get(eventId)
-  const event: OrganizerEvent | undefined = organizerEventStore.events.get(eventId || "")
+  const event = organizerEventStore.eventById(eventId)
   const userId = userStore.userId
 
   useHeader({

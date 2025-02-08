@@ -99,14 +99,17 @@ export const OrganizerChatModel = types
 export const OrganizerChatStoreModel = types
   .model("OrganizerChatStore")
   .props({
-    chats: types.map(OrganizerChatModel),
+    chats: types.array(OrganizerChatModel),
   })
   .views((store) => ({
     get chatsAsList() {
-      return Array.from(store.chats.values()).filter((chat) => chat.is_user_joined)
+      return store.chats.slice()
     },
   }))
   .views((self) => ({
+    get usersChatsAsArray() {
+      return self.chatsAsList.filter((chat) => !!chat.is_user_joined)
+    },
     get chatsByDateLocationId() {
       const map = new Map()
       self.chats.forEach((chat) => {
@@ -116,13 +119,16 @@ export const OrganizerChatStoreModel = types
       })
       return map
     },
+    chatById(chatId: string | undefined) {
+      return self.chats.find((chat) => chat.id === chatId)
+    },
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
     toggleChatParticipation: flow(function* (userId: string, eventChatId: string | null) {
       try {
         if (!eventChatId) throw new Error("errors:unknown" as TxKeyPath)
-        const { data, error } = yield supabase
+        const { error } = yield supabase
           .rpc("toggle_chat_participation", {
             participant_id: userId,
             chat_id: eventChatId,
@@ -130,33 +136,14 @@ export const OrganizerChatStoreModel = types
           .single()
         if (error) throw error
 
-        if (data.is_user_joined) store.chats.put({ ...data.event_chat, is_user_joined: true })
-        else store.chats.put({ ...data.event_chat, is_user_joined: false })
+        const changedChat = store.chats.find((chat) => chat.id === eventChatId)!
+        changedChat.is_user_joined = !changedChat?.is_user_joined
 
         return true
       } catch (e) {
         return handleError(e).message
       }
     }),
-  }))
-  .actions((store) => ({
-    deleteChat: (eventChatIds: string[]) => {
-      eventChatIds.forEach((id) => store.chats.delete(id))
-    },
-
-    setChatsFromArrayToMap: (chats: IOrganizerChatSnapshotIn[]) => {
-      chats.forEach((chat) => {
-        if (!store.chats.has(chat.id)) store.chats.put(chat)
-      })
-    },
-  }))
-  .actions((store) => ({
-    clearAndSet: (chats: IOrganizerChatSnapshotIn[], newChatIds: Set<string>) => {
-      for (const key of store.chats.keys()) {
-        if (!newChatIds.has(key)) store.chats.delete(key)
-      }
-      store.setChatsFromArrayToMap(chats)
-    },
   }))
   .actions((store) => ({
     fetchOrganizerEventChats: flow(function* (userId) {
@@ -167,15 +154,11 @@ export const OrganizerChatStoreModel = types
           .eq("events.publisher_id", userId)
 
         if (error) throw error
-        store.setChatsFromArrayToMap(eventChats)
+        store.setProp("chats", eventChats)
       } catch (e) {
         handleError(e)
       }
     }),
-    addNewChat: (eventId: string, chat: any) => {
-      const chatInstance = OrganizerChatModel.create(chat)
-      store.chats.put(chatInstance)
-    },
   }))
   .actions((store) => ({
     createUpdateChat: flow(function* (
@@ -197,7 +180,8 @@ export const OrganizerChatStoreModel = types
         }
 
         if (result.error) throw result.error
-        store.chats.put(result.data)
+        const oldChat = store.chats.find((chat) => chat.id === result!.data.id)!
+        Object.assign(oldChat, result.data)
         return handleSuccess("success:chatSaved" as TxKeyPath).success
       } catch (e) {
         return handleError(e).message

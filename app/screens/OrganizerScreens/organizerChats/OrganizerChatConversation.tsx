@@ -25,7 +25,7 @@ export const OrganizerChatConversationScreen: FC<
     theme: { colors },
   } = useAppTheme()
 
-  const eventChat = organizerChatStore.chats.get(eventChatId)
+  const eventChat = organizerChatStore.chatById(eventChatId)
   const userId = userStore.userId
 
   useHeader({

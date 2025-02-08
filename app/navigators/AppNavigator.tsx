@@ -79,7 +79,6 @@ const AppStack = observer(function AppStack() {
   const url = Linking.useURL()
   if (url) createSessionFromUrl(url)
   console.log("URL: ", url)
-  console.log("Authentication Role: ", authRole)
   return (
     <Stack.Navigator
       screenOptions={{

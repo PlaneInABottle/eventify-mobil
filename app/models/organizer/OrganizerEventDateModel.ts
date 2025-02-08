@@ -36,20 +36,12 @@ export const OrganizerEventDateLocationModel = types
 export const OrganizerEventDateLocationStoreModel = types
   .model("OrganizerEventDateLocation")
   .props({
-    datesLocations: types.map(OrganizerEventDateLocationModel),
-    favorites: types.map(types.reference(OrganizerEventDateLocationModel)),
+    datesLocations: types.array(OrganizerEventDateLocationModel),
   })
   .views((self) => ({
     // TODO: Refactor in the future, didn't like it very much
-    get favoritesAsArray() {
-      return Array.from(self.favorites.values()).sort((a, b) =>
-        a.start_time.localeCompare(b.start_time),
-      )
-    },
     get datesLocationsAsList() {
-      return Array.from(self.datesLocations.values()).sort((a, b) =>
-        a.start_time.localeCompare(b.start_time),
-      )
+      return self.datesLocations.slice().sort((a, b) => a.start_time.localeCompare(b.start_time))
     },
     get eventsDatesByEventId() {
       const map = new Map()
@@ -108,26 +100,11 @@ export const OrganizerEventDateLocationStoreModel = types
 
       rootStore.organizerChatStore.deleteChat(willDeletedChatIds)
       oldIds.forEach((oldID: string) => {
-        store.datesLocations.delete(oldID)
-      })
-    },
-    setDatesLocationsFromArrayToMap: (datesLocations: OrganizerEventDateLocationSnapshotIn[]) => {
-      datesLocations.forEach((dl) => {
-        store.datesLocations.put(dl)
-        if (dl.is_user_favorite) store.favorites.set(dl.id, dl.id)
+        //   store.datesLocations.delete(oldID)
       })
     },
   }))
   .actions((store) => ({
-    clearAndSet: (
-      datesLocations: OrganizerEventDateLocationSnapshotIn[],
-      newDatesLocationsIds: Set<string>,
-    ) => {
-      for (const key of store.datesLocations.keys()) {
-        if (!newDatesLocationsIds.has(key)) store.datesLocations.delete(key)
-      }
-      store.setDatesLocationsFromArrayToMap(datesLocations)
-    },
     toggleFavorite: flow(function* (dateLocId: string, userId: string) {
       try {
         const { error } = yield supabase.rpc("toggle_favorite_event_date", {
@@ -135,8 +112,8 @@ export const OrganizerEventDateLocationStoreModel = types
           _events_dates_locations_id: dateLocId,
         })
         if (error) throw error
-        if (store.favorites.has(dateLocId)) store.favorites.delete(dateLocId)
-        else store.favorites.set(dateLocId, dateLocId)
+        const changedObject = store.datesLocations.find((dl) => dl.id === dateLocId)!
+        changedObject.is_user_favorite = !changedObject?.is_user_favorite
       } catch (e) {
         handleError(e)
       }

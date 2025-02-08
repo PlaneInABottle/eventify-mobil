@@ -32,7 +32,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<IOrganizerChat>
-          data={organizerChatStore.chatsAsList}
+          data={organizerChatStore.usersChatsAsArray}
           estimatedItemSize={100}
           contentContainerStyle={themed([$listContentContainer, $styles.container])}
           ListHeaderComponent={
