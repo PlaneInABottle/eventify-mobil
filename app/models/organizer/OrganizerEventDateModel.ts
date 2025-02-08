@@ -90,21 +90,6 @@ export const OrganizerEventDateLocationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    clearOldDates: (oldIds: string[]) => {
-      const rootStore = getRootStore(store)
-      const chats = rootStore.organizerChatStore.chatsAsList
-
-      const willDeletedChatIds = chats
-        .filter((chat) => oldIds.includes(chat.events_dates_locations_id.id))
-        .map((chat) => chat.id)
-
-      rootStore.organizerChatStore.deleteChat(willDeletedChatIds)
-      oldIds.forEach((oldID: string) => {
-        //   store.datesLocations.delete(oldID)
-      })
-    },
-  }))
-  .actions((store) => ({
     toggleFavorite: flow(function* (dateLocId: string, userId: string) {
       try {
         const { error } = yield supabase.rpc("toggle_favorite_event_date", {

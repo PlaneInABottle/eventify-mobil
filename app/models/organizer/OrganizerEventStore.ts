@@ -76,6 +76,7 @@ export const OrganizerEventStoreModel = types
         handleError(e, { toast: false })
       }
     }),
+    // WARN: THIS WILL REFACTORED later,
     uploadDatesLocations: flow(function* (
       eventId: string,
       datesLocations: Array<{ start_time: string; end_time: string | null; location_id: string }>,
@@ -231,11 +232,8 @@ export const OrganizerEventStoreModel = types
         if (result.error) throw result.error
 
         // Here we upload dates and locations
-        const newDatesLocations = yield store.uploadDatesLocations(result.data.id, datesLocations)
+        yield store.uploadDatesLocations(result.data.id, datesLocations)
         getRootStore(store).authenticationStore.organizerFirstRequest(eventsFields.publisher_id)
-        // store.events.push(result.data)
-
-        // getRootStore(store).organizerEventDateLocationStore.clearOldDates(oldDateLocationIds)
         handleSuccess("success:eventSaved")
         return true
       } catch (e) {
