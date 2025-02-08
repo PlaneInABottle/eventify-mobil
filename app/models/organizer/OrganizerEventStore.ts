@@ -163,6 +163,7 @@ export const OrganizerEventStoreModel = types
               dates_location: OrganizerEventDateLocationSnapshotIn
               event_chat: IOrganizerChat
               is_user_joined: boolean
+              is_user_favorite: boolean
             },
           ) => {
             if (item.event_chat) {
@@ -170,7 +171,10 @@ export const OrganizerEventStoreModel = types
               acc.eventChatIds.add(item.event_chat.id)
             }
 
-            acc.datesLocations.push(item.dates_location)
+            acc.datesLocations.push({
+              ...item.dates_location,
+              is_user_favorite: item.is_user_favorite,
+            })
             acc.datesLocationsIds.add(item.dates_location.id)
 
             if (!acc.eventIds.has(item.event.id)) {

@@ -1,9 +1,11 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { OrganizerEventModel } from "./OrganizerEventStore"
 import { LocationModel } from "../location/LocationStore"
 import { formatDate } from "@/utils/formatDate"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { getRootStore } from "../helpers/getRootStore"
+import { handleError } from "@/utils/errorHandler"
+import { supabase } from "@/services/auth/supabase"
 
 export const OrganizerEventDateLocationModel = types
   .model("OrganizerEventDate")
@@ -13,6 +15,7 @@ export const OrganizerEventDateLocationModel = types
     location_id: types.reference(LocationModel),
     start_time: types.string,
     end_time: types.maybeNull(types.string),
+    is_user_favorite: types.maybeNull(types.boolean),
   })
   .views((self) => ({
     get dateFormatted() {
@@ -34,9 +37,15 @@ export const OrganizerEventDateLocationStoreModel = types
   .model("OrganizerEventDateLocation")
   .props({
     datesLocations: types.map(OrganizerEventDateLocationModel),
+    favorites: types.map(types.reference(OrganizerEventDateLocationModel)),
   })
   .views((self) => ({
     // TODO: Refactor in the future, didn't like it very much
+    get favoritesAsArray() {
+      return Array.from(self.favorites.values()).sort((a, b) =>
+        a.start_time.localeCompare(b.start_time),
+      )
+    },
     get datesLocationsAsList() {
       return Array.from(self.datesLocations.values()).sort((a, b) =>
         a.start_time.localeCompare(b.start_time),
@@ -105,6 +114,7 @@ export const OrganizerEventDateLocationStoreModel = types
     setDatesLocationsFromArrayToMap: (datesLocations: OrganizerEventDateLocationSnapshotIn[]) => {
       datesLocations.forEach((dl) => {
         store.datesLocations.put(dl)
+        if (dl.is_user_favorite) store.favorites.set(dl.id, dl.id)
       })
     },
   }))
@@ -118,6 +128,19 @@ export const OrganizerEventDateLocationStoreModel = types
       }
       store.setDatesLocationsFromArrayToMap(datesLocations)
     },
+    toggleFavorite: flow(function* (dateLocId: string, userId: string) {
+      try {
+        const { error } = yield supabase.rpc("toggle_favorite_event_date", {
+          _user_id: userId,
+          _events_dates_locations_id: dateLocId,
+        })
+        if (error) throw error
+        if (store.favorites.has(dateLocId)) store.favorites.delete(dateLocId)
+        else store.favorites.set(dateLocId, dateLocId)
+      } catch (e) {
+        handleError(e)
+      }
+    }),
   }))
 
 export interface OrganizerEventDateLocationSnapshotIn

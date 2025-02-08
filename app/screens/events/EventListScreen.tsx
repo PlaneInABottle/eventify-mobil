@@ -101,14 +101,13 @@ const EventCard = observer(function EventCard({
     themed,
   } = useAppTheme()
 
-  const { organizerChatStore, userStore } = useStores()
+  const { organizerChatStore, userStore, organizerEventDateLocationStore } = useStores()
   const eventChat = organizerChatStore.chatsByDateLocationId.get(eventDateLocation.id)
+  const isFavorite = organizerEventDateLocationStore.favorites.has(eventDateLocation.id)
 
   const userId = userStore.userId
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  console.log("EVENT CHAT: ", eventChat?.is_user_joined)
-  const [isFavorite, setIsFavorite] = useState<boolean>(false)
   const liked = useSharedValue(isFavorite ? 1 : 0)
   const chatJoined = useSharedValue(eventChat?.is_user_joined ? 1 : 0)
 
@@ -154,6 +153,7 @@ const EventCard = observer(function EventCard({
 
   const handlePressFavorite = () => {
     setIsLoading(true)
+    organizerEventDateLocationStore.toggleFavorite(eventDateLocation.id, userId)
     liked.value = withSpring(liked.value ? 0 : 1)
     setIsLoading(false)
   }
