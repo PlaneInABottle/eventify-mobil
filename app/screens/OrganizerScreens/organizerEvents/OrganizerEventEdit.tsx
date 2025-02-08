@@ -20,8 +20,6 @@ import DatePicker from "react-native-date-picker"
 import { formatDate } from "@/utils/formatDate"
 import { SelectField } from "@/components/SelectField"
 import { pickSingleImage } from "@/utils/imageFunctions"
-import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
-import { OrganizerEvent } from "@/models/organizer/OrganizerEventStore"
 
 type DateLocationEntry = {
   id?: string
@@ -74,8 +72,7 @@ export const OrganizerEventEditScreen: FC<
     useStores()
   const { themed, themeContext } = useAppTheme()
 
-  const eventDates: OrganizerEventDateLocation[] | undefined =
-    organizerEventDateLocationStore.eventsDatesByEventId.get(eventId)
+  const eventDates = organizerEventDateLocationStore.eventsDatesByEventId(eventId)
   const event = organizerEventStore.eventById(eventId)
   const userId = userStore.userId
 

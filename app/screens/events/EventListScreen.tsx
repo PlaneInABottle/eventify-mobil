@@ -102,7 +102,7 @@ const EventCard = observer(function EventCard({
   } = useAppTheme()
 
   const { organizerChatStore, userStore, organizerEventDateLocationStore } = useStores()
-  const eventChat = organizerChatStore.chatsByDateLocationId.get(eventDateLocation.id)
+  const eventChat = organizerChatStore.chatsByDateLocationId(eventDateLocation.id).at(0)
   const isFavorite = organizerEventDateLocationStore.datesLocationsAsList.find(
     (dl) => dl.id === eventDateLocation.id,
   )?.is_user_favorite

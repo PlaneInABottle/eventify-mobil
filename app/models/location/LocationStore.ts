@@ -77,7 +77,8 @@ export const LocationStoreModel = types
         const oldLocation = store.locations.find(
           (loc) => loc.id === (result!.data as LocationSnapshotIn).id,
         )!
-        Object.assign(oldLocation, result.data)
+        if (oldLocation) Object.assign(oldLocation, result.data)
+        else store.locations.push(result.data)
 
         handleSuccess("success:locationSaved")
         return true

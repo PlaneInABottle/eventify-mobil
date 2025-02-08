@@ -52,7 +52,7 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
           <NewMarkerField
             key={location.id}
             location={location}
-            eventsDateLocations={eventsDatesByLocationId.get(location.id)}
+            eventsDateLocations={eventsDatesByLocationId(location.id)}
             coordinate={{
               longitude: location.lat_long.coordinates[0],
               latitude: location.lat_long.coordinates[1],

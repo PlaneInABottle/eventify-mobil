@@ -110,14 +110,8 @@ export const OrganizerChatStoreModel = types
     get usersChatsAsArray() {
       return self.chatsAsList.filter((chat) => !!chat.is_user_joined)
     },
-    get chatsByDateLocationId() {
-      const map = new Map()
-      self.chats.forEach((chat) => {
-        const dateLocationId = chat.events_dates_locations_id.id
-        if (!map.has(dateLocationId)) map.set(dateLocationId, chat)
-        else map.get(dateLocationId).put(chat)
-      })
-      return map
+    chatsByDateLocationId(dateLocId: string) {
+      return self.chats.filter((chat) => chat.events_dates_locations_id.id === dateLocId)
     },
     chatById(chatId: string | undefined) {
       return self.chats.find((chat) => chat.id === chatId)
@@ -181,7 +175,10 @@ export const OrganizerChatStoreModel = types
 
         if (result.error) throw result.error
         const oldChat = store.chats.find((chat) => chat.id === result!.data.id)!
-        Object.assign(oldChat, result.data)
+
+        if (oldChat) Object.assign(oldChat, result.data)
+        else store.chats.push(result.data)
+
         return handleSuccess("success:chatSaved" as TxKeyPath).success
       } catch (e) {
         return handleError(e).message

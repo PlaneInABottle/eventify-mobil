@@ -43,45 +43,24 @@ export const OrganizerEventDateLocationStoreModel = types
     get datesLocationsAsList() {
       return self.datesLocations.slice().sort((a, b) => a.start_time.localeCompare(b.start_time))
     },
-    get eventsDatesByEventId() {
-      const map = new Map()
-      self.datesLocations.forEach((dateLoc) => {
-        const eventId = dateLoc.event_id.id
-        if (!map.has(eventId)) map.set(eventId, [dateLoc])
-        else map.get(eventId).push(dateLoc)
-      })
-      return map
+    eventsDatesByEventId(eventId: string | undefined) {
+      return self.datesLocations.filter((dl) => dl.event_id.id === eventId)
     },
-    get eventsDatesByLocationId() {
-      const dateLocationMap = new Map()
-
-      self.datesLocations.forEach((dateLoc) => {
-        const locationId = dateLoc.location_id.id
-        const list = dateLocationMap.get(locationId) || []
-
-        // Insert in sorted order (binary search insertion could be used for better performance)
-        const index = list.findIndex(
-          (item: OrganizerEventDateLocationSnapshotIn) => item.start_time > dateLoc.start_time,
-        )
-        if (index === -1) {
-          list.push(dateLoc)
-        } else {
-          list.splice(index, 0, dateLoc)
-        }
-
-        dateLocationMap.set(locationId, list)
-      })
-      return dateLocationMap
+    eventsDatesByLocationId(locationId: string) {
+      return self.datesLocations
+        .filter((dl) => dl.location_id.id === locationId)
+        .sort((a, b) => a.start_time.localeCompare(b.start_time))
     },
   }))
   .views((self) => ({
     forSelectFieldForAnEvent(eventId: string): Array<{ label: string; value: string }> {
-      const rootStore = getRootStore(self)
-      const chatsDatesLocationIds = rootStore.organizerChatStore.chatsByDateLocationId
+      const chatsDatesLocationIds = getRootStore(self).organizerChatStore.chatsByDateLocationId
 
-      const eventDates = (self.eventsDatesByEventId.get(eventId) || []).filter(
-        (date: OrganizerEventDateLocationSnapshotIn) => !chatsDatesLocationIds.has(date.id),
-      )
+      const eventDates = self
+        .eventsDatesByEventId(eventId)
+        // Filter out dates that ALREADY HAVE chats
+        .filter((dl) => chatsDatesLocationIds(dl.id).length === 0)
+
       return eventDates.map((val: OrganizerEventDateLocation) => ({
         label: `${val.dateFormatted.textLabel} - ${val.timeFormatted.textLabel}\n${val.location_id.name}`,
         value: val.id,
