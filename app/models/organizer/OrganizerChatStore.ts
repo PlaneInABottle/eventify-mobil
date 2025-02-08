@@ -119,22 +119,19 @@ export const OrganizerChatStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    toggleChatParticipation: flow(function* (
-      userId: string,
-      eventChatId: string | null,
-      isJoined: boolean,
-    ) {
+    toggleChatParticipation: flow(function* (userId: string, eventChatId: string | null) {
       try {
         if (!eventChatId) throw new Error("errors:unknown" as TxKeyPath)
-        const { data, error } = yield supabase.rpc("toggle_chat_participation", {
-          participant_id: userId,
-          chat_id: eventChatId,
-        })
+        const { data, error } = yield supabase
+          .rpc("toggle_chat_participation", {
+            participant_id: userId,
+            chat_id: eventChatId,
+          })
+          .single()
         if (error) throw error
 
-        if (isJoined) {
-          store.chats.put({ ...data, is_user_joined: false })
-        } else store.chats.put({ ...data, is_user_joined: true })
+        if (data.is_user_joined) store.chats.put({ ...data.event_chat, is_user_joined: true })
+        else store.chats.put({ ...data.event_chat, is_user_joined: false })
 
         return true
       } catch (e) {

@@ -1,4 +1,4 @@
-import { ComponentType, FC, useCallback, useMemo, useState } from "react"
+import { ComponentType, FC, useMemo, useState } from "react"
 import { ViewStyle, View, TextStyle, ImageStyle, StyleSheet } from "react-native"
 import {
   Card,
@@ -161,11 +161,9 @@ const EventCard = observer(function EventCard({
   const handlePressChat = async () => {
     setIsLoading(true)
     chatJoined.value = withSpring(chatJoined.value ? 0 : 1)
-    // setIsChatJoined(!isChatJoined)
     const result: true | string = await organizerChatStore.toggleChatParticipation(
       userId,
       eventChat.id,
-      eventChat.is_user_joined,
     )
     if (result !== true) {
       // setIsChatJoined(!isChatJoined)
