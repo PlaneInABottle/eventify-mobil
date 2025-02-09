@@ -103,47 +103,22 @@ export const AuthenticationStoreModel: IAnyModelType = types
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
     organizerFirstRequest: flow(function* (userId: string) {
-      const [locationRes, eventsRes, eventChatsRes, profileRes, eventsDatesLocationsRes] =
-        yield Promise.all([
-          supabase.rpc("get_user_locations_and_favorites", {
-            _user_id: userId,
-          }),
-          supabase.from("events").select("*").eq("publisher_id", userId),
-          supabase
-            .from("event_chats")
-            .select("*, events_dates_locations!inner(events())")
-            .eq("events_dates_locations.events.publisher_id", userId),
-          supabase.from("profiles").select("*").eq("id", userId).single(),
-          supabase
-            .from("events_dates_locations")
-            .select("*,  events!inner()")
-            .eq("events.publisher_id", userId),
-        ])
+      const { data, error } = yield supabase.rpc("get_organizer_events", {
+        _user_id: userId,
+      })
 
-      if (
-        locationRes.error ||
-        eventsRes.error ||
-        eventChatsRes.error ||
-        profileRes.error ||
-        eventsDatesLocationsRes.error
-      ) {
-        throw (
-          locationRes.error ||
-          eventsRes.error ||
-          eventChatsRes.error ||
-          profileRes.error ||
-          eventsDatesLocationsRes.error
-        )
+      if (error) {
+        throw error
       }
 
-      getRootStore(store).locationStore.setProp("locations", locationRes.data)
-      getRootStore(store).organizerEventStore.setProp("events", eventsRes.data)
-      getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data)
+      getRootStore(store).locationStore.setProp("locations", data.locations)
+      getRootStore(store).organizerEventStore.setProp("events", data.events)
+      getRootStore(store).organizerChatStore.setProp("chats", data.eventChats)
       getRootStore(store).organizerEventDateLocationStore.setProp(
         "datesLocations",
-        eventsDatesLocationsRes.data,
+        data.eventsDatesLocations,
       )
-      getRootStore(store).userStore.setProp("user", profileRes.data)
+      getRootStore(store).userStore.setProp("user", data.profile)
     }),
   }))
   .actions((store) => ({
