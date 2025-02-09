@@ -19,7 +19,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import * as Linking from "expo-linking"
 import * as Sentry from "@sentry/react-native"
 import { OrganizerNavigator } from "./OrganizerNavigator"
-import { OrganizerTabParamList } from "./navigationTypes.ts"
+import { OrganizerTabParamList } from "./navigationTypes"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator

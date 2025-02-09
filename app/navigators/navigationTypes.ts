@@ -7,6 +7,7 @@ export type OrganizerEventStackParamList = {
   OrganizerEventListScreen: undefined
   OrganizerEventDisplayScreen: undefined
   OrganizerEventEditScreen: { eventId?: string }
+  OrganizerEventLocationMapScreen: undefined
 }
 export type OrganizerLocationStackParamList = {
   OrganizerLocationListScreen: undefined

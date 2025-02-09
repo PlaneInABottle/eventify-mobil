@@ -12,7 +12,7 @@ import {
   OrganizerEventStackParamList,
   OrganizerLocationStackParamList,
   OrganizerTabParamList,
-} from "./navigationTypes.ts"
+} from "./navigationTypes"
 import { OrganizerLocationEditScreen } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationEdit"
 import { OrganizerEventEditScreen } from "@/screens/OrganizerScreens/organizerEvents/OrganizerEventEdit"
 import { OrganizerChatListScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatList"

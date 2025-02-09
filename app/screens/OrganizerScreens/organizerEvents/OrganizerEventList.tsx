@@ -5,7 +5,7 @@ import { FC } from "react"
 import { Icon, ListItem, ListView, Screen, Text } from "@/components"
 import { View, ViewStyle } from "react-native"
 import { useStores } from "@/models"
-import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes.ts"
+import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes"
 import { OrganizerEvent } from "@/models/organizer/OrganizerEventStore"
 
 export const OrganizerEventListScreen: FC<

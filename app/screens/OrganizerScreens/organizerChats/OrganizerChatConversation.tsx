@@ -11,7 +11,7 @@ import { useHeader } from "@/utils/useHeader"
 import { ContentStyle } from "@shopify/flash-list"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { OrganizerChatStackScreenProps } from "@/navigators/navigationTypes.ts"
+import { OrganizerChatStackScreenProps } from "@/navigators/navigationTypes"
 import { IOrganizerChatMessage } from "@/models/organizer/OrganizerChatMessageModel"
 
 export const OrganizerChatConversationScreen: FC<

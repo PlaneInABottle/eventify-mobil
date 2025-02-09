@@ -8,7 +8,7 @@ import { View, ViewStyle } from "react-native"
 import {
   OrganizerChatStackParamList,
   OrganizerChatStackScreenProps,
-} from "@/navigators/navigationTypes.ts"
+} from "@/navigators/navigationTypes"
 import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"

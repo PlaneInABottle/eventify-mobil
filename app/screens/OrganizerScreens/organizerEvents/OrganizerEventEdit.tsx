@@ -13,7 +13,7 @@ import {
   ImageStyle,
   TextStyle,
 } from "react-native"
-import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes.ts"
+import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes"
 import { useHeader } from "@/utils/useHeader"
 import { TxKeyPath, locale, translate } from "@/i18n"
 import DatePicker from "react-native-date-picker"
