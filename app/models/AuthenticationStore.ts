@@ -81,13 +81,6 @@ export const AuthenticationStoreModel: IAnyModelType = types
       }
     }),
     userFirstRequest: flow(function* (userId: string) {
-      /*
-        supabase
-          .from("event_chats")
-          .select("*,event_chats_participants!inner()")
-          .eq("event_chats_participants.user_id", userId)
-          .eq("event_chats_participants.status", "joined"),
-            */
       const [profileRes, eventChatsRes] = yield Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single(),
         supabase.rpc("get_user_chat_events", {
@@ -99,60 +92,14 @@ export const AuthenticationStoreModel: IAnyModelType = types
         throw profileRes.error || eventChatsRes.error
       }
 
-      const { datesLocations, events, locations, publishers, eventChats } =
-        eventChatsRes.data.reduce(
-          (
-            acc: any,
-            item: {
-              event: OrganizerEventSnapshotIn
-              location: LocationSnapshotIn
-              publisher: IPublisherSnapshotIn
-              dates_location: OrganizerEventDateLocationSnapshotIn
-              event_chat: IOrganizerChatSnapshotIn
-            },
-          ) => {
-            acc.eventChats.push({ ...item.event_chat, is_user_joined: true })
-            acc.eventChatIds.add(item.event_chat.id)
-
-            acc.datesLocations.push(item.dates_location)
-            acc.datesLocationsIds.add(item.dates_location.id)
-
-            if (!acc.eventIds.has(item.event.id)) {
-              acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
-              acc.eventIds.add(item.event.id)
-            }
-
-            if (!acc.publisherIds.has(item.publisher.id)) {
-              acc.publishers.push(item.publisher)
-              acc.publisherIds.add(item.publisher.id)
-            }
-
-            if (!acc.locationIds.has(item.location.id)) {
-              acc.locations.push(item.location)
-              acc.locationIds.add(item.location.id)
-            }
-
-            return acc
-          },
-          {
-            datesLocations: [],
-            eventChats: [],
-            events: [],
-            locations: [],
-            publishers: [],
-            datesLocationsIds: new Set(),
-            eventChatIds: new Set(),
-            locationIds: new Set(),
-            publisherIds: new Set(),
-            eventIds: new Set(),
-          },
-        )
-
-      getRootStore(store).organizerEventStore.setProp("events", events)
-      getRootStore(store).locationStore.setProp("locations", locations)
-      getRootStore(store).publisherStore.setProp("publishers", publishers)
-      getRootStore(store).organizerEventDateLocationStore.setProp("datesLocations", datesLocations)
-      getRootStore(store).organizerChatStore.setProp("chats", eventChats)
+      getRootStore(store).organizerEventStore.setProp("events", eventChatsRes.data.events)
+      getRootStore(store).locationStore.setProp("locations", eventChatsRes.data.locations)
+      getRootStore(store).publisherStore.setProp("publishers", eventChatsRes.data.publishers)
+      getRootStore(store).organizerEventDateLocationStore.setProp(
+        "datesLocations",
+        eventChatsRes.data.datesLocations,
+      )
+      getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data.eventChats)
       getRootStore(store).userStore.setProp("user", profileRes.data)
     }),
     organizerFirstRequest: flow(function* (userId: string) {

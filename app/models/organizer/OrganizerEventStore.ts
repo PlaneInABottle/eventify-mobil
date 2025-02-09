@@ -114,70 +114,16 @@ export const OrganizerEventStoreModel = types
           ...regionForSupabase,
           _user_id: userId,
         })
+
         if (error) throw error
 
-        const { datesLocations, events, locations, publishers, eventChats } = data.reduce(
-          (
-            acc: any,
-            item: {
-              event: OrganizerEventSnapshotIn
-              location: LocationSnapshotIn
-              publisher: IPublisherSnapshotIn
-              dates_location: OrganizerEventDateLocationSnapshotIn
-              event_chat: IOrganizerChat
-              is_user_joined: boolean
-              is_user_favorite: boolean
-            },
-          ) => {
-            if (item.event_chat) {
-              acc.eventChats.push({ ...item.event_chat, is_user_joined: item.is_user_joined })
-              acc.eventChatIds.add(item.event_chat.id)
-            }
-
-            acc.datesLocations.push({
-              ...item.dates_location,
-              is_user_favorite: item.is_user_favorite,
-            })
-            acc.datesLocationsIds.add(item.dates_location.id)
-
-            if (!acc.eventIds.has(item.event.id)) {
-              acc.events.push({ ...item.event, publisher_profile: item.publisher.id })
-              acc.eventIds.add(item.event.id)
-            }
-
-            if (!acc.publisherIds.has(item.publisher.id)) {
-              acc.publishers.push(item.publisher)
-              acc.publisherIds.add(item.publisher.id)
-            }
-
-            if (!acc.locationIds.has(item.location.id)) {
-              acc.locations.push(item.location)
-              acc.locationIds.add(item.location.id)
-            }
-            return acc
-          },
-          {
-            datesLocations: [],
-            events: [],
-            locations: [],
-            publishers: [],
-            eventChats: [],
-            datesLocationsIds: new Set(),
-            eventChatIds: new Set(),
-            locationIds: new Set(),
-            publisherIds: new Set(),
-            eventIds: new Set(),
-          },
-        )
-        if (error) throw error
-
-        store.setProp("events", events)
-        getRootStore(store).locationStore.setProp("locations", locations)
-        getRootStore(store).publisherStore.setProp("publishers", publishers)
-        getRootStore(store).organizerChatStore.setProp("chats", eventChats)
+        store.setProp("events", data.events)
+        getRootStore(store).locationStore.setProp("locations", data.locations)
+        getRootStore(store).publisherStore.setProp("publishers", data.publishers)
+        getRootStore(store).organizerChatStore.setProp("chats", data.eventChats)
         getRootStore(store).organizerEventDateLocationStore.setProp(
           "datesLocations",
-          datesLocations,
+          data.datesLocations,
         )
       } catch (e) {
         handleError(e)
