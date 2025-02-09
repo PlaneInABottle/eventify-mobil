@@ -79,6 +79,7 @@ export const OrganizerEventStoreModel = types
     fetchEventsInSight: flow(function* (bounds: Region, userId: string) {
       try {
         const regionForSupabase = transformRegionForSupabase(bounds)
+        console.log(regionForSupabase)
         const { data, error } = yield supabase.rpc("events_in_sight", {
           ...regionForSupabase,
           _user_id: userId,
@@ -132,21 +133,6 @@ export const OrganizerEventStoreModel = types
           if (fields.image_url && isUpdate) store.deleteEventImage(fields.image_url)
           eventsFields.image_url = yield store.uploadEventImage(newImage)
         }
-
-        const _eventData = {
-          title: eventsFields.title,
-          description: eventsFields.description,
-          image_url: eventsFields.image_url,
-          publisher_id: eventsFields.publisher_id,
-        }
-
-        // Prepare dates locations for SQL
-        const _datesLocations = fields.datesLocations.map((dl) => ({
-          id: dl.id || null,
-          start_time: dl.start_time,
-          end_time: dl.end_time,
-          location_id: dl.location_id,
-        }))
         const { error } = yield supabase.rpc("create_update_event", {
           _event_id: eventsFields.id,
           _event_data: { ...eventsFields },
