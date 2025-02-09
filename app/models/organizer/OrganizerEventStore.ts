@@ -2,13 +2,11 @@ import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
-import { LocationSnapshotIn } from "../location/LocationStore"
 import { handleSuccess } from "@/utils/successHandler"
 import { transformRegionForSupabase } from "@/utils/regionFunctions"
 import { Region } from "react-native-maps"
 import { getRootStore } from "../helpers/getRootStore"
 import { OrganizerEventDateLocationSnapshotIn } from "./OrganizerEventDateModel"
-import { IOrganizerChat } from "./OrganizerChatStore"
 
 const PublisherModel = types.model("Publisher").props({
   id: types.identifier,
@@ -76,35 +74,6 @@ export const OrganizerEventStoreModel = types
         handleError(e, { toast: false })
       }
     }),
-    // WARN: THIS WILL REFACTORED later,
-    uploadDatesLocations: flow(function* (
-      eventId: string,
-      datesLocations: Array<{ start_time: string; end_time: string | null; location_id: string }>,
-    ) {
-      const newDatesLocations = datesLocations.map((dl) => {
-        return {
-          event_id: eventId,
-          ...dl,
-        }
-      })
-      // We catch error on top.
-      const { data, error } = yield supabase.rpc("upsert_events_dates_locations", {
-        p_event_id: eventId,
-        data: newDatesLocations,
-      })
-
-      if (error) throw error
-
-      return data.map((newDL: any) => {
-        return {
-          id: newDL.r_id,
-          event_id: newDL.r_event_id,
-          start_time: newDL.r_start_time,
-          end_time: newDL.r_end_time,
-          location_id: newDL.r_location_id,
-        }
-      })
-    }),
   }))
   .actions((store) => ({
     fetchEventsInSight: flow(function* (bounds: Region, userId: string) {
@@ -150,13 +119,13 @@ export const OrganizerEventStoreModel = types
           mimeType: string
           buffer: any
         }
-        datesLocations: Array<{ start_time: string; end_time: string | null; location_id: string }>
-        oldDateLocationIds: string[]
+        datesLocations: (Omit<OrganizerEventDateLocationSnapshotIn, "id" | "event_id"> & {
+          id?: string
+        })[]
       },
     ) {
       try {
-        let result
-        const { image: newImage, datesLocations, oldDateLocationIds, ...eventsFields } = fields
+        const { image: newImage, datesLocations, ...eventsFields } = fields
         const isUpdate = !!fields.id
 
         if (newImage) {
@@ -164,21 +133,28 @@ export const OrganizerEventStoreModel = types
           eventsFields.image_url = yield store.uploadEventImage(newImage)
         }
 
-        if (fields.id) {
-          result = yield supabase
-            .from("events")
-            .update(eventsFields)
-            .eq("id", fields.id)
-            .select()
-            .single()
-        } else {
-          result = yield supabase.from("events").insert(eventsFields).select().single()
+        const _eventData = {
+          title: eventsFields.title,
+          description: eventsFields.description,
+          image_url: eventsFields.image_url,
+          publisher_id: eventsFields.publisher_id,
         }
 
-        if (result.error) throw result.error
+        // Prepare dates locations for SQL
+        const _datesLocations = fields.datesLocations.map((dl) => ({
+          id: dl.id || null,
+          start_time: dl.start_time,
+          end_time: dl.end_time,
+          location_id: dl.location_id,
+        }))
+        const { error } = yield supabase.rpc("create_update_event", {
+          _event_id: eventsFields.id,
+          _event_data: { ...eventsFields },
+          _dates_locations: datesLocations,
+        })
 
-        // Here we upload dates and locations
-        yield store.uploadDatesLocations(result.data.id, datesLocations)
+        if (error) throw error
+
         getRootStore(store).authenticationStore.organizerFirstRequest(eventsFields.publisher_id)
         handleSuccess("success:eventSaved")
         return true

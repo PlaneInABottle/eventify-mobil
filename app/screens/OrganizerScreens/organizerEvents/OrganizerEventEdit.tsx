@@ -13,13 +13,13 @@ import {
   ImageStyle,
   TextStyle,
 } from "react-native"
-import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes"
 import { useHeader } from "@/utils/useHeader"
 import { TxKeyPath, locale, translate } from "@/i18n"
 import DatePicker from "react-native-date-picker"
 import { formatDate } from "@/utils/formatDate"
 import { SelectField } from "@/components/SelectField"
 import { pickSingleImage } from "@/utils/imageFunctions"
+import { OrganizerEventStackScreenProps } from "@/navigators/navigationTypes"
 
 type DateLocationEntry = {
   id?: string
@@ -66,7 +66,7 @@ export const OrganizerEventEditScreen: FC<
   OrganizerEventStackScreenProps<"OrganizerEventEditScreen">
 > = observer(function OrganizerEventScreen(_props) {
   const { eventId } = _props.route.params
-  const { goBack, navigate } = _props.navigation
+  const { goBack } = _props.navigation
 
   const { organizerEventStore, userStore, locationStore, organizerEventDateLocationStore } =
     useStores()
@@ -84,7 +84,6 @@ export const OrganizerEventEditScreen: FC<
   })
 
   const [open, setOpen] = useState(false)
-  const [oldDateLocationIds, setOldDateLocationIds] = useState<string[]>([])
 
   const [formState, setFormState] = useState<EventFormState>({
     title: event?.title || "",
@@ -145,7 +144,6 @@ export const OrganizerEventEditScreen: FC<
       image: formState.image,
       datesLocations: formState.datesLocations,
       publisher_id: userId,
-      oldDateLocationIds,
     })
     if (result !== true) {
       setFormState((prev) => ({
@@ -179,11 +177,6 @@ export const OrganizerEventEditScreen: FC<
   }
 
   const removeDateLocation = (index: number) => {
-    const removed = formState.datesLocations[index]
-    if (removed?.id) {
-      // Add id if it's not already in our oldDateLocationIds list.
-      setOldDateLocationIds((prev) => (prev.includes(removed.id!) ? prev : [...prev, removed.id!]))
-    }
     const newDates = formState.datesLocations.filter((_, i) => i !== index)
     updateField("datesLocations", newDates)
   }
