@@ -79,7 +79,6 @@ export const OrganizerEventStoreModel = types
     fetchEventsInSight: flow(function* (bounds: Region, userId: string) {
       try {
         const regionForSupabase = transformRegionForSupabase(bounds)
-        console.log(regionForSupabase)
         const { data, error } = yield supabase.rpc("events_in_sight", {
           ...regionForSupabase,
           _user_id: userId,

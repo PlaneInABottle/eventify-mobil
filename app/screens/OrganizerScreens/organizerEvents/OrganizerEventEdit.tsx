@@ -88,16 +88,17 @@ export const OrganizerEventEditScreen: FC<
   const [formState, setFormState] = useState<EventFormState>({
     title: event?.title || "",
     description: event?.description || "",
-    datesLocations: eventDates
-      ? eventDates.map((eventDate) => {
-          return {
-            id: eventDate.id,
-            start_time: eventDate.start_time,
-            end_time: eventDate.end_time,
-            location_id: eventDate.location_id.id,
-          }
-        })
-      : [{ start_time: new Date().toISOString(), end_time: null, location_id: "" }],
+    datesLocations:
+      eventDates.length > 0
+        ? eventDates.map((eventDate) => {
+            return {
+              id: eventDate.id,
+              start_time: eventDate.start_time,
+              end_time: eventDate.end_time,
+              location_id: eventDate.location_id.id,
+            }
+          })
+        : [{ start_time: new Date().toISOString(), end_time: null, location_id: "" }],
     image_url: event?.image_url || "",
     image: undefined,
     errors: {},
