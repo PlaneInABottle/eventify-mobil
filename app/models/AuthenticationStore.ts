@@ -188,7 +188,6 @@ export const AuthenticationStoreModel: IAnyModelType = types
           eventsDatesLocationsRes.error
         )
       }
-      console.log("loc res: ", locationRes)
 
       getRootStore(store).locationStore.setProp("locations", locationRes.data)
       getRootStore(store).organizerEventStore.setProp("events", eventsRes.data)
