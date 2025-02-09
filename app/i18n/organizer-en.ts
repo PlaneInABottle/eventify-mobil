@@ -30,6 +30,11 @@ const organizerEn = {
     multipleDatesAndLocations: "Multiple Dates and Locations",
     addDateLocation: "Add New Date-Location",
   },
+  organizerEventLocationMapScreen: {
+    publicLocations: "Public Locations",
+    chooseLocation: "Please Choose a Location",
+    locationSelected: "{{locationName}} Selected\n\nConfirm Changes",
+  },
   organizerLocationListScreen: {
     heading: "Locations",
   },
@@ -40,6 +45,7 @@ const organizerEn = {
     addressPlaceholder: "Enter address of the location",
     header: "{{locationName}}",
     dragMarker: "Note: Hold and Drag the marker",
+    publicLocation: "Note: This is a public location, you can't change it",
     addLocation: "Add Location",
   },
   organizerChatListScreen: {
