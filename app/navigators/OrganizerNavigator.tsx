@@ -19,6 +19,7 @@ import { OrganizerChatListScreen } from "@/screens/OrganizerScreens/organizerCha
 import { OrganizerChatEditScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatEdit"
 import { OrganizerChatParticipantScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatParticipant"
 import { OrganizerChatConversationScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatConversation"
+import { OrganizerLocationMap } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationMap"
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>()
 const EventStack = createNativeStackNavigator<OrganizerEventStackParamList>()
@@ -77,6 +78,15 @@ function OrganizerLocationStack() {
       <LocationStack.Screen
         name="OrganizerLocationEditScreen"
         component={OrganizerLocationEditScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+      <LocationStack.Screen
+        name="OrganizerLocationMapScreen"
+        component={OrganizerLocationMap}
         options={{
           contentStyle: {
             paddingTop: 0,

@@ -3,10 +3,10 @@ import { useStores } from "../../../models"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC } from "react"
-import { Icon, ListItem, ListView, Screen, Text } from "@/components"
+import { Button, Icon, ListItem, ListView, Screen, Text } from "@/components"
 import { View, ViewStyle } from "react-native"
 import { Location } from "@/models/location/LocationStore"
-import { OrganizerLocationStackScreenProps } from "@/navigators/navigationTypes.ts"
+import { OrganizerLocationStackScreenProps } from "@/navigators/navigationTypes"
 
 export const OrganizerLocationListScreen: FC<
   OrganizerLocationStackScreenProps<"OrganizerLocationListScreen">
@@ -20,16 +20,24 @@ export const OrganizerLocationListScreen: FC<
         data={locationStore.locationsForList}
         estimatedItemSize={10}
         ListHeaderComponent={
-          <View style={themed($heading)}>
-            <Text preset="heading" tx="organizerLocationListScreen:heading" />
-            <Icon
-              icon="plus"
-              size={24}
-              onPress={() =>
-                navigate("OrganizerLocationEditScreen", {
-                  locationId: undefined,
-                })
-              }
+          <View>
+            <View style={themed($heading)}>
+              <Text preset="heading" tx="organizerLocationListScreen:heading" />
+              <Icon
+                icon="plus"
+                size={24}
+                onPress={() =>
+                  navigate("OrganizerLocationEditScreen", {
+                    locationId: undefined,
+                  })
+                }
+              />
+            </View>
+            <Button
+              text="Add From Common"
+              onPress={() => navigate("OrganizerLocationMapScreen")}
+              LeftAccessory={() => <Icon icon="plus" size={24} style={themed($addIconStyle)} />}
+              preset="filled"
             />
           </View>
         }
@@ -63,4 +71,7 @@ const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
+})
+const $addIconStyle: ThemedStyle<ImageStyle> = ({ spacing, colors }) => ({
+  marginHorizontal: spacing.xs,
 })

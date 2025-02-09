@@ -158,7 +158,9 @@ export const AuthenticationStoreModel: IAnyModelType = types
     organizerFirstRequest: flow(function* (userId: string) {
       const [locationRes, eventsRes, eventChatsRes, profileRes, eventsDatesLocationsRes] =
         yield Promise.all([
-          supabase.from("locations").select("*").eq("creator_id", userId),
+          supabase.rpc("get_user_locations_and_favorites", {
+            _user_id: userId,
+          }),
           supabase.from("events").select("*").eq("publisher_id", userId),
           supabase
             .from("event_chats")
@@ -186,6 +188,7 @@ export const AuthenticationStoreModel: IAnyModelType = types
           eventsDatesLocationsRes.error
         )
       }
+      console.log("loc res: ", locationRes)
 
       getRootStore(store).locationStore.setProp("locations", locationRes.data)
       getRootStore(store).organizerEventStore.setProp("events", eventsRes.data)

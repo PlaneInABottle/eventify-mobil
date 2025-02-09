@@ -66,7 +66,7 @@ export const OrganizerEventEditScreen: FC<
   OrganizerEventStackScreenProps<"OrganizerEventEditScreen">
 > = observer(function OrganizerEventScreen(_props) {
   const { eventId } = _props.route.params
-  const { goBack } = _props.navigation
+  const { goBack, navigate } = _props.navigation
 
   const { organizerEventStore, userStore, locationStore, organizerEventDateLocationStore } =
     useStores()

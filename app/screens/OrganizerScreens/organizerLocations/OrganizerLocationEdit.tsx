@@ -40,6 +40,7 @@ export const OrganizerLocationEditScreen: FC<
 
   const location = locationStore.locationById(locationId)
   const userId = userStore.userId
+  const isFormReadOnly = location?.creator_id !== userId
 
   useHeader({
     titleTx: location
@@ -141,13 +142,19 @@ export const OrganizerLocationEditScreen: FC<
               longitude: regionRef.current.longitude,
             }}
             title={location?.name}
-            draggable
+            draggable={!isFormReadOnly}
           />
         </MapView>
       </View>
 
       <View style={themed($topContainer)}>
-        <Text tx="organizerLocationEditScreen:dragMarker" />
+        <Text
+          tx={
+            isFormReadOnly
+              ? "organizerLocationEditScreen:publicLocation"
+              : "organizerLocationEditScreen:dragMarker"
+          }
+        />
       </View>
       <View style={themed($textFieldContainer)}>
         <TextField
@@ -158,7 +165,7 @@ export const OrganizerLocationEditScreen: FC<
           keyboardType="default"
           helperTx={formState.errors.name}
           status={formState.errors.name ? "error" : undefined}
-          readOnly={formState.isLoading}
+          readOnly={formState.isLoading || isFormReadOnly}
         />
         <TextField
           value={formState.address}
@@ -169,13 +176,13 @@ export const OrganizerLocationEditScreen: FC<
           keyboardType="default"
           helperTx={formState.errors.address}
           status={formState.errors.address ? "error" : undefined}
-          readOnly={formState.isLoading}
+          readOnly={formState.isLoading || isFormReadOnly}
         />
         <Button
           preset="reversed"
           tx={formState.isLoading ? undefined : "common:save"}
           disabledStyle={themed($disabledButton)}
-          disabled={formState.isLoading}
+          disabled={formState.isLoading || isFormReadOnly}
           onPress={handleSaveLocation}
           RightAccessory={formState.isLoading ? LoadingIndicator : undefined}
         />

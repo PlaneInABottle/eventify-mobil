@@ -1,8 +1,10 @@
 import { withSetPropAction } from "../helpers/withSetPropAction"
 import { supabase } from "@/services/auth/supabase"
 import { handleError } from "@/utils/errorHandler"
+import { transformRegionForSupabase } from "@/utils/regionFunctions"
 import { handleSuccess } from "@/utils/successHandler"
 import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
+import { Region } from "react-native-maps"
 
 const PointModel = types.model("Point", {
   coordinates: types.refinement(types.array(types.number), (arr) => !!arr && arr.length === 2),
@@ -22,6 +24,10 @@ export const LocationStoreModel = types
   .props({
     locations: types.array(LocationModel),
   })
+  .volatile(() => ({
+    locationsForSelect: [] as Location[],
+    selectedLocation: undefined as Location | undefined,
+  }))
   .views((store) => ({
     get locationsForList() {
       return store.locations.slice()
@@ -39,6 +45,37 @@ export const LocationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
+    selectLocation: (location: Location | undefined) => {
+      store.selectedLocation = location
+    },
+    addSelectLocationToStore: flow(function* (userId: string) {
+      if (!store.selectedLocation) return
+      try {
+        const { error } = yield supabase.from("favorites_locations").insert({
+          user_id: userId,
+          location_id: store.selectedLocation.id,
+        })
+
+        if (error) throw error
+        store.locations.push(store.selectedLocation)
+      } catch (e) {
+        handleError(e)
+      } finally {
+        store.locationsForSelect = []
+        store.selectedLocation = undefined
+      }
+    }),
+  }))
+  .actions((store) => ({
+    fetchLocationsInSight: flow(function* (bounds: Region, userId: string) {
+      const regionForSupabase = transformRegionForSupabase(bounds)
+      const { data, error } = yield supabase.rpc("locations_in_sight", {
+        ...regionForSupabase,
+        _user_id: userId,
+      })
+      if (error) throw error
+      store.locationsForSelect = data
+    }),
     fetchOrganizerLocations: flow(function* (userId) {
       try {
         if (!userId) throw new Error("errors:userIdNotFound")
