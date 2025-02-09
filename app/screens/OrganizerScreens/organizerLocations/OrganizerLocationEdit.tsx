@@ -164,7 +164,7 @@ export const OrganizerLocationEditScreen: FC<
           placeholderTx="organizerLocationEditScreen:namePlaceholder"
           keyboardType="default"
           helperTx={formState.errors.name}
-          status={formState.errors.name ? "error" : undefined}
+          status={formState.errors.name ? "error" : isFormReadOnly ? "disabled" : undefined}
           readOnly={formState.isLoading || isFormReadOnly}
         />
         <TextField
@@ -175,7 +175,7 @@ export const OrganizerLocationEditScreen: FC<
           placeholderTx="organizerLocationEditScreen:addressPlaceholder"
           keyboardType="default"
           helperTx={formState.errors.address}
-          status={formState.errors.address ? "error" : undefined}
+          status={formState.errors.address ? "error" : isFormReadOnly ? "disabled" : undefined}
           readOnly={formState.isLoading || isFormReadOnly}
         />
         <Button
