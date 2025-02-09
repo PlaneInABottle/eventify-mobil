@@ -80,7 +80,7 @@ function CheckboxInput(props: CheckboxInputProps) {
   const iconTintColor = [
     disabled && colors.palette.neutral600,
     status === "error" && colors.error,
-    colors.palette.accent100,
+    colors.palette.neutral800,
   ].filter(Boolean)[0]
 
   return (
