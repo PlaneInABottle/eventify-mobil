@@ -52,6 +52,23 @@ const en = {
     locationNameShort: "Location's name should be at least 6 characters.",
     locationAddressShort: "Location's address should be at least 16 characters.",
   },
+  filters: {
+    filtersNotApplied: "Note: Filters not applied without a selection",
+    date: {
+      date: "Date",
+      today: "Today",
+      tomorrow: "Tomorrow",
+      thisWeek: "This Week",
+    },
+    music: {
+      music: "Music",
+      selectAllMusic: "Select All Music",
+      rock: "Rock",
+      pop: "Pop",
+      jazz: "Jazz",
+      classic: "Classic",
+    },
+  },
   success: {
     title: "Success",
     // Auth
