@@ -48,17 +48,20 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
           longitudeDelta: 0.0421,
         }}
       >
-        {locationsForList.map((location) => (
-          <NewMarkerField
-            key={location.id}
-            location={location}
-            eventsDateLocations={eventsDatesByLocationId(location.id)}
-            coordinate={{
-              longitude: location.lat_long.coordinates[0],
-              latitude: location.lat_long.coordinates[1],
-            }}
-          />
-        ))}
+        {locationsForList.map((location) => {
+          const eventDatesByLocation = eventsDatesByLocationId(location.id)
+          return eventDatesByLocation.length === 0 ? undefined : (
+            <NewMarkerField
+              key={location.id}
+              location={location}
+              eventsDateLocations={eventDatesByLocation}
+              coordinate={{
+                longitude: location.lat_long.coordinates[0],
+                latitude: location.lat_long.coordinates[1],
+              }}
+            />
+          )
+        })}
       </MapView>
 
       <Button
@@ -82,7 +85,9 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
             data: [
               { label: "filters:date.today", value: "today" },
               { label: "filters:date.tomorrow", value: "tomorrow" },
-              { label: "filters:date.thisWeek", value: "this-week" },
+              { label: "filters:date.next7Days", value: "next-seven-days" },
+              { label: "filters:date.next14Days", value: "next-fourteen-days" },
+              { label: "filters:date.next30Days", value: "next-thirty-days" },
             ],
           },
         ]}
