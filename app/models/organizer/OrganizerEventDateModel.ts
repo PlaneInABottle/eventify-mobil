@@ -41,14 +41,18 @@ export const OrganizerEventDateLocationStoreModel = types
   .views((self) => ({
     // TODO: Refactor in the future, didn't like it very much
     get datesLocationsAsList() {
-      return self.datesLocations.slice().sort((a, b) => a.start_time.localeCompare(b.start_time))
+      const now = new Date().toISOString()
+      return self.datesLocations
+        .filter((dl) => dl.start_time >= now)
+        .sort((a, b) => a.start_time.localeCompare(b.start_time))
     },
     eventsDatesByEventId(eventId: string | undefined) {
       return self.datesLocations.filter((dl) => dl.event_id.id === eventId)
     },
     eventsDatesByLocationId(locationId: string) {
+      const now = new Date().toISOString()
       return self.datesLocations
-        .filter((dl) => dl.location_id.id === locationId)
+        .filter((dl) => dl.start_time >= now && dl.location_id.id === locationId)
         .sort((a, b) => a.start_time.localeCompare(b.start_time))
     },
   }))
