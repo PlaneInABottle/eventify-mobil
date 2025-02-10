@@ -58,7 +58,9 @@ const en = {
       date: "Date",
       today: "Today",
       tomorrow: "Tomorrow",
-      thisWeek: "This Week",
+      next7Days: "Next 7 Days",
+      next14Days: "Next 14 Days",
+      next30Days: "Next 30 Days",
     },
     music: {
       music: "Music",
