@@ -11,13 +11,14 @@ import { $styles, ThemedStyle } from "@/theme"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { LocationSnapshotIn } from "@/models/location/LocationStore"
 import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
+import { SectionListSelectField } from "@/components/SectionListSelectField"
 
 interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
 
 export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMapScreen(_props) {
   const {
     organizerEventDateLocationStore: { eventsDatesByLocationId },
-    organizerEventStore: { fetchEventsInSight },
+    organizerEventStore: { fetchEventsInSight, setProp, typeFilters, dateFilters },
     locationStore: { locationsForList },
     userStore: { userId },
   } = useStores()
@@ -33,7 +34,6 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
       setIsSearching(false)
     }
   }
-
   return (
     <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
       <MapView
@@ -62,13 +62,52 @@ export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMa
       </MapView>
 
       <Button
-        preset="filled"
+        preset="default"
         tx={isSearching ? "common:searching" : "eventMapScreen:searchThisArea"}
         style={themed($searchButton)}
         disabledStyle={themed($disabledButton)}
         onPress={handleSearchThisArea}
         disabled={isSearching}
         RightAccessory={isSearching ? LoadingIndicator : undefined}
+      />
+      <SectionListSelectField
+        containerStyle={themed($filterButton)}
+        isOnlyIcon
+        multiple={false}
+        iconName="calendar"
+        showFooter={true}
+        sections={[
+          {
+            title: "filters:date.date",
+            data: [
+              { label: "filters:date.today", value: "today" },
+              { label: "filters:date.tomorrow", value: "tomorrow" },
+              { label: "filters:date.thisWeek", value: "this-week" },
+            ],
+          },
+        ]}
+        value={dateFilters.slice()}
+        onSelect={(v) => setProp("dateFilters", v)}
+      />
+      <SectionListSelectField
+        containerStyle={themed($filterButton)}
+        isOnlyIcon
+        iconName="filter"
+        sections={[
+          {
+            title: "filters:music.music",
+            data: [
+              { label: "filters:music.selectAllMusic", value: "select-all-music" },
+              { label: "filters:music.rock", value: "rock" },
+              { label: "filters:music.pop", value: "pop" },
+              { label: "filters:music.jazz", value: "jazz" },
+              { label: "filters:music.classic", value: "classic" },
+            ],
+          },
+        ]}
+        value={typeFilters.slice()}
+        onSelect={(v) => setProp("typeFilters", v)}
+        multiple
       />
     </Screen>
   )
@@ -231,6 +270,12 @@ const $searchButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   minWidth: 200,
 })
 
+const $filterButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  margin: spacing.lg,
+  borderRadius: spacing.xxl,
+  alignSelf: "flex-end",
+})
+
 const $disabledButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral400,
   opacity: 0.7,
@@ -290,19 +335,4 @@ const $eventContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   paddingBottom: spacing.lg,
   borderBottomWidth: 1,
   borderBottomColor: colors.separator,
-})
-
-const $separator: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  height: 1,
-  backgroundColor: colors.separator,
-  marginVertical: spacing.lg,
-})
-
-const $noEventsText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-  textAlign: "center",
-})
-
-const $chatButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.sm,
 })

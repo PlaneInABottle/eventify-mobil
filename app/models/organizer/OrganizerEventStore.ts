@@ -37,6 +37,8 @@ export const OrganizerEventStoreModel = types
   .model("OrganizerEventStore")
   .props({
     events: types.array(OrganizerEventModel),
+    typeFilters: types.array(types.string),
+    dateFilters: types.array(types.string),
   })
   .views((self) => ({
     get eventsAsList() {
