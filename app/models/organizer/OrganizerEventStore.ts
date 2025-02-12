@@ -84,17 +84,19 @@ export const OrganizerEventStoreModel = types
         const { data, error } = yield supabase.rpc("events_in_sight", {
           ...regionForSupabase,
           _user_id: userId,
+          _date_filters: store.dateFilters,
+          _type_filters: store.typeFilters,
         })
 
         if (error) throw error
 
-        store.setProp("events", data.events)
-        getRootStore(store).locationStore.setProp("locations", data.locations)
-        getRootStore(store).publisherStore.setProp("publishers", data.publishers)
-        getRootStore(store).organizerChatStore.setProp("chats", data.eventChats)
+        store.setProp("events", data.events ?? [])
+        getRootStore(store).locationStore.setProp("locations", data.locations ?? [])
+        getRootStore(store).publisherStore.setProp("publishers", data.publishers ?? [])
+        getRootStore(store).organizerChatStore.setProp("chats", data.eventChats ?? [])
         getRootStore(store).organizerEventDateLocationStore.setProp(
           "datesLocations",
-          data.datesLocations,
+          data.datesLocations ?? [],
         )
       } catch (e) {
         handleError(e)

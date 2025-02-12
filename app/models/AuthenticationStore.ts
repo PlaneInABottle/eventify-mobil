@@ -9,10 +9,6 @@ import { handleSuccess } from "@/utils/successHandler"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { IPublisherSnapshotIn, OrganizerEventSnapshotIn } from "./organizer/OrganizerEventStore"
-import { LocationSnapshotIn } from "./location/LocationStore"
-import { OrganizerEventDateLocationSnapshotIn } from "./organizer/OrganizerEventDateModel"
-import { IOrganizerChatSnapshotIn } from "./organizer/OrganizerChatStore"
 
 export const AuthenticationStoreModel: IAnyModelType = types
   .model("AuthenticationStore")
@@ -92,15 +88,15 @@ export const AuthenticationStoreModel: IAnyModelType = types
         throw profileRes.error || eventChatsRes.error
       }
 
-      getRootStore(store).organizerEventStore.setProp("events", eventChatsRes.data.events)
-      getRootStore(store).locationStore.setProp("locations", eventChatsRes.data.locations)
-      getRootStore(store).publisherStore.setProp("publishers", eventChatsRes.data.publishers)
+      getRootStore(store).organizerEventStore.setProp("events", eventChatsRes.data.events ?? [])
+      getRootStore(store).locationStore.setProp("locations", eventChatsRes.data.locations ?? [])
+      getRootStore(store).publisherStore.setProp("publishers", eventChatsRes.data.publishers ?? [])
       getRootStore(store).organizerEventDateLocationStore.setProp(
         "datesLocations",
-        eventChatsRes.data.datesLocations,
+        eventChatsRes.data.datesLocations ?? [],
       )
-      getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data.eventChats)
-      getRootStore(store).userStore.setProp("user", profileRes.data)
+      getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data.eventChats ?? [])
+      getRootStore(store).userStore.setProp("user", profileRes.data ?? [])
     }),
     organizerFirstRequest: flow(function* (userId: string) {
       const { data, error } = yield supabase.rpc("get_organizer_events", {
@@ -111,14 +107,14 @@ export const AuthenticationStoreModel: IAnyModelType = types
         throw error
       }
 
-      getRootStore(store).locationStore.setProp("locations", data.locations)
-      getRootStore(store).organizerEventStore.setProp("events", data.events)
-      getRootStore(store).organizerChatStore.setProp("chats", data.eventChats)
+      getRootStore(store).locationStore.setProp("locations", data.locations ?? [])
+      getRootStore(store).organizerEventStore.setProp("events", data.events ?? [])
+      getRootStore(store).organizerChatStore.setProp("chats", data.eventChats ?? [])
       getRootStore(store).organizerEventDateLocationStore.setProp(
         "datesLocations",
-        data.eventsDatesLocations,
+        data.eventsDatesLocations ?? [],
       )
-      getRootStore(store).userStore.setProp("user", data.profile)
+      getRootStore(store).userStore.setProp("user", data.profile ?? [])
     }),
   }))
   .actions((store) => ({

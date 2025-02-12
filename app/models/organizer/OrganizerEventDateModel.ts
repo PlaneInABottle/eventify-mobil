@@ -39,12 +39,8 @@ export const OrganizerEventDateLocationStoreModel = types
     datesLocations: types.array(OrganizerEventDateLocationModel),
   })
   .views((self) => ({
-    // TODO: Refactor in the future, didn't like it very much
     get datesLocationsAsList() {
-      const now = new Date().toISOString()
-      return self.datesLocations
-        .filter((dl) => dl.start_time >= now)
-        .sort((a, b) => a.start_time.localeCompare(b.start_time))
+      return self.datesLocations.slice().sort((a, b) => a.start_time.localeCompare(b.start_time))
     },
     eventsDatesByEventId(eventId: string | undefined) {
       return self.datesLocations.filter((dl) => dl.event_id.id === eventId)

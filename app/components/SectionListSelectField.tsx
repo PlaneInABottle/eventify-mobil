@@ -206,16 +206,20 @@ export const SectionListSelectField = forwardRef(function SelectField(
         <BottomSheetSectionList
           sections={sections}
           keyExtractor={(item) => item.value}
+          /*
           ListHeaderComponent={() =>
             value.length === 0 ? (
               <Text tx="filters:filtersNotApplied" preset="default" style={themed($note)} />
             ) : undefined
           }
+                        */
           renderItem={renderListItem}
           renderSectionHeader={({ section }) => (
             <Text tx={section.title} preset="subheading" size="xl" style={themed($sectionHeader)} />
           )}
-          contentContainerStyle={{ paddingBottom: bottom + (multiple ? spacing.xl * 2 : 0) }}
+          contentContainerStyle={{
+            paddingBottom: bottom + (multiple || showFooter ? spacing.xl * 2 : 0),
+          }}
         />
       </BottomSheetModal>
     </>
