@@ -26,6 +26,7 @@ const en = {
     title: "There was an error.",
     invalidCredentials: "Invalid credentials, check your credentials",
     invalidEmail: "Invalid email address.",
+    invalidValue: "Invalid value",
     timeout: "Request timed out. Please try again.",
     cannotConnect: "Cannot connect to the server. Please check your internet connection.",
     server: "Server error occurred. Please try again later.",
@@ -43,6 +44,7 @@ const en = {
     cantBeBlank: "Field can't be blank",
     socketNotConnected: "Socket not connected. Try again.",
     must6Chars: "Field must be at least 6 characters",
+    must16Chars: "Field must be at least 16 characters.",
     mustBeValidEmail: "Field must be valid email address",
     profile: {
       deleteFailed: "Failed to delete profile",
@@ -71,6 +73,12 @@ const en = {
       classic: "Classic",
     },
   },
+  campaign: {
+    maxPerUser: "Limit of maximum generatable code for a user",
+    dailyLimit: "Limit of how many codes can a user generate daily.",
+    totalCodeLimit: "Total generatable codes for the campaign",
+    minInterval: "Minimum interval to generate codes for a user in hours.",
+  },
   success: {
     title: "Success",
     // Auth
@@ -91,6 +99,7 @@ const en = {
     default: "Operation completed successfully",
     locationSaved: "Location saved successfully.",
     eventSaved: "Event saved successfully.",
+    campaignSaved: "Campaign saved successfully",
     participantRemoved: "Participant removed successfully.",
     chatSaved: "Chat saved successfully.",
   },

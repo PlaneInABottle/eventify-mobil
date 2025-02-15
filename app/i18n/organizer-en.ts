@@ -74,6 +74,24 @@ const organizerEn = {
   organizerChatConversationScreen: {
     headerTitle: "{{eventName}}'s Chat",
   },
+  organizerCampaignListScreen: {
+    heading: "Campaigns",
+  },
+  organizerCampaignEditScreen: {
+    header: "Campaigns",
+    addCampaign: "Add Campaign",
+    title: "Campaign's Title",
+    titlePlaceholder: "Enter Campaign's Title",
+    details: "Campaign's Details",
+    detailsPlaceholder: "Enter Campaign's Details",
+    rules: "Rules",
+    ruleType: "Rule Type",
+    ruleValue: "Rule Value",
+    addRule: "Add Rule",
+    image: "Image",
+    addImage: "Add Image",
+    changeImage: "Change Image",
+  },
 }
 
 export default organizerEn
