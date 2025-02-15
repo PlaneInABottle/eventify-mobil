@@ -9,6 +9,9 @@ import { LocationStoreModel } from "./location/LocationStore"
 import { OrganizerEventStoreModel, PublisherStoreModel } from "./organizer/OrganizerEventStore"
 import { OrganizerChatStoreModel } from "./organizer/OrganizerChatStore"
 import { OrganizerEventDateLocationStoreModel } from "./organizer/OrganizerEventDateModel"
+import { CampaignStoreModel } from "./campaign/CampaignStore"
+import { CampaignRuleStoreModel } from "./campaign/CampaignRuleStore"
+import { CampaignCodeStoreModel } from "./campaign/CampaignCodeStore"
 
 /**
  * A RootStore model.
@@ -25,6 +28,9 @@ export const RootStoreModel = types
     organizerChatStore: types.optional(OrganizerChatStoreModel, {}),
     publisherStore: types.optional(PublisherStoreModel, {}),
     organizerEventDateLocationStore: types.optional(OrganizerEventDateLocationStoreModel, {}),
+    campaignStore: types.optional(CampaignStoreModel, {}),
+    campaignRuleStore: types.optional(CampaignRuleStoreModel, {}),
+    campaignCodeStore: types.optional(CampaignCodeStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
