@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { OrganizerEventListScreen } from "@/screens/OrganizerScreens/organizerEvents/OrganizerEventList"
 import { OrganizerLocationListScreen } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationList"
 import {
+  OrganizerCampaignStackParamList,
   OrganizerChatStackParamList,
   OrganizerEventStackParamList,
   OrganizerLocationStackParamList,
@@ -20,11 +21,14 @@ import { OrganizerChatEditScreen } from "@/screens/OrganizerScreens/organizerCha
 import { OrganizerChatParticipantScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatParticipant"
 import { OrganizerChatConversationScreen } from "@/screens/OrganizerScreens/organizerChats/OrganizerChatConversation"
 import { OrganizerLocationMap } from "@/screens/OrganizerScreens/organizerLocations/OrganizerLocationMap"
+import { OrganizerCampaignEditScreen } from "@/screens/OrganizerScreens/organizerCampaigns/OrganizerCampaignEdit"
+import { OrganizerCampaignListScreen } from "@/screens/OrganizerScreens/organizerCampaigns/OrganizerCampaignList"
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>()
 const EventStack = createNativeStackNavigator<OrganizerEventStackParamList>()
 const LocationStack = createNativeStackNavigator<OrganizerLocationStackParamList>()
 const ChatStack = createNativeStackNavigator<OrganizerChatStackParamList>()
+const CampaignStack = createNativeStackNavigator<OrganizerCampaignStackParamList>()
 
 function OrganizerEventsStack() {
   const {
@@ -135,6 +139,38 @@ function OrganizerChatStack() {
   )
 }
 
+function OrganizerCampaignStack() {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+  const { top } = useSafeAreaInsets()
+  return (
+    <CampaignStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        navigationBarColor: colors.background,
+        contentStyle: {
+          paddingTop: top + 20,
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <CampaignStack.Screen
+        name="OrganizerCampaignListScreen"
+        component={OrganizerCampaignListScreen}
+      />
+      <CampaignStack.Screen
+        name="OrganizerCampaignEditScreen"
+        component={OrganizerCampaignEditScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+    </CampaignStack.Navigator>
+  )
+}
 export function OrganizerNavigator() {
   const { bottom } = useSafeAreaInsets()
   const {
@@ -181,6 +217,16 @@ export function OrganizerNavigator() {
           tabBarLabel: "Chats",
           tabBarIcon: ({ focused }) => (
             <Icon icon="chat" color={focused ? colors.tint : colors.tintInactive} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Campaigns"
+        component={OrganizerCampaignStack}
+        options={{
+          tabBarLabel: "Campaigns",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="bell" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
         }}
       />

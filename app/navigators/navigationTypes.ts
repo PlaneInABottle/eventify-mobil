@@ -5,7 +5,6 @@ import { AppStackParamList, AppStackScreenProps } from "."
 
 export type OrganizerEventStackParamList = {
   OrganizerEventListScreen: undefined
-  OrganizerEventDisplayScreen: undefined
   OrganizerEventEditScreen: { eventId?: string }
 }
 export type OrganizerLocationStackParamList = {
@@ -26,13 +25,24 @@ export type OrganizerProfileStackParamList = {
   OrganizerProfileEditScreen: undefined
 }
 
+export type OrganizerCampaignStackParamList = {
+  OrganizerCampaignListScreen: undefined
+  OrganizerCampaignEditScreen: { campaignId?: string }
+}
+
 export type OrganizerTabParamList = {
   Events: NavigatorScreenParams<OrganizerEventStackParamList>
   Locations: NavigatorScreenParams<OrganizerLocationStackParamList>
   Chats: NavigatorScreenParams<OrganizerChatStackParamList>
   Profile: NavigatorScreenParams<OrganizerProfileStackParamList>
+  Campaigns: NavigatorScreenParams<OrganizerCampaignStackParamList>
 }
 
+export type OrganizerCampaignStackScreenProps<T extends keyof OrganizerCampaignStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<OrganizerCampaignStackParamList, T>,
+    OrganizerTabScreenProps<"Campaigns">
+  >
 export type OrganizerLocationStackScreenProps<T extends keyof OrganizerLocationStackParamList> =
   CompositeScreenProps<
     NativeStackScreenProps<OrganizerLocationStackParamList, T>,
