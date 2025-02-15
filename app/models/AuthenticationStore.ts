@@ -114,6 +114,8 @@ export const AuthenticationStoreModel: IAnyModelType = types
         "datesLocations",
         data.eventsDatesLocations ?? [],
       )
+      getRootStore(store).campaignStore.setProp("campaigns", data.campaigns ?? [])
+      getRootStore(store).campaignRuleStore.setProp("rules", data.campaignRules ?? [])
       getRootStore(store).userStore.setProp("user", data.profile ?? [])
     }),
   }))
