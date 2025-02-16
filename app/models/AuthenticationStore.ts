@@ -96,8 +96,12 @@ export const AuthenticationStoreModel: IAnyModelType = types
         eventChatsRes.data.datesLocations ?? [],
       )
       getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data.eventChats ?? [])
+      getRootStore(store).campaignStore.setProp("campaigns", eventChatsRes.data.campaigns ?? [])
+      getRootStore(store).campaignRuleStore.setProp("rules", eventChatsRes.data.campaignRules ?? [])
+      getRootStore(store).campaignCodeStore.setProp("codes", eventChatsRes.data.campaignCodes ?? [])
       getRootStore(store).userStore.setProp("user", profileRes.data ?? [])
     }),
+
     organizerFirstRequest: flow(function* (userId: string) {
       const { data, error } = yield supabase.rpc("get_organizer_events", {
         _user_id: userId,
