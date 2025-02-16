@@ -14,11 +14,13 @@ import { EventListScreen } from "@/screens/events/EventListScreen"
 import { EventMapScreen } from "@/screens/events/EventMapScreen"
 import { ProfileScreen } from "@/screens/ProfileScreen"
 import { ChatListScreen } from "@/screens/chat/ChatListScreen"
+import { CampaignListScreen } from "@/screens/campaign/CampaignListScreen"
 
 // Define the Event tab's parameter list
 export type EventTabParamList = {
   EventListScreen: undefined
   EventMapScreen: undefined
+  CampaignListScreen: undefined
 }
 
 // Define the main tab parameter list
@@ -74,6 +76,13 @@ function EventsNavigator() {
         component={EventListScreen}
         options={{
           tabBarLabel: "LIST",
+        }}
+      />
+      <EventTab.Screen
+        name="CampaignListScreen"
+        component={CampaignListScreen}
+        options={{
+          tabBarLabel: "CAMPAIGNS",
         }}
       />
     </EventTab.Navigator>
