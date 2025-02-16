@@ -219,7 +219,7 @@ const NewMarkerField = observer(
                     */}
                 <View style={themed($organizerContainer)}>
                   <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
-                  <Text text={dateLocation.event_id.publisher_profile?.display_name} />
+                  <Text text={dateLocation.event_id.publisher_id?.display_name} />
                 </View>
 
                 {/* Chat Button 
