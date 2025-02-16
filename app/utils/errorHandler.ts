@@ -1,6 +1,5 @@
 import { translate } from "@/i18n"
 import Toast from "react-native-toast-message"
-import { ErrorType, reportCrash } from "./crashReporting"
 import * as Sentry from "@sentry/react-native"
 export interface ErrorConfig {
   silent?: boolean
