@@ -76,6 +76,7 @@ const organizerEn = {
   },
   organizerCampaignListScreen: {
     heading: "Campaigns",
+    generateCode: "Generate Code",
   },
   organizerCampaignEditScreen: {
     header: "Campaigns",
