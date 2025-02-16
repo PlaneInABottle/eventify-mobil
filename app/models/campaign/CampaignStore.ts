@@ -8,15 +8,50 @@ import { getRootStore } from "../helpers/getRootStore"
 import { handleSuccess } from "@/utils/successHandler"
 import { withSetPropAction } from "../helpers/withSetPropAction"
 
-export const CampaignModel = types.model("Campaign").props({
-  id: types.identifier,
-  title: types.string,
-  details: types.string,
-  end_date: types.maybeNull(types.string),
-  image_url: types.maybeNull(types.string),
-  publisher_id: types.reference(PublisherModel),
-  location_id: types.reference(LocationModel),
-})
+export const CampaignModel = types
+  .model("Campaign")
+  .props({
+    id: types.identifier,
+    title: types.string,
+    details: types.string,
+    end_date: types.maybeNull(types.string),
+    image_url: types.maybeNull(types.string),
+    publisher_id: types.reference(PublisherModel),
+    location_id: types.reference(LocationModel),
+    is_user_favorite: types.maybeNull(types.boolean),
+  })
+  .actions((item) => ({
+    toggleFavorite: flow(function* () {
+      try {
+        const userId: string = getRootStore(item).userStore.userId
+        const { error } = yield supabase.rpc("toggle_favorite_campaign", {
+          _user_id: userId,
+          _campaign_id: item.id,
+        })
+        if (error) throw error
+        item.is_user_favorite = !item.is_user_favorite
+      } catch (e) {
+        handleError(e)
+      }
+    }),
+    generateCampaignCode: flow(function* () {
+      try {
+        const userId: string = getRootStore(item).userStore.userId
+        const { data, error } = yield supabase
+          .from("campaign_codes")
+          .insert({
+            campaign_id: item.id,
+            user_id: userId,
+          })
+          .select()
+          .single()
+        if (error) throw error
+        getRootStore(item).campaignCodeStore.addCode(data)
+      } catch (e) {
+        handleError(e)
+      }
+    }),
+  }))
 
 export const CampaignStoreModel = types
   .model("CampaignStore")
