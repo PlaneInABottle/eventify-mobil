@@ -8,7 +8,7 @@ import { Region } from "react-native-maps"
 import { getRootStore } from "../helpers/getRootStore"
 import { OrganizerEventDateLocationSnapshotIn } from "./OrganizerEventDateModel"
 
-const PublisherModel = types.model("Publisher").props({
+export const PublisherModel = types.model("Publisher").props({
   id: types.identifier,
   email: types.string,
   about: types.maybeNull(types.string),
@@ -26,11 +26,10 @@ export const PublisherStoreModel = types
 
 export const OrganizerEventModel = types.model("OrganizerEvent").props({
   id: types.identifier,
-  publisher_id: types.string,
+  publisher_id: types.reference(PublisherModel),
   title: types.string,
   description: types.optional(types.string, ""),
   image_url: types.maybeNull(types.string),
-  publisher_profile: types.maybe(types.reference(PublisherModel)),
 })
 
 export const OrganizerEventStoreModel = types
@@ -94,6 +93,8 @@ export const OrganizerEventStoreModel = types
         getRootStore(store).locationStore.setProp("locations", data.locations ?? [])
         getRootStore(store).publisherStore.setProp("publishers", data.publishers ?? [])
         getRootStore(store).organizerChatStore.setProp("chats", data.eventChats ?? [])
+        getRootStore(store).campaignStore.setProp("campaigns", data.campaigns ?? [])
+        getRootStore(store).campaignRuleStore.setProp("rules", data.campaignRules ?? [])
         getRootStore(store).organizerEventDateLocationStore.setProp(
           "datesLocations",
           data.datesLocations ?? [],
