@@ -198,7 +198,7 @@ export const SectionListSelectField = forwardRef(function SelectField(
                   style={themed($bottomSheetFooter)}
                   bottomInset={bottom}
                 >
-                  <Button text="Dismiss" preset="reversed" onPress={dismissOptions} />
+                  <Button tx={"common:dismiss"} preset="reversed" onPress={dismissOptions} />
                 </BottomSheetFooter>
               )
         }

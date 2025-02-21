@@ -15,6 +15,8 @@ const en = {
     searching: "Searching...",
     loading: "Loading...",
     delete: "Delete",
+    close: "Close",
+    dismiss: "Dismiss",
     confirm: "Confirm",
     confirmChanges: "Confirm Changes",
     saveChanges: "Save Changes",
@@ -212,7 +214,16 @@ const en = {
 
     textInputPlaceholder: "Type a message",
   },
-
+  codeListScreen: {
+    title: "{{title}}'s Code",
+    publisherNameAndTime: "{{publisherName}} - {{time}}",
+    code: "Campaign Code: {{code}}",
+    isUsed: "Campaign Code Is Used: {{isUsed}}",
+    useCode: "Use Code",
+    useCodeWarning: "Use Code",
+    useCodeWarningDescription:
+      "Are you sure you want to use this code ? This action can not taken back.",
+  },
   eventMapScreen: {
     searchThisArea: "Search This Area",
     eventDescription: " {{ description }}",
