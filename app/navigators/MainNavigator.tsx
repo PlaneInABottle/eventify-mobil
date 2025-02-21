@@ -15,8 +15,14 @@ import { EventMapScreen } from "@/screens/events/EventMapScreen"
 import { ProfileScreen } from "@/screens/ProfileScreen"
 import { ChatListScreen } from "@/screens/chat/ChatListScreen"
 import { CampaignListScreen } from "@/screens/campaign/CampaignListScreen"
+import { CodeListScreen } from "@/screens/codesTickets/CodeListScreen"
+import { TicketListScreen } from "@/screens/codesTickets/TicketListScreen"
 
 // Define the Event tab's parameter list
+export type CodesTicketsTabParamList = {
+  CodeListScreen: undefined
+  TicketListScreen: undefined
+}
 export type EventTabParamList = {
   EventListScreen: undefined
   EventMapScreen: undefined
@@ -28,6 +34,7 @@ export type MainTabParamList = {
   Events: undefined
   Profile: undefined
   ChatList: undefined
+  CodesTickets: undefined
 }
 
 /**
@@ -43,8 +50,49 @@ export type EventTabScreenProps<T extends keyof EventTabParamList> = CompositeSc
   MainTabScreenProps<"Events">
 >
 
+export type CodesTicketsTabScreenProps<T extends keyof CodesTicketsTabParamList> =
+  CompositeScreenProps<
+    MaterialTopTabScreenProps<CodesTicketsTabParamList, T>,
+    MainTabScreenProps<"CodesTickets">
+  >
 const Tab = createBottomTabNavigator<MainTabParamList>()
 const EventTab = createMaterialTopTabNavigator<EventTabParamList>()
+const CodesTicketsTab = createMaterialTopTabNavigator<CodesTicketsTabParamList>()
+
+function CodesTicketsNavigator() {
+  const {
+    themed,
+    theme: { colors },
+  } = useAppTheme()
+  const { top } = useSafeAreaInsets()
+
+  return (
+    <CodesTicketsTab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: colors.tint,
+        tabBarInactiveTintColor: colors.text,
+        tabBarIndicatorStyle: themed($tabBarIndicator),
+        tabBarStyle: themed([$tabBarStyle, { paddingTop: top + 20 }]),
+        tabBarLabelStyle: themed($tabBarLabel),
+      }}
+    >
+      <CodesTicketsTab.Screen
+        name="CodeListScreen"
+        component={CodeListScreen}
+        options={{
+          tabBarLabel: "CODES",
+        }}
+      />
+      <CodesTicketsTab.Screen
+        name="TicketListScreen"
+        component={TicketListScreen}
+        options={{
+          tabBarLabel: "TICKETS",
+        }}
+      />
+    </CodesTicketsTab.Navigator>
+  )
+}
 
 // Events navigator with material top tabs
 function EventsNavigator() {
@@ -128,6 +176,16 @@ export function MainNavigator() {
           tabBarLabel: "Chats",
           tabBarIcon: ({ focused }) => (
             <Icon icon="chat" color={focused ? colors.tint : colors.tintInactive} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CodesTickets"
+        component={CodesTicketsNavigator}
+        options={{
+          tabBarLabel: "Codes & Tickets",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="bell" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
         }}
       />
