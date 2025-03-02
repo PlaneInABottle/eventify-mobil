@@ -27,10 +27,13 @@ export const CampaignCodeModel = types
   .actions((store) => ({
     useCode: flow(function* () {
       try {
-        const { error } = yield supabase.from("campaign_codes").update({
-          id: store.id,
-          is_used: true,
-        })
+        const { error } = yield supabase
+          .from("campaign_codes")
+          .update({
+            is_used: true,
+          })
+          .eq("id", store.id)
+
         if (error) throw error
         store.is_used = true
       } catch (e) {
@@ -46,7 +49,15 @@ export const CampaignCodeStoreModel = types
   })
   .views((self) => ({
     get codesAsList() {
-      return self.codes.slice()
+      return self.codes.slice().sort((a, b) => {
+        if (!a.is_used && b.is_used) {
+          return -1 // a comes before b
+        }
+        if (a.is_used && !b.is_used) {
+          return 1 // b comes before a
+        }
+        return 0 // a and b are equal
+      })
     },
   }))
   .actions(withSetPropAction)
