@@ -215,8 +215,10 @@ const en = {
     textInputPlaceholder: "Type a message",
   },
   codeListScreen: {
+    campaignCodes: "Campaign Codes",
     title: "{{title}}'s Code",
     publisherNameAndTime: "{{publisherName}} - {{time}}",
+    lightIsUsed: "Code Used: {{isUsed}}",
     code: "Campaign Code: {{code}}",
     isUsed: "Campaign Code Is Used: {{isUsed}}",
     useCode: "Use Code",
