@@ -183,7 +183,7 @@ export function MainNavigator() {
         name="CodesTickets"
         component={CodesTicketsNavigator}
         options={{
-          tabBarLabel: "Codes & Tickets",
+          tabBarLabel: "Inventory",
           tabBarIcon: ({ focused }) => (
             <Icon icon="bell" color={focused ? colors.tint : colors.tintInactive} size={30} />
           ),
