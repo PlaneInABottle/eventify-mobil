@@ -25,7 +25,7 @@ const en = {
     selectDate: "Select Date",
   },
   errors: {
-    title: "There was an error.",
+    title: "Error",
     invalidCredentials: "Invalid credentials, check your credentials",
     invalidEmail: "Invalid email address.",
     invalidValue: "Invalid value",
