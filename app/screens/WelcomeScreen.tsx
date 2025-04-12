@@ -18,7 +18,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
   const { navigation } = _props
 
   function goToLogin() {
-    navigation.navigate("Login")
+    navigation.navigate("UserLogin")
   }
 
   function goToRegister() {

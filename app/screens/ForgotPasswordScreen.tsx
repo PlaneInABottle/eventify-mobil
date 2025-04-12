@@ -40,7 +40,7 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = observer(
       const success = await sendResetPasswordEmail(email)
       if (success) {
         setIsSubmitted(false)
-        navigation.navigate("Login")
+        navigation.navigate("UserLogin")
       }
     }
 

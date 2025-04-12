@@ -12,6 +12,9 @@ export * from "./chat/ChatScreen"
 export * from "./ReportScreen"
 export * from "./ResetPasswordScreen"
 
+// User screens
+export * from "./UserScreens/userAuth/UserLoginScreen"
+
 // Organizer screens
 export * from "./OrganizerScreens/OrganizerRegisterScreen"
 export * from "./OrganizerScreens/organizerLocations/OrganizerLocationList"

@@ -50,6 +50,7 @@ export type AppStackParamList = {
   Event: { eventId: string }
   OrganizerRegister: undefined
   OrganizerLocations: undefined
+  UserLogin: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -107,7 +108,7 @@ const AppStack = observer(function AppStack() {
           {/* <Stack.Screen name="Main" component={MainNavigator} /> */}
 
           <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
-          <Stack.Screen name="Login" component={Screens.LoginScreen} />
+          <Stack.Screen name="UserLogin" component={Screens.UserLoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
           <Stack.Screen name="OrganizerRegister" component={Screens.OrganizerRegisterScreen} />
           <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />
