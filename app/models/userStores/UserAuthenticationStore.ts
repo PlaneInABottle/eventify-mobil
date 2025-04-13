@@ -82,6 +82,7 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
         joinedEventChats,
         relatedCampaigns,
         unusedCampaignCodes,
+        userProfile,
       ] = yield Promise.all([
         supabase.rpc("find_user_favorite_events", {
           _user_id: userId,
@@ -104,14 +105,23 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
         supabase.rpc("find_user_unused_campaign_codes", {
           _user_id: userId,
         }),
+        supabase.from("profiles").select("*").eq("id", userId).single(),
       ])
-      console.log("EVENTS: ", favoriteEvents)
-      console.log("EVENTS3: ", favoriteEventsLocations)
-      console.log("EVENTS2: ", favoriteEventsPublishers)
-      console.log("EVENTS4: ", favoriteEventsDatesLocations)
-      console.log("EVENTS5: ", joinedEventChats)
-      console.log("EVENTS6: ", relatedCampaigns)
-      console.log("EVENTS7: ", unusedCampaignCodes)
+
+      getRootStore(store).userEventStore.setProp("events", favoriteEvents.data ?? [])
+      getRootStore(store).userLocationStore.setProp("locations", favoriteEventsLocations.data ?? [])
+      getRootStore(store).userPublisherStore.setProp(
+        "publishers",
+        favoriteEventsPublishers.data ?? [],
+      )
+      getRootStore(store).userEventDateLocationStore.setProp(
+        "datesLocations",
+        favoriteEventsDatesLocations.data ?? [],
+      )
+      getRootStore(store).userChatStore.setProp("chats", joinedEventChats.data ?? [])
+      getRootStore(store).userCampaignStore.setProp("campaigns", relatedCampaigns.data ?? [])
+      getRootStore(store).userCampaignCodeStore.setProp("codes", unusedCampaignCodes.data ?? [])
+      getRootStore(store).userProfileStore.setProp("profile", userProfile.data ?? [])
     }),
   }))
   .actions((store) => ({

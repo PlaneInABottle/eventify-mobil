@@ -12,6 +12,15 @@ import { OrganizerEventDateLocationStoreModel } from "./organizer/OrganizerEvent
 import { CampaignStoreModel } from "./campaign/CampaignStore"
 import { CampaignRuleStoreModel } from "./campaign/CampaignRuleStore"
 import { CampaignCodeStoreModel } from "./campaign/CampaignCodeStore"
+import { UserAuthenticationStoreModel } from "./userStores/UserAuthenticationStore"
+import { UserEventStoreModel } from "./userStores/UserEventStore"
+import { UserLocationStoreModel } from "./userStores/UserLocationStore"
+import { UserPublisherStoreModel } from "./userStores/UserPublisherStore"
+import { UserEventDateLocationStoreModel } from "./userStores/UserEventDateStore"
+import { UserChatStoreModel } from "./userStores/UserChatStore"
+import { UserCampaignStoreModel } from "./userStores/UserCampaignStore"
+import { UserCampaignCodeStoreModel } from "./userStores/UserCampaignCodeStore"
+import { UserProfileStoreModel } from "./userStores/UserProfileStore"
 
 /**
  * A RootStore model.
@@ -31,11 +40,22 @@ export const RootStoreModel = types
     campaignStore: types.optional(CampaignStoreModel, {}),
     campaignRuleStore: types.optional(CampaignRuleStoreModel, {}),
     campaignCodeStore: types.optional(CampaignCodeStoreModel, {}),
+    // User stores
+    userAuthenticationStore: types.optional(UserAuthenticationStoreModel, {}),
+    userProfileStore: types.optional(UserProfileStoreModel, {}),
+    userEventStore: types.optional(UserEventStoreModel, {}),
+    userLocationStore: types.optional(UserLocationStoreModel, {}),
+    userPublisherStore: types.optional(UserPublisherStoreModel, {}),
+    userEventDateLocationStore: types.optional(UserEventDateLocationStoreModel, {}),
+    userChatStore: types.optional(UserChatStoreModel, {}),
+    userCampaignStore: types.optional(UserCampaignStoreModel, {}),
+    userCampaignCodeStore: types.optional(UserCampaignCodeStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
     resetAllStores() {
       store.setProp("authenticationStore", undefined)
+      store.setProp("userAuthenticationStore", undefined)
       store.setProp("userStore", undefined)
       store.setProp("eventStore", undefined)
       store.setProp("chatStore", undefined)
