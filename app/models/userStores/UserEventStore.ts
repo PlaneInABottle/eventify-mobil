@@ -37,17 +37,21 @@ export const UserEventStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((store) => ({
-    fetchEventsInSight: flow(function* (bounds: Region, userId: string) {
+    fetchEventsInSight: flow(function* (bounds: Region): Generator<any, void, any> {
       try {
-        const regionForSupabase = transformRegionForSupabase(bounds)
-        const { data, error } = yield supabase.rpc("events_in_sight", {
-          ...regionForSupabase,
-          _user_id: userId,
-          _date_filters: store.dateFilters,
-          _type_filters: store.typeFilters,
-        })
+        const userId = getRootStore(store).userAuthenticationStore.getUserId
 
-        if (error) throw error
+        const regionForSupabase = transformRegionForSupabase(bounds)
+        const { data } = yield supabase
+          .rpc("events_in_sight", {
+            ...regionForSupabase,
+            _user_id: userId,
+            _date_filters: store.dateFilters,
+            _type_filters: store.typeFilters,
+          })
+          .throwOnError() // This might throw error automatically
+
+        // if (error) throw error
 
         store.setProp("events", data.events ?? [])
         getRootStore(store).locationStore.setProp("locations", data.locations ?? [])

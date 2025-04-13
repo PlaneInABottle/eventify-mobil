@@ -70,7 +70,8 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
   const {
-    authenticationStore: { isAuthenticated, createSessionFromUrl, authRole },
+    authenticationStore: { createSessionFromUrl, authRole },
+    userAuthenticationStore: { isAuthenticated },
   } = useStores()
 
   const {

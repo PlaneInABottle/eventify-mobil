@@ -10,3 +10,10 @@ export type UserLoginFormState = {
   }
   isLoading: boolean
 }
+
+export type UserProfileFormState = {
+  errors: {
+    general?: TxKeyPath
+  }
+  isLoading: boolean
+}

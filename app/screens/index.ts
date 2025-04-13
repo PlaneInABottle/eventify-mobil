@@ -6,7 +6,6 @@ export * from "./DemoDebugScreen"
 export * from "./ErrorScreen/ErrorBoundary"
 // Export the new screens
 export * from "./events"
-export * from "./ProfileScreen"
 export * from "./EditProfileScreen"
 export * from "./chat/ChatScreen"
 export * from "./ReportScreen"

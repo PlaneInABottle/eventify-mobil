@@ -20,6 +20,9 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
     error: undefined as string | undefined,
   }))
   .views((store) => ({
+    get getUserId(): string | null {
+      return store.userId
+    },
     get isAuthenticated(): boolean {
       return !!store.authEmail && !!store.userId
     },

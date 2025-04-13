@@ -105,8 +105,7 @@ export const UserProfileStoreModel: IAnyModelType = types
         yield store.updateProfile({ avatar_url: data.path })
         return true
       } catch (error) {
-        handleError(error)
-        return false
+        return handleError(error).message
       }
     }),
   }))
