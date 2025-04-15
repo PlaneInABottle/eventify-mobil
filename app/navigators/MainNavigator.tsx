@@ -1,63 +1,61 @@
-import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { CompositeScreenProps } from "@react-navigation/native"
-import {
-  createMaterialTopTabNavigator,
-  MaterialTopTabScreenProps,
-} from "@react-navigation/material-top-tabs"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { TextStyle, ViewStyle } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "../components"
 import type { ThemedStyle } from "@/theme"
-import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { EventListScreen } from "@/screens/UserScreens/events/EventListScreen"
 import { EventMapScreen } from "@/screens/UserScreens/events/EventMapScreen"
 import { ProfileScreen } from "@/screens/UserScreens/profile/ProfileScreen"
+import { EditProfileScreen } from "@/screens/UserScreens/profile/EditProfileScreen"
 import { ChatListScreen } from "@/screens/chat/ChatListScreen"
-import { CampaignListScreen } from "@/screens/campaign/CampaignListScreen"
-import { CodeListScreen } from "@/screens/codesTickets/CodeListScreen"
-import { TicketListScreen } from "@/screens/codesTickets/TicketListScreen"
+import { CampaignListScreen } from "@/screens/UserScreens/campaign/CampaignListScreen"
+import { CodeListScreen } from "@/screens/UserScreens/codesTickets/CodeListScreen"
+import { TicketListScreen } from "@/screens/UserScreens/codesTickets/TicketListScreen"
+import {
+  CodesTicketsTabParamList,
+  EventTabParamList,
+  MainTabParamList,
+  UserProfileStackParamList,
+} from "./userNavigationTypes"
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
-// Define the Event tab's parameter list
-export type CodesTicketsTabParamList = {
-  CodeListScreen: undefined
-  TicketListScreen: undefined
-}
-export type EventTabParamList = {
-  EventListScreen: undefined
-  EventMapScreen: undefined
-  CampaignListScreen: undefined
-}
-
-// Define the main tab parameter list
-export type MainTabParamList = {
-  Events: undefined
-  Profile: undefined
-  ChatList: undefined
-  CodesTickets: undefined
-}
-
-/**
- * Helper for automatically generating navigation prop types for each route.
- */
-export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
-  BottomTabScreenProps<MainTabParamList, T>,
-  AppStackScreenProps<keyof AppStackParamList>
->
-
-export type EventTabScreenProps<T extends keyof EventTabParamList> = CompositeScreenProps<
-  MaterialTopTabScreenProps<EventTabParamList, T>,
-  MainTabScreenProps<"Events">
->
-
-export type CodesTicketsTabScreenProps<T extends keyof CodesTicketsTabParamList> =
-  CompositeScreenProps<
-    MaterialTopTabScreenProps<CodesTicketsTabParamList, T>,
-    MainTabScreenProps<"CodesTickets">
-  >
 const Tab = createBottomTabNavigator<MainTabParamList>()
 const EventTab = createMaterialTopTabNavigator<EventTabParamList>()
+const UserProfileStack = createNativeStackNavigator<UserProfileStackParamList>()
 const CodesTicketsTab = createMaterialTopTabNavigator<CodesTicketsTabParamList>()
+
+function UserProfileStackNavigator() {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+  const { top } = useSafeAreaInsets()
+  return (
+    <UserProfileStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        navigationBarColor: colors.background,
+        contentStyle: {
+          paddingTop: top + 20,
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <UserProfileStack.Screen name="UserProfileScreen" component={ProfileScreen} />
+
+      <UserProfileStack.Screen
+        name="UserProfileEditPersonalScreen"
+        component={EditProfileScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+    </UserProfileStack.Navigator>
+  )
+}
 
 function CodesTicketsNavigator() {
   const {
@@ -192,7 +190,7 @@ export function MainNavigator() {
 
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={UserProfileStackNavigator}
         options={{
           tabBarLabel: "Profile",
           tabBarIcon: ({ focused }) => (

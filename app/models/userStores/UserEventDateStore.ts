@@ -5,14 +5,14 @@ import { handleError } from "@/utils/errorHandler"
 import { withSetPropAction } from "@/models/helpers/withSetPropAction"
 import { getRootStore } from "@/models/helpers/getRootStore"
 import { UserEventModel } from "@/models/userStores/UserEventStore"
-import { LocationModel } from "@/models/location/LocationStore"
+import { UserLocationModel } from "./UserLocationStore"
 
 export const UserEventDateLocationModel = types
   .model("UserEventDate")
   .props({
     id: types.identifier,
     event_id: types.reference(UserEventModel),
-    location_id: types.reference(LocationModel),
+    location_id: types.reference(UserLocationModel),
     start_time: types.string,
     end_time: types.maybeNull(types.string),
     is_user_favorite: types.maybeNull(types.boolean),

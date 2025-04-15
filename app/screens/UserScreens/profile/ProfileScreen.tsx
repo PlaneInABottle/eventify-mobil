@@ -12,11 +12,11 @@ import {
 } from "react-native"
 import { observer } from "mobx-react-lite"
 import { translate } from "@/i18n"
+import { Screen, Text, Icon, Button, Card } from "@/components"
 import { $styles, colors, ThemedStyle } from "@/theme"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { navigate } from "@/navigators/navigationUtilities"
 import { UserProfileFormState } from "@/types/userFormTypes"
-import { Screen, Text, Icon, Button, Card } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
 

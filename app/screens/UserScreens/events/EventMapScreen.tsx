@@ -2,125 +2,125 @@ import { FC, forwardRef, useCallback, useImperativeHandle, useRef, useState } fr
 import { ViewStyle, StyleSheet, ActivityIndicator, ImageStyle, View, TextStyle } from "react-native"
 import { AutoImage, Button, Icon, Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { EventTabScreenProps } from "@/navigators/MainNavigator"
 import MapView, { Region, Marker, MapMarkerProps } from "react-native-maps"
 import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
 import { ButtonAccessoryProps } from "@/components/Button"
 import { $styles, ThemedStyle } from "@/theme"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet"
-import { LocationSnapshotIn } from "@/models/location/LocationStore"
-import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
 import { SectionListSelectField } from "@/components/SectionListSelectField"
+import { IUserEventDateLocation } from "@/models/userStores/UserEventDateStore"
+import { EventTabScreenProps } from "@/navigators/userNavigationTypes"
+import { IUserLocationSnapshotIn } from "@/models/userStores/UserLocationStore"
 
-interface EventMapScreenProps extends EventTabScreenProps<"EventMapScreen"> {}
+export const EventMapScreen: FC<EventTabScreenProps<"EventMapScreen">> = observer(
+  function EventMapScreen(_props) {
+    const {
+      userEventDateLocationStore: { eventsDatesByLocationId },
+      userEventStore: { fetchEventsInSight, setProp, typeFilters, dateFilters },
+      userLocationStore: { locationsForList },
+    } = useStores()
+    const { themed } = useAppTheme()
 
-export const EventMapScreen: FC<EventMapScreenProps> = observer(function EventMapScreen(_props) {
-  const {
-    organizerEventDateLocationStore: { eventsDatesByLocationId },
-    organizerEventStore: { fetchEventsInSight, setProp, typeFilters, dateFilters },
-    locationStore: { locationsForList },
-    userStore: { userId },
-  } = useStores()
-  const { themed } = useAppTheme()
+    const regionRef = useRef<Region | null>(null)
+    const [isSearching, setIsSearching] = useState<boolean>(false)
 
-  const regionRef = useRef<Region | null>(null)
-  const [isSearching, setIsSearching] = useState<boolean>(false)
-
-  const handleSearchThisArea = async () => {
-    if (regionRef.current) {
-      setIsSearching(true)
-      await fetchEventsInSight(regionRef.current, userId)
-      setIsSearching(false)
+    const handleSearchThisArea = async () => {
+      if (regionRef.current) {
+        setIsSearching(true)
+        await fetchEventsInSight(regionRef.current)
+        setIsSearching(false)
+      }
     }
-  }
-  return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-      <MapView
-        style={$mapView}
-        onRegionChangeComplete={(region) => {
-          regionRef.current = region
-        }}
-        initialRegion={{
-          latitude: 39.88825,
-          longitude: 32.8324,
-          latitudeDelta: 0.922,
-          longitudeDelta: 0.0421,
-        }}
-      >
-        {locationsForList.map((location) => {
-          const eventDatesByLocation = eventsDatesByLocationId(location.id)
-          return eventDatesByLocation.length === 0 ? undefined : (
-            <NewMarkerField
-              key={location.id}
-              location={location}
-              eventsDateLocations={eventDatesByLocation}
-              coordinate={{
-                longitude: location.lat_long.coordinates[0],
-                latitude: location.lat_long.coordinates[1],
-              }}
-            />
-          )
-        })}
-      </MapView>
+    return (
+      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
+        <MapView
+          style={$mapView}
+          onRegionChangeComplete={(region) => {
+            regionRef.current = region
+          }}
+          initialRegion={{
+            latitude: 39.88825,
+            longitude: 32.8324,
+            latitudeDelta: 0.922,
+            longitudeDelta: 0.0421,
+          }}
+        >
+          {locationsForList.map((location) => {
+            const eventDatesByLocation = eventsDatesByLocationId(location.id)
+            console.log("Eventsdatews: ", eventDatesByLocation)
+            return eventDatesByLocation.length === 0 ? undefined : (
+              <NewMarkerField
+                key={location.id}
+                location={location}
+                eventsDateLocations={eventDatesByLocation}
+                coordinate={{
+                  longitude: location.lat_long.coordinates[0],
+                  latitude: location.lat_long.coordinates[1],
+                }}
+              />
+            )
+          })}
+        </MapView>
 
-      <Button
-        preset="default"
-        tx={isSearching ? "common:searching" : "eventMapScreen:searchThisArea"}
-        style={themed($searchButton)}
-        disabledStyle={themed($disabledButton)}
-        onPress={handleSearchThisArea}
-        disabled={isSearching}
-        RightAccessory={isSearching ? LoadingIndicator : undefined}
-      />
-      <SectionListSelectField
-        containerStyle={themed($filterButton)}
-        isOnlyIcon
-        multiple={false}
-        iconName="calendar"
-        showFooter={true}
-        sections={[
-          {
-            title: "filters:date.date",
-            data: [
-              { label: "filters:date.today", value: "today" },
-              { label: "filters:date.tomorrow", value: "tomorrow" },
-              { label: "filters:date.next7Days", value: "next-seven-days" },
-              { label: "filters:date.next14Days", value: "next-fourteen-days" },
-              { label: "filters:date.next30Days", value: "next-thirty-days" },
-            ],
-          },
-        ]}
-        value={dateFilters.slice()}
-        onSelect={(v) => setProp("dateFilters", v)}
-      />
-      <SectionListSelectField
-        containerStyle={themed($filterButton)}
-        isOnlyIcon
-        iconName="filter"
-        sections={[
-          {
-            title: "filters:music.music",
-            data: [
-              { label: "filters:music.selectAllMusic", value: "select-all-music" },
-              { label: "filters:music.rock", value: "rock" },
-              { label: "filters:music.pop", value: "pop" },
-              { label: "filters:music.jazz", value: "jazz" },
-              { label: "filters:music.classic", value: "classic" },
-            ],
-          },
-        ]}
-        value={typeFilters.slice()}
-        onSelect={(v) => setProp("typeFilters", v)}
-        multiple
-      />
-    </Screen>
-  )
-})
+        <Button
+          preset="default"
+          tx={isSearching ? "common:searching" : "eventMapScreen:searchThisArea"}
+          style={themed($searchButton)}
+          disabledStyle={themed($disabledButton)}
+          onPress={handleSearchThisArea}
+          disabled={isSearching}
+          RightAccessory={isSearching ? LoadingIndicator : undefined}
+        />
+        <SectionListSelectField
+          containerStyle={themed($filterButton)}
+          isOnlyIcon
+          multiple={false}
+          iconName="calendar"
+          showFooter={true}
+          sections={[
+            {
+              title: "filters:date.date",
+              data: [
+                { label: "filters:date.today", value: "today" },
+                { label: "filters:date.tomorrow", value: "tomorrow" },
+                { label: "filters:date.next7Days", value: "next-seven-days" },
+                { label: "filters:date.next14Days", value: "next-fourteen-days" },
+                { label: "filters:date.next30Days", value: "next-thirty-days" },
+              ],
+            },
+          ]}
+          value={dateFilters.slice()}
+          onSelect={(v) => setProp("dateFilters", v)}
+        />
+        <SectionListSelectField
+          containerStyle={themed($filterButton)}
+          isOnlyIcon
+          iconName="filter"
+          sections={[
+            {
+              title: "filters:music.music",
+              data: [
+                { label: "filters:music.selectAllMusic", value: "select-all-music" },
+                { label: "filters:music.rock", value: "rock" },
+                { label: "filters:music.pop", value: "pop" },
+                { label: "filters:music.jazz", value: "jazz" },
+                { label: "filters:music.classic", value: "classic" },
+              ],
+            },
+          ]}
+          value={typeFilters.slice()}
+          onSelect={(v) => setProp("typeFilters", v)}
+          multiple
+        />
+      </Screen>
+    )
+  },
+)
 
 interface IMarkerFieldProps extends Omit<MapMarkerProps, "ref"> {
-  eventsDateLocations: OrganizerEventDateLocation[]
-  location: LocationSnapshotIn
+  eventsDateLocations: IUserEventDateLocation[]
+  location: IUserLocationSnapshotIn
 }
 
 export interface MarkerFieldRef {
@@ -136,6 +136,7 @@ const NewMarkerField = observer(
       themed,
       theme: { colors },
     } = useAppTheme()
+    console.log("LLLLL: ", eventsDateLocations)
 
     useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }))
 

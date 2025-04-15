@@ -43,23 +43,20 @@ export const UserEventStoreModel = types
 
         const regionForSupabase = transformRegionForSupabase(bounds)
         const { data } = yield supabase
-          .rpc("events_in_sight", {
+          .rpc("events_in_sight_v2", {
             ...regionForSupabase,
             _user_id: userId,
             _date_filters: store.dateFilters,
             _type_filters: store.typeFilters,
           })
-          .throwOnError() // This might throw error automatically
-
-        // if (error) throw error
+          .throwOnError()
 
         store.setProp("events", data.events ?? [])
-        getRootStore(store).locationStore.setProp("locations", data.locations ?? [])
-        getRootStore(store).publisherStore.setProp("publishers", data.publishers ?? [])
-        getRootStore(store).organizerChatStore.setProp("chats", data.eventChats ?? [])
-        getRootStore(store).campaignStore.setProp("campaigns", data.campaigns ?? [])
-        getRootStore(store).campaignRuleStore.setProp("rules", data.campaignRules ?? [])
-        getRootStore(store).organizerEventDateLocationStore.setProp(
+        getRootStore(store).userLocationStore.setProp("locations", data.locations ?? [])
+        getRootStore(store).userPublisherStore.setProp("publishers", data.publishers ?? [])
+        getRootStore(store).userChatStore.setProp("chats", data.eventChats ?? [])
+        getRootStore(store).userCampaignStore.setProp("campaigns", data.campaigns ?? [])
+        getRootStore(store).userEventDateLocationStore.setProp(
           "datesLocations",
           data.datesLocations ?? [],
         )

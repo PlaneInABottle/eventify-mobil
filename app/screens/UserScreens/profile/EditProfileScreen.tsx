@@ -1,6 +1,5 @@
 import { FC, useState } from "react"
 import { View, ViewStyle, Alert } from "react-native"
-import { AppStackScreenProps } from "@/navigators"
 import { Screen, Button, TextField } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
@@ -9,11 +8,10 @@ import { $styles, ThemedStyle } from "@/theme"
 import { navigate } from "@/navigators/navigationUtilities"
 import { useHeader } from "@/utils/useHeader"
 import { translate } from "@/i18n"
+import { UserProfileStackScreenProps } from "@/navigators/userNavigationTypes"
 
-interface EditProfileScreenProps extends AppStackScreenProps<"EditProfile"> {}
-
-export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
-  function EditProfileScreen(_props) {
+export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditPersonalScreen">> =
+  observer(function EditProfileScreen(_props) {
     const { themed } = useAppTheme()
     const { userStore } = useStores()
     const user = userStore.user
@@ -103,8 +101,7 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
         </View>
       </Screen>
     )
-  },
-)
+  })
 
 const $formContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.lg,

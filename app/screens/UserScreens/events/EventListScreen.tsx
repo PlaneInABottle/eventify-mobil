@@ -20,26 +20,27 @@ import {
   Button,
   ButtonAccessoryProps,
   AutoImage,
+  EmptyState,
 } from "@/components"
-import { EventTabScreenProps } from "@/navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { convertImageURLToSupabaseURL } from "@/utils/imageFunctions"
 import { useStores } from "@/models"
 import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
 import { ICON_SIZE } from "consts/constVariables"
+import { IUserEventDateLocation } from "@/models/userStores/UserEventDateStore"
+import { EventTabScreenProps } from "@/navigators/userNavigationTypes"
 
-interface EventListScreenProps extends EventTabScreenProps<"EventListScreen"> {}
-
-export const EventListScreen: FC<EventListScreenProps> = observer(function EventListScreen(_props) {
-  const { userEventDateLocationStore } = useStores()
-  const { themed } = useAppTheme()
-  return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-      <ListView<OrganizerEventDateLocation>
-        contentContainerStyle={themed([$styles.container, $listContentContainer])}
-        data={userEventDateLocationStore.datesLocationsAsList}
-        estimatedItemSize={177}
-        /*
+export const EventListScreen: FC<EventTabScreenProps<"EventListScreen">> = observer(
+  function EventListScreen(_props) {
+    const { userEventDateLocationStore } = useStores()
+    const { themed } = useAppTheme()
+    return (
+      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
+        <ListView<IUserEventDateLocation>
+          contentContainerStyle={themed([$styles.container, $listContentContainer])}
+          data={userEventDateLocationStore.datesLocationsAsList}
+          estimatedItemSize={177}
+          /*
         ListEmptyComponent={
           eventStore.isLoading || chatStore.isLoading ? (
             <ActivityIndicator />
@@ -84,11 +85,28 @@ export const EventListScreen: FC<EventListScreenProps> = observer(function Event
           </View>
         }
         */
-        renderItem={({ item }) => <EventCard eventDateLocation={item} />}
-      />
-    </Screen>
-  )
-})
+          ListEmptyComponent={
+            <EmptyState
+              preset="generic"
+              // style={themed($emptyState)}
+              headingTx={"eventListScreen:noEventsEmptyState.heading"}
+              contentTx={"eventListScreen:noEventsEmptyState.content"}
+              button={""}
+              // imageStyle={$emptyStateImage}
+              ImageProps={{ resizeMode: "contain" }}
+            />
+          }
+          ListHeaderComponent={
+            <View style={themed($heading)}>
+              <Text preset="heading" tx="eventListScreen:title" />
+            </View>
+          }
+          renderItem={({ item }) => <EventCard eventDateLocation={item} />}
+        />
+      </Screen>
+    )
+  },
+)
 
 const EventCard = observer(function EventCard({
   eventDateLocation,

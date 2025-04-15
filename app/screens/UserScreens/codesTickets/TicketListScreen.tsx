@@ -1,11 +1,10 @@
-import { Observer, observer } from "mobx-react-lite"
-import { $styles, type ThemedStyle } from "@/theme"
+import { observer } from "mobx-react-lite"
+import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC, useCallback, useRef } from "react"
-import { Button, Icon, ListItem, ListItemProps, ListView, Screen, Text } from "@/components"
+import { Button, ListItem, ListItemProps, ListView, Screen, Text } from "@/components"
 import { Alert, View, ViewStyle } from "react-native"
 import { useStores } from "@/models"
-import { CodesTicketsTabScreenProps } from "@/navigators/MainNavigator"
 import { ICampaignCode } from "@/models/campaign/CampaignCodeStore"
 import {
   BottomSheetBackdrop,
@@ -15,33 +14,29 @@ import {
 } from "@gorhom/bottom-sheet"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { translate } from "@/i18n"
-import { ContentStyle } from "@shopify/flash-list"
-import QRCode from "react-native-qrcode-svg"
+import { CodesTicketsTabScreenProps } from "@/navigators/userNavigationTypes"
+import { IUserCampaignCode } from "@/models/userStores/UserCampaignCodeStore"
 
-export const CodeListScreen: FC<CodesTicketsTabScreenProps<"CodeListScreen">> = observer(
-  function CodesListScreen(_props) {
+export const TicketListScreen: FC<CodesTicketsTabScreenProps<"TicketListScreen">> = observer(
+  function TicketListScreen(_props) {
     const { navigation } = _props
     const navigate = navigation.navigate
 
-    const { campaignCodeStore } = useStores()
+    const { userCampaignCodeStore } = useStores()
 
     const { themed } = useAppTheme()
     return (
-      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-        <ListView<ICampaignCode>
-          data={campaignCodeStore.codesAsList}
-          contentContainerStyle={themed([$listContentContainer])}
+      <Screen preset="auto" contentContainerStyle={themed($screenContentContainer)}>
+        <ListView<IUserCampaignCode>
+          data={userCampaignCodeStore.codesAsList}
           estimatedItemSize={10}
-          keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <View style={themed($heading)}>
-              <Text preset="heading" tx="codeListScreen:campaignCodes" />
+              <Text preset="heading" tx="organizerEventListScreen:heading" />
             </View>
           }
           renderItem={({ item }) => (
-            <Observer>
-              {() => <CampaignCodeListItem item={item} bottomSeparator rightIcon="caretRight" />}
-            </Observer>
+            <TicketListItem item={item} bottomSeparator rightIcon="caretRight" />
           )}
         />
       </Screen>
@@ -49,17 +44,14 @@ export const CodeListScreen: FC<CodesTicketsTabScreenProps<"CodeListScreen">> = 
   },
 )
 
-interface ICampaignCodeListItem extends ListItemProps {
-  item: ICampaignCode
+interface ITicketListItem extends ListItemProps {
+  item: IUserCampaignCode
 }
 
-const CampaignCodeListItem = observer(function CampaignCodeListItem(props: ICampaignCodeListItem) {
+const TicketListItem = observer(function TicketListItem(props: ITicketListItem) {
   const { item, ...ListItemProps } = props
 
-  const {
-    themed,
-    theme: { spacing },
-  } = useAppTheme()
+  const { themed } = useAppTheme()
 
   const { bottom } = useSafeAreaInsets()
 
@@ -85,7 +77,8 @@ const CampaignCodeListItem = observer(function CampaignCodeListItem(props: ICamp
         {
           text: translate("codeListScreen:useCode"),
           onPress: async () => {
-            await item.useCode()
+            item.useCode()
+            dismissOptions()
           },
         },
       ],
@@ -110,40 +103,27 @@ const CampaignCodeListItem = observer(function CampaignCodeListItem(props: ICamp
             time: item.timeFormatted.textLabel,
           }}
         />
-        {"\n"}
-        <Text
-          weight="light"
-          size="xxs"
-          tx="codeListScreen:lightIsUsed"
-          txOptions={{
-            isUsed: item.is_used,
-          }}
-        />
       </ListItem>
       <BottomSheetModal
         ref={sheet}
         backgroundStyle={themed($bottomSheetBackground)}
         stackBehavior="replace"
+        enableDynamicSizing
         handleIndicatorStyle={themed($handleIndicator)}
         enableDismissOnClose
-        detached={true}
+        detached
         snapPoints={["80%"]}
-        bottomInset={bottom + spacing.xxxl}
+        bottomInset={bottom} // What is this
         backdropComponent={(props) => (
           <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
         )}
-        footerComponent={(props) =>
-          !item.is_used && (
-            <BottomSheetFooter {...props} style={themed($bottomSheetFooter)} bottomInset={bottom}>
-              <Button tx={"codeListScreen:useCode"} preset="reversed" onPress={handleUseCode} />
-            </BottomSheetFooter>
-          )
-        }
+        footerComponent={(props) => (
+          <BottomSheetFooter {...props} style={themed($bottomSheetFooter)} bottomInset={bottom}>
+            <Button tx={"codeListScreen:useCode"} preset="reversed" onPress={handleUseCode} />
+          </BottomSheetFooter>
+        )}
       >
         <BottomSheetView style={themed($bottomSheetContent)}>
-          <View style={themed($qrContainer)}>
-            <QRCode value={item.code} size={150} />
-          </View>
           <Text
             tx={"codeListScreen:code"}
             txOptions={{
@@ -166,20 +146,11 @@ const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
 })
 
-const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
-  paddingTop: spacing.lg,
-  paddingHorizontal: spacing.lg,
-  paddingBottom: spacing.lg,
-})
 const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-})
-const $qrContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  justifyContent: "center",
-  alignItems: "center",
 })
 const $bottomSheetBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background,
@@ -190,7 +161,6 @@ const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $bottomSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.lg,
   paddingHorizontal: spacing.lg,
 })
 const $bottomSheetFooter: ThemedStyle<ViewStyle> = ({ spacing }) => ({

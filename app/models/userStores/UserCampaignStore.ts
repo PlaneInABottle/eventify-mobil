@@ -19,23 +19,26 @@ export const UserCampaignModel = types
     is_user_favorite: types.maybeNull(types.boolean),
   })
   .actions((item) => ({
-    toggleFavorite: flow(function* () {
+    toggleFavorite: flow(function* (): Generator<any, void, any> {
       try {
-        const userId: string = getRootStore(item).userStore.userId
-        const { error } = yield supabase.rpc("toggle_favorite_campaign", {
-          _user_id: userId,
-          _campaign_id: item.id,
-        })
-        if (error) throw error
+        const userId = getRootStore(item).userAuthenticationStore.getUserId
+
+        yield supabase
+          .rpc("toggle_favorite_campaign", {
+            _user_id: userId,
+            _campaign_id: item.id,
+          })
+          .throwOnError()
+
         item.is_user_favorite = !item.is_user_favorite
       } catch (e) {
         handleError(e)
       }
     }),
-    generateCampaignCode: flow(function* () {
+    generateCampaignCode: flow(function* (): Generator<any, void, any> {
       try {
-        const userId: string = getRootStore(item).userStore.userId
-        const { data, error } = yield supabase
+        const userId = getRootStore(item).userAuthenticationStore.getUserId
+        const { data } = yield supabase
           .from("campaign_codes")
           .insert({
             campaign_id: item.id,
@@ -43,8 +46,9 @@ export const UserCampaignModel = types
           })
           .select()
           .single()
-        if (error) throw error
-        getRootStore(item).campaignCodeStore.addCode(data)
+          .throwOnError()
+
+        getRootStore(item).userCampaignCodeStore.addCode(data)
       } catch (e) {
         handleError(e)
       }

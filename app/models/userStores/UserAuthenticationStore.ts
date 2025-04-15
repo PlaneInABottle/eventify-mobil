@@ -52,79 +52,31 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
       const userId = store.userId
 
       const [profileRes, eventChatsRes] = yield Promise.all([
-        supabase.from("profiles").select("*").eq("id", userId).single(),
-        supabase.rpc("get_user_chat_events", {
-          _user_id: userId,
-        }),
+        supabase.from("profiles").select("*").eq("id", userId).single().throwOnError(),
+        supabase
+          .rpc("get_user_chat_events", {
+            _user_id: userId,
+          })
+          .throwOnError(),
       ])
 
-      if (profileRes.error || eventChatsRes.error) {
-        throw profileRes.error || eventChatsRes.error
-      }
-
-      getRootStore(store).organizerEventStore.setProp("events", eventChatsRes.data.events ?? [])
-      getRootStore(store).locationStore.setProp("locations", eventChatsRes.data.locations ?? [])
-      getRootStore(store).publisherStore.setProp("publishers", eventChatsRes.data.publishers ?? [])
-      getRootStore(store).organizerEventDateLocationStore.setProp(
-        "datesLocations",
-        eventChatsRes.data.datesLocations ?? [],
-      )
-      getRootStore(store).organizerChatStore.setProp("chats", eventChatsRes.data.eventChats ?? [])
-      getRootStore(store).campaignStore.setProp("campaigns", eventChatsRes.data.campaigns ?? [])
-      getRootStore(store).campaignRuleStore.setProp("rules", eventChatsRes.data.campaignRules ?? [])
-      getRootStore(store).campaignCodeStore.setProp("codes", eventChatsRes.data.campaignCodes ?? [])
-      getRootStore(store).userStore.setProp("user", profileRes.data ?? [])
-    }),
-    userFirstRequestV2: flow(function* () {
-      const userId = store.userId
-      const [
-        favoriteEvents,
-        favoriteEventsLocations,
-        favoriteEventsPublishers,
-        favoriteEventsDatesLocations,
-        joinedEventChats,
-        relatedCampaigns,
-        unusedCampaignCodes,
-        userProfile,
-      ] = yield Promise.all([
-        supabase.rpc("find_user_favorite_events", {
-          _user_id: userId,
-        }),
-        supabase.rpc("find_user_favorite_event_locations", {
-          _user_id: userId,
-        }),
-        supabase.rpc("find_publishers_of_favorite_events", {
-          _user_id: userId,
-        }),
-        supabase.rpc("find_favorite_dates_locations", {
-          _user_id: userId,
-        }),
-        supabase.rpc("find_user_joined_event_chats", {
-          _user_id: userId,
-        }),
-        supabase.rpc("find_user_related_campaigns", {
-          _user_id: userId,
-        }),
-        supabase.rpc("find_user_unused_campaign_codes", {
-          _user_id: userId,
-        }),
-        supabase.from("profiles").select("*").eq("id", userId).single(),
-      ])
-
-      getRootStore(store).userEventStore.setProp("events", favoriteEvents.data ?? [])
-      getRootStore(store).userLocationStore.setProp("locations", favoriteEventsLocations.data ?? [])
+      getRootStore(store).userEventStore.setProp("events", eventChatsRes.data.events ?? [])
+      getRootStore(store).userLocationStore.setProp("locations", eventChatsRes.data.locations ?? [])
       getRootStore(store).userPublisherStore.setProp(
         "publishers",
-        favoriteEventsPublishers.data ?? [],
+        eventChatsRes.data.publishers ?? [],
       )
       getRootStore(store).userEventDateLocationStore.setProp(
         "datesLocations",
-        favoriteEventsDatesLocations.data ?? [],
+        eventChatsRes.data.datesLocations ?? [],
       )
-      getRootStore(store).userChatStore.setProp("chats", joinedEventChats.data ?? [])
-      getRootStore(store).userCampaignStore.setProp("campaigns", relatedCampaigns.data ?? [])
-      getRootStore(store).userCampaignCodeStore.setProp("codes", unusedCampaignCodes.data ?? [])
-      getRootStore(store).userProfileStore.setProp("profile", userProfile.data ?? [])
+      getRootStore(store).userChatStore.setProp("chats", eventChatsRes.data.eventChats ?? [])
+      getRootStore(store).userCampaignStore.setProp("campaigns", eventChatsRes.data.campaigns ?? [])
+      getRootStore(store).userCampaignCodeStore.setProp(
+        "codes",
+        eventChatsRes.data.campaignCodes ?? [],
+      )
+      getRootStore(store).userProfileStore.setProp("profile", profileRes.data ?? [])
     }),
   }))
   .actions((store) => ({
@@ -145,7 +97,7 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
         store.setProp("authEmail", decodedToken.email)
         store.setProp("userId", decodedToken.sub)
 
-        store.userFirstRequestV2()
+        store.userFirstRequest()
 
         handleSuccess("success:loginSuccess")
         return true

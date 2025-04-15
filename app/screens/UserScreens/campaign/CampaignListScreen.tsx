@@ -10,9 +10,6 @@ import {
   ButtonAccessoryProps,
   AutoImage,
 } from "@/components"
-import { useAppTheme } from "@/utils/useAppTheme"
-import { EventTabScreenProps } from "@/navigators/MainNavigator"
-import { Observer, observer } from "mobx-react-lite"
 import Animated, {
   Extrapolation,
   interpolate,
@@ -20,71 +17,32 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated"
+import { Observer, observer } from "mobx-react-lite"
 import { translate } from "@/i18n"
 import { $styles, ThemedStyle } from "@/theme"
 import { ContentStyle } from "@shopify/flash-list"
+import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
 import { convertImageURLToSupabaseURL } from "@/utils/imageFunctions"
-import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
-import { ICampaign } from "@/models/campaign/CampaignStore"
-
-const ICON_SIZE = 14
+import { IUserCampaign } from "@/models/userStores/UserCampaignStore"
+import { EventTabScreenProps } from "@/navigators/userNavigationTypes"
+import { ICON_SIZE } from "consts/constVariables"
 
 export const CampaignListScreen: FC<EventTabScreenProps<"CampaignListScreen">> = observer(
   function CampaignListScreen(_props) {
-    const { campaignStore } = useStores()
+    const { userCampaignStore } = useStores()
     const { themed } = useAppTheme()
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-        <ListView<ICampaign>
+        <ListView<IUserCampaign>
           contentContainerStyle={themed([$styles.container, $listContentContainer])}
-          data={campaignStore.campaignsAsList}
+          data={userCampaignStore.campaignsAsList}
           estimatedItemSize={177}
-          /*
-        ListEmptyComponent={
-          eventStore.isLoading || chatStore.isLoading ? (
-            <ActivityIndicator />
-          ) : (
-            <EmptyState
-              preset="generic"
-              style={themed($emptyState)}
-              headingTx={
-                eventStore.favoritesOnly
-                  ? "eventListScreen:noFavoritesEmptyState.heading"
-                  : "eventListScreen:noEventsEmptyState.heading"
-              }
-              contentTx={
-                eventStore.favoritesOnly
-                  ? "eventListScreen:noFavoritesEmptyState.content"
-                  : "eventListScreen:noEventsEmptyState.content"
-              }
-              button={eventStore.favoritesOnly ? "" : ""}
-              imageStyle={$emptyStateImage}
-              ImageProps={{ resizeMode: "contain" }}
-            />
-          )
-        }
-        
-        ListHeaderComponent={
-          <View style={themed($heading)}>
-            <Text preset="heading" tx="eventListScreen:title" />
-            {(eventStore.favoritesOnly || eventStore.eventsForList.length > 0) && (
-              <View style={themed($toggle)}>
-                <Switch
-                  value={eventStore.favoritesOnly}
-                  onValueChange={() =>
-                    eventStore.setProp("favoritesOnly", !eventStore.favoritesOnly)
-                  }
-                  labelTx="eventListScreen:onlyFavorites"
-                  labelPosition="left"
-                  labelStyle={$labelStyle}
-                  accessibilityLabel={translate("eventListScreen:accessibility.switch")}
-                />
-              </View>
-            )}
-          </View>
-        }
-        */
+          ListHeaderComponent={
+            <View style={themed($heading)}>
+              <Text preset="heading" tx="campaign:campaigns" />
+            </View>
+          }
           renderItem={({ item }) => <Observer>{() => <CampaignCard campaign={item} />}</Observer>}
         />
       </Screen>
@@ -92,48 +50,33 @@ export const CampaignListScreen: FC<EventTabScreenProps<"CampaignListScreen">> =
   },
 )
 
-const CampaignCard = observer(function CampaignCard({ campaign }: { campaign: ICampaign }) {
+const CampaignCard = observer(function CampaignCard({ campaign }: { campaign: IUserCampaign }) {
   const {
     theme: { colors },
     themed,
   } = useAppTheme()
 
-  const { campaignStore } = useStores()
   const isFavorite = campaign.is_user_favorite
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const liked = useSharedValue(isFavorite ? 1 : 0)
 
-  // Grey community
   const animatedCodeButtonStyles = useAnimatedStyle(() => {
     return {
-      transform: [
-        {
-          scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND),
-        },
-      ],
+      transform: [{ scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND) }],
       opacity: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.CLAMP),
     }
   })
-  // Grey heart
   const animatedLikeButtonStyles = useAnimatedStyle(() => {
     return {
-      transform: [
-        {
-          scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND),
-        },
-      ],
+      transform: [{ scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND) }],
       opacity: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.CLAMP),
     }
   })
 
-  // Pink heart
   const animatedUnlikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: liked.value }],
-      opacity: liked.value,
-    }
+    return { transform: [{ scale: liked.value }], opacity: liked.value }
   })
 
   const handlePressFavorite = () => {
