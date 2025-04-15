@@ -12,14 +12,12 @@ import { ContentStyle } from "@shopify/flash-list"
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
-interface ChatScreenProps extends AppStackScreenProps<"Chat"> {}
-
-export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(_props) {
+export const ChatScreen: FC<AppStackScreenProps<"Chat">> = observer(function ChatScreen(_props) {
   const { route, navigation } = _props
   const { eventChatId, eventTitle } = route.params
-  const { chatStore, userStore } = useStores()
+  const { chatStore, userAuthenticationStore } = useStores()
   const chat = chatStore.getChat(eventChatId) as Chat
-  const userId = userStore.userId
+  const userId = userAuthenticationStore.getUserId
   const {
     themed,
     theme: { colors },

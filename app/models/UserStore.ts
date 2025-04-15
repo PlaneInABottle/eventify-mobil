@@ -122,9 +122,10 @@ export const UserStoreModel: IAnyModelType = types
   .actions((store) => ({
     report: flow(function* (reportedItemId: string, reportType: string, reason: string) {
       store.setLoading(true)
+      const reporterId = getRootStore(store).userStore.userId
       try {
         const { error } = yield supabase.from("reports").insert({
-          reporter_id: getRootStore(store).userStore.userId,
+          reporter_id: reporterId,
           report_type: reportType,
           reported_id: reportedItemId,
           reason,

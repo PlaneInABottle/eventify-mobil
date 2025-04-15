@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite"
 import { FC, useCallback, useRef } from "react"
 import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { AutoImage, ListItem, ListView, Screen, Text } from "@/components"
-import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
 import { ContentStyle } from "@shopify/flash-list"
@@ -11,28 +10,28 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { AppStackParamList } from "@/navigators"
 import { handleError } from "@/utils/errorHandler"
-import { IOrganizerChat } from "@/models/organizer/OrganizerChatStore"
-import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
 import { convertImageURLToSupabaseURL } from "@/utils/imageFunctions"
+import { MainTabScreenProps } from "@/navigators/userNavigationTypes"
+import { IUserChat } from "@/models/userStores/UserChatStore"
+import { IUserEventDateLocation } from "@/models/userStores/UserEventDateStore"
 
 export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
   function ChatListScreen(_props) {
     const { navigation } = _props
     const { themed } = useAppTheme()
-    const { organizerChatStore, chatStore } = useStores()
+    const { userChatStore } = useStores()
     const handlePressChat = (chatId: string, eventTitle: string | undefined) => {
       if (eventTitle === undefined) {
         handleError("errors:unknown")
         return
       }
 
-      chatStore.joinSocketChatRoom(chatId)
       navigation.navigate("Chat", { eventChatId: chatId, eventTitle })
     }
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-        <ListView<IOrganizerChat>
-          data={organizerChatStore.usersChatsAsArray}
+        <ListView<IUserChat>
+          data={userChatStore.usersChatsAsArray}
           estimatedItemSize={100}
           contentContainerStyle={themed([$listContentContainer, $styles.container])}
           ListHeaderComponent={
@@ -58,7 +57,7 @@ export const ChatListScreen: FC<MainTabScreenProps<"ChatList">> = observer(
 )
 interface ChatListItemProps {
   chatId: string
-  eventsDatesLocations: OrganizerEventDateLocation
+  eventsDatesLocations: IUserEventDateLocation
   handlePressChat: () => void
 }
 const ChatListItem: FC<ChatListItemProps> = observer(function ChatListItem(props) {

@@ -130,7 +130,7 @@ export const ChatStoreModel = types
         const authenticationToken = getRootStore(store).authenticationStore.token
         if (!authenticationToken) return
 
-        store.setupSocketListeners()
+        // store.setupSocketListeners()
       } catch (e) {
         handleError(e)
       }
