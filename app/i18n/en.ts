@@ -76,6 +76,7 @@ const en = {
     },
   },
   campaign: {
+    campaigns: "Campaigns",
     maxPerUser: "Limit of maximum generatable code for a user",
     dailyLimit: "Limit of how many codes can a user generate daily.",
     totalCodeLimit: "Total generatable codes for the campaign",
