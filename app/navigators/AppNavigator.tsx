@@ -11,7 +11,7 @@ import * as Screens from "@/screens"
 import Config from "../config"
 import { useStores } from "../models"
 // import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
-import { MainNavigator, MainTabParamList } from "./MainNavigator"
+import { MainNavigator } from "./MainNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
@@ -20,6 +20,7 @@ import * as Linking from "expo-linking"
 import * as Sentry from "@sentry/react-native"
 import { OrganizerNavigator } from "./OrganizerNavigator"
 import { OrganizerTabParamList } from "./navigationTypes"
+import { MainTabParamList } from "./userNavigationTypes"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -51,6 +52,7 @@ export type AppStackParamList = {
   OrganizerRegister: undefined
   OrganizerLocations: undefined
   UserLogin: undefined
+  UserPaymentScreen: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -100,7 +102,7 @@ const AppStack = observer(function AppStack() {
       ) : isAuthenticated ? (
         <>
           <Stack.Screen name="Main" component={MainNavigator} />
-          <Stack.Screen name="EditProfile" component={Screens.EditProfileScreen} />
+          <Stack.Screen name="UserPaymentScreen" component={Screens.PaymentScreen} />
           <Stack.Screen name="Chat" component={Screens.ChatScreen} />
           <Stack.Screen name="Report" component={Screens.ReportScreen} />
         </>

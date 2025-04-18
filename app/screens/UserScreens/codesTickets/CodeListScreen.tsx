@@ -30,7 +30,7 @@ export const CodeListScreen: FC<CodesTicketsTabScreenProps<"CodeListScreen">> = 
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<IUserCampaignCode>
           data={userCampaignCodeStore.codesAsList}
-          contentContainerStyle={themed([$listContentContainer])}
+          contentContainerStyle={themed($listContentContainer)}
           estimatedItemSize={10}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={

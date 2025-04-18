@@ -35,7 +35,7 @@ export const CampaignListScreen: FC<EventTabScreenProps<"CampaignListScreen">> =
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<IUserCampaign>
-          contentContainerStyle={themed([$styles.container, $listContentContainer])}
+          contentContainerStyle={themed($listContentContainer)}
           data={userCampaignStore.campaignsAsList}
           estimatedItemSize={177}
           ListHeaderComponent={
@@ -214,7 +214,7 @@ const CampaignCard = observer(function CampaignCard({ campaign }: { campaign: IU
 // #region Styles
 const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
-  paddingTop: spacing.lg + spacing.xl,
+  paddingTop: spacing.lg,
   paddingBottom: spacing.lg,
 })
 

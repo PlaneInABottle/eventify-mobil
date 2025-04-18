@@ -1,4 +1,4 @@
-import { ComponentType, FC, useMemo, useState } from "react"
+import { ComponentType, FC, useCallback, useMemo, useRef, useState } from "react"
 import { ViewStyle, View, TextStyle, ImageStyle, StyleSheet } from "react-native"
 import { observer } from "mobx-react-lite"
 import Animated, {
@@ -11,6 +11,12 @@ import Animated, {
 import { translate } from "@/i18n"
 import { $styles, ThemedStyle } from "@/theme"
 import { ContentStyle } from "@shopify/flash-list"
+import {
+  BottomSheetBackdrop,
+  BottomSheetFooter,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet"
 import {
   Card,
   Icon,
@@ -27,8 +33,10 @@ import { convertImageURLToSupabaseURL } from "@/utils/imageFunctions"
 import { useStores } from "@/models"
 import { OrganizerEventDateLocation } from "@/models/organizer/OrganizerEventDateModel"
 import { ICON_SIZE } from "consts/constVariables"
+import { navigate } from "@/navigators/navigationUtilities"
 import { IUserEventDateLocation } from "@/models/userStores/UserEventDateStore"
 import { EventTabScreenProps } from "@/navigators/userNavigationTypes"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 export const EventListScreen: FC<EventTabScreenProps<"EventListScreen">> = observer(
   function EventListScreen(_props) {
@@ -37,7 +45,7 @@ export const EventListScreen: FC<EventTabScreenProps<"EventListScreen">> = obser
     return (
       <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<IUserEventDateLocation>
-          contentContainerStyle={themed([$styles.container, $listContentContainer])}
+          contentContainerStyle={themed($listContentContainer)}
           data={userEventDateLocationStore.datesLocationsAsList}
           estimatedItemSize={177}
           /*
@@ -124,11 +132,28 @@ const EventCard = observer(function EventCard({
     (dl) => dl.id === eventDateLocation.id,
   )?.is_user_favorite
 
+  const { bottom } = useSafeAreaInsets()
+
   const userId = userAuthenticationStore.userId
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const liked = useSharedValue(isFavorite ? 1 : 0)
   const chatJoined = useSharedValue(eventChat?.is_user_joined ? 1 : 0)
+  const sheet = useRef<BottomSheetModal>(null)
+
+  const presentOptions = useCallback(() => {
+    sheet.current?.present()
+  }, [])
+
+  const dismissOptions = useCallback(() => {
+    sheet.current?.dismiss()
+  }, [])
+
+  const handleTicketPayment = () => {
+    dismissOptions()
+    navigate("UserPaymentScreen")
+    console.log("Buying Ticket")
+  }
 
   // Grey heart
   const animatedLikeButtonStyles = useAnimatedStyle(() => {
@@ -191,6 +216,7 @@ const EventCard = observer(function EventCard({
   }
 
   const handlePressCard = () => {
+    presentOptions()
     console.log("handlePressCard", eventDateLocation.event_id.title)
   }
 
@@ -262,84 +288,112 @@ const EventCard = observer(function EventCard({
     [animatedChatJoinedButtonStyles, animatedChatQuitButtonStyles, colors, themed],
   )
   return (
-    <Card
-      style={themed($item)}
-      verticalAlignment="force-footer-bottom"
-      onPress={handlePressCard}
-      onLongPress={handlePressFavorite}
-      HeadingComponent={
-        <View style={[$styles.row, themed($metadata)]}>
-          <Text style={themed($metadataText)} size="xxs">
-            {eventDateLocation.dateFormatted.textLabel}
-          </Text>
-          <Text style={themed($metadataText)} size="xxs">
-            {eventDateLocation.timeFormatted.textLabel}
-          </Text>
-        </View>
-      }
-      content={eventDateLocation.event_id.title}
-      RightComponent={
-        eventDateLocation.event_id.image_url ? (
-          <AutoImage
-            source={{
-              uri: convertImageURLToSupabaseURL("events", eventDateLocation.event_id.image_url),
-            }}
-            style={themed($itemThumbnail)}
-            maxWidth={80}
-            maxHeight={80}
-          />
-        ) : undefined
-      }
-      FooterComponent={
-        <View style={$styles.row}>
-          <Button
-            onPress={handlePressFavorite}
-            onLongPress={handlePressFavorite}
-            style={themed([$favoriteButton, isFavorite && $unFavoriteButton])}
-            accessibilityLabel={
-              isFavorite
-                ? translate("eventListScreen:accessibility.unfavoriteIcon")
-                : translate("eventListScreen:accessibility.favoriteIcon")
-            }
-            LeftAccessory={ButtonLeftAccessory}
-          >
-            <Text
-              size="xxs"
-              weight="medium"
-              tx={
-                isFavorite ? "eventListScreen:unfavoriteButton" : "eventListScreen:favoriteButton"
-              }
+    <>
+      <Card
+        style={themed($item)}
+        verticalAlignment="force-footer-bottom"
+        onPress={handlePressCard}
+        onLongPress={handlePressFavorite}
+        HeadingComponent={
+          <View style={[$styles.row, themed($metadata)]}>
+            <Text style={themed($metadataText)} size="xxs">
+              {eventDateLocation.dateFormatted.textLabel}
+            </Text>
+            <Text style={themed($metadataText)} size="xxs">
+              {eventDateLocation.timeFormatted.textLabel}
+            </Text>
+          </View>
+        }
+        content={eventDateLocation.event_id.title}
+        RightComponent={
+          eventDateLocation.event_id.image_url ? (
+            <AutoImage
+              source={{
+                uri: convertImageURLToSupabaseURL("events", eventDateLocation.event_id.image_url),
+              }}
+              style={themed($itemThumbnail)}
+              maxWidth={80}
+              maxHeight={80}
             />
-          </Button>
-
-          {!!eventChat && (
+          ) : undefined
+        }
+        FooterComponent={
+          <View style={$styles.row}>
             <Button
-              onPress={handlePressChat}
-              onLongPress={handlePressChat}
-              style={themed([$favoriteButton, eventChat?.is_user_joined && $unFavoriteButton])}
-              LeftAccessory={ChatButtonLeftAccessory}
-              disabled={isLoading}
+              onPress={handlePressFavorite}
+              onLongPress={handlePressFavorite}
+              style={themed([$favoriteButton, isFavorite && $unFavoriteButton])}
+              accessibilityLabel={
+                isFavorite
+                  ? translate("eventListScreen:accessibility.unfavoriteIcon")
+                  : translate("eventListScreen:accessibility.favoriteIcon")
+              }
+              LeftAccessory={ButtonLeftAccessory}
             >
               <Text
                 size="xxs"
                 weight="medium"
                 tx={
-                  eventChat?.is_user_joined
-                    ? "eventListScreen:quitChat"
-                    : "eventListScreen:joinChat"
+                  isFavorite ? "eventListScreen:unfavoriteButton" : "eventListScreen:favoriteButton"
                 }
               />
             </Button>
-          )}
-        </View>
-      }
-    />
+
+            {!!eventChat && (
+              <Button
+                onPress={handlePressChat}
+                onLongPress={handlePressChat}
+                style={themed([$favoriteButton, eventChat?.is_user_joined && $unFavoriteButton])}
+                LeftAccessory={ChatButtonLeftAccessory}
+                disabled={isLoading}
+              >
+                <Text
+                  size="xxs"
+                  weight="medium"
+                  tx={
+                    eventChat?.is_user_joined
+                      ? "eventListScreen:quitChat"
+                      : "eventListScreen:joinChat"
+                  }
+                />
+              </Button>
+            )}
+          </View>
+        }
+      />
+      <BottomSheetModal
+        ref={sheet}
+        backgroundStyle={themed($bottomSheetBackground)}
+        stackBehavior="replace"
+        handleIndicatorStyle={themed($handleIndicator)}
+        enableDismissOnClose
+        detached
+        snapPoints={["80%"]}
+        bottomInset={bottom} // What is this
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}
+        footerComponent={(props) => (
+          <BottomSheetFooter {...props} style={themed($bottomSheetFooter)} bottomInset={bottom}>
+            <Button
+              tx={"eventListScreen:buyTicket"}
+              preset="reversed"
+              onPress={handleTicketPayment}
+            />
+          </BottomSheetFooter>
+        )}
+      >
+        <BottomSheetView style={themed($bottomSheetContent)}>
+          <Text text="Hello" />
+        </BottomSheetView>
+      </BottomSheetModal>
+    </>
   )
 })
 // #region Styles
 const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
-  paddingTop: spacing.lg + spacing.xl,
+  paddingTop: spacing.lg,
   paddingBottom: spacing.lg,
 })
 
@@ -394,4 +448,21 @@ const $favoriteButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 const $unFavoriteButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderColor: colors.palette.primary100,
   backgroundColor: colors.palette.primary100,
+})
+
+const $bottomSheetBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+})
+
+const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.neutral800,
+})
+
+const $bottomSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.lg,
+  paddingHorizontal: spacing.lg,
+})
+const $bottomSheetFooter: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.xs,
 })

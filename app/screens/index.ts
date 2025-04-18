@@ -12,6 +12,7 @@ export * from "./ResetPasswordScreen"
 // User screens
 export * from "./UserScreens/userAuth/UserLoginScreen"
 export * from "./UserScreens/profile/EditProfileScreen"
+export * from "./UserScreens/payment/PaymentScreen"
 
 // Organizer screens
 export * from "./OrganizerScreens/OrganizerRegisterScreen"

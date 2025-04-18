@@ -227,6 +227,9 @@ const en = {
     useCodeWarningDescription:
       "Are you sure you want to use this code ? This action can not taken back.",
   },
+  ticketListScreen: {
+    tickets: "Tickets",
+  },
   eventMapScreen: {
     searchThisArea: "Search This Area",
     eventDescription: " {{ description }}",
@@ -239,6 +242,7 @@ const en = {
     quitChat: "Quit Chat",
     title: "Events",
     onlyFavorites: "Only Show Favorites",
+    buyTicket: "Buy Ticket",
     noEventsEmptyState: {
       heading: "No Events Found",
       content:

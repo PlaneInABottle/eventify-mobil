@@ -1,11 +1,10 @@
 import { observer } from "mobx-react-lite"
-import type { ThemedStyle } from "@/theme"
+import { $styles, type ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC, useCallback, useRef } from "react"
 import { Button, ListItem, ListItemProps, ListView, Screen, Text } from "@/components"
 import { Alert, View, ViewStyle } from "react-native"
 import { useStores } from "@/models"
-import { ICampaignCode } from "@/models/campaign/CampaignCodeStore"
 import {
   BottomSheetBackdrop,
   BottomSheetFooter,
@@ -16,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { translate } from "@/i18n"
 import { CodesTicketsTabScreenProps } from "@/navigators/userNavigationTypes"
 import { IUserCampaignCode } from "@/models/userStores/UserCampaignCodeStore"
+import { ContentStyle } from "@shopify/flash-list"
 
 export const TicketListScreen: FC<CodesTicketsTabScreenProps<"TicketListScreen">> = observer(
   function TicketListScreen(_props) {
@@ -26,13 +26,14 @@ export const TicketListScreen: FC<CodesTicketsTabScreenProps<"TicketListScreen">
 
     const { themed } = useAppTheme()
     return (
-      <Screen preset="auto" contentContainerStyle={themed($screenContentContainer)}>
+      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
         <ListView<IUserCampaignCode>
           data={userCampaignCodeStore.codesAsList}
+          contentContainerStyle={themed($listContentContainer)}
           estimatedItemSize={10}
           ListHeaderComponent={
             <View style={themed($heading)}>
-              <Text preset="heading" tx="organizerEventListScreen:heading" />
+              <Text preset="heading" tx="ticketListScreen:tickets" />
             </View>
           }
           renderItem={({ item }) => (
@@ -84,6 +85,8 @@ const TicketListItem = observer(function TicketListItem(props: ITicketListItem) 
       ],
     )
   }
+
+  const handleTicketPayment = () => {}
   return (
     <>
       <ListItem {...ListItemProps} onPress={presentOptions}>
@@ -108,7 +111,6 @@ const TicketListItem = observer(function TicketListItem(props: ITicketListItem) 
         ref={sheet}
         backgroundStyle={themed($bottomSheetBackground)}
         stackBehavior="replace"
-        enableDynamicSizing
         handleIndicatorStyle={themed($handleIndicator)}
         enableDismissOnClose
         detached
@@ -141,9 +143,11 @@ const TicketListItem = observer(function TicketListItem(props: ITicketListItem) 
     </>
   )
 })
-const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingBottom: spacing.xxl,
+
+const $listContentContainer: ThemedStyle<ContentStyle> = ({ spacing }) => ({
+  paddingTop: spacing.lg,
   paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.lg,
 })
 
 const $heading: ThemedStyle<ViewStyle> = ({ spacing }) => ({
