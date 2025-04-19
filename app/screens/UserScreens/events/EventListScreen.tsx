@@ -122,7 +122,7 @@ const EventCard = observer(function EventCard({
   eventDateLocation: OrganizerEventDateLocation
 }) {
   const {
-    theme: { colors },
+    theme: { colors, spacing },
     themed,
   } = useAppTheme()
 
@@ -369,7 +369,7 @@ const EventCard = observer(function EventCard({
         enableDismissOnClose
         detached
         snapPoints={["80%"]}
-        bottomInset={bottom} // What is this
+        bottomInset={bottom + spacing.xxxl}
         backdropComponent={(props) => (
           <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
         )}
@@ -384,7 +384,60 @@ const EventCard = observer(function EventCard({
         )}
       >
         <BottomSheetView style={themed($bottomSheetContent)}>
-          <Text text="Hello" />
+          <View key={eventDateLocation.id} style={themed($eventContainer)}>
+            {/* Event Image */}
+            {eventDateLocation.event_id.image_url && (
+              <AutoImage
+                source={{
+                  uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/events/${eventDateLocation.event_id.image_url}`,
+                }}
+                style={themed($image)}
+              />
+            )}
+
+            {/* Event Header */}
+            <View style={themed($headerContainer)}>
+              <Text
+                preset="heading"
+                text={eventDateLocation.event_id.title}
+                style={themed($title)}
+              />
+              <View style={themed($dateTimeContainer)}>
+                <View style={themed($iconTextContainer)}>
+                  <Icon icon="calendar" size={20} color={colors.palette.primary500} />
+                  <Text
+                    text={eventDateLocation.dateFormatted.textLabel}
+                    style={themed($dateTimeText)}
+                    size="xxs"
+                  />
+                </View>
+                <View style={themed($iconTextContainer)}>
+                  <Icon icon="clock" size={20} color={colors.palette.primary500} />
+                  <Text
+                    text={eventDateLocation.timeFormatted.textLabel}
+                    style={themed($dateTimeText)}
+                    size="xxs"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* Event Description */}
+            {eventDateLocation.event_id.description && (
+              <View style={themed($descriptionContainer)}>
+                <Text preset="subheading" text="About" style={themed($sectionTitle)} />
+                <Text text={eventDateLocation.event_id.description} />
+              </View>
+            )}
+
+            {/* 
+                  Organizer Info 
+                    */}
+            <View style={themed($organizerContainer)}>
+              <Text preset="subheading" text="Organizer" style={themed($sectionTitle)} />
+              <Text text={eventDateLocation.event_id.publisher_id?.display_name} />
+            </View>
+          </View>
         </BottomSheetView>
       </BottomSheetModal>
     </>
@@ -465,4 +518,56 @@ const $bottomSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $bottomSheetFooter: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
   paddingBottom: spacing.xs,
+})
+
+const $headerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.xs,
+})
+
+const $title: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xs,
+})
+
+const $dateTimeContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  marginBottom: spacing.md,
+  gap: spacing.md,
+})
+
+const $iconTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xxs,
+})
+
+const $dateTimeText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginLeft: spacing.xxs,
+  color: colors.textDim,
+})
+
+const $descriptionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
+
+const $sectionTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xs,
+})
+
+const $organizerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xl,
+})
+
+const $image: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  width: "100%",
+  height: 200,
+  alignSelf: "center",
+  marginBottom: spacing.md,
+  borderRadius: 16,
+})
+const $eventContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.lg,
+  paddingBottom: spacing.lg,
+  borderBottomWidth: 1,
+  borderBottomColor: colors.separator,
 })
