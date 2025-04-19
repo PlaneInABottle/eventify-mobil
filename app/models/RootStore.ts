@@ -51,7 +51,7 @@ export const RootStoreModel = types
     userChatStore: types.optional(UserChatStoreModel, {}),
     userCampaignStore: types.optional(UserCampaignStoreModel, {}),
     userCampaignCodeStore: types.optional(UserCampaignCodeStoreModel, {}),
-    userPaymentStore: types.optional(UserPaymentStoreModel ,{}),
+    userPaymentStore: types.optional(UserPaymentStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
