@@ -9,17 +9,19 @@ import { navigate } from "@/navigators/navigationUtilities"
 import { useHeader } from "@/utils/useHeader"
 import { translate } from "@/i18n"
 import { UserProfileStackScreenProps } from "@/navigators/userNavigationTypes"
+import { IUserEditPublicProfileFormState } from "@/types/userFormTypes"
 
 export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditPersonalScreen">> =
   observer(function EditProfileScreen(_props) {
     const { themed } = useAppTheme()
-    const { userStore } = useStores()
-    const user = userStore.user
+    const { userProfileStore } = useStores()
 
-    const [displayName, setDisplayName] = useState(user?.display_name || "")
-    const [about, setAbout] = useState(user?.about || "")
-    const [age, setAge] = useState(user?.age?.toString() || "")
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [formState, setFormState] = useState<IUserEditPublicProfileFormState>({
+      displayName: "",
+      about: "",
+      errors: {},
+      isLoading: false,
+    })
 
     const handleSave = async () => {
       Alert.alert(
@@ -33,31 +35,42 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
           {
             text: translate("common:save"),
             onPress: async () => {
-              setIsSubmitting(true)
-              try {
-                const updates = {
-                  display_name: displayName,
-                  about,
-                  age: age ? parseInt(age, 10) : null,
-                }
+              setFormState((prev) => ({ ...prev, isLoading: true }))
 
-                const success = await userStore.updateProfile(updates)
-                if (success) {
-                  navigate("Main", { screen: "Profile" })
-                }
-              } finally {
-                setIsSubmitting(false)
+              const result = await userProfileStore.updateProfile(formState)
+              if (result === true) {
+                setFormState({
+                  displayName: "",
+                  about: "",
+                  errors: {},
+                  isLoading: false,
+                })
+                navigate("Profile", { screen: "UserProfileScreen" })
+              } else {
+                setFormState((prev) => ({
+                  ...prev,
+                  errors: { general: result },
+                  isLoading: false,
+                }))
               }
             },
           },
         ],
       )
     }
+
+    const updateField = (field: keyof IUserEditPublicProfileFormState, value: any) => {
+      setFormState((prev) => ({
+        ...prev,
+        [field]: value,
+        errors: { ...prev.errors, [field]: undefined, general: undefined },
+      }))
+    }
     useHeader(
       {
         titleTx: "editProfileScreen:editProfile",
         leftIcon: "back",
-        onLeftPress: () => navigate("Main", { screen: "Profile" }),
+        onLeftPress: () => navigate("Profile", { screen: "UserProfileScreen" }),
       },
       [],
     )
@@ -65,8 +78,8 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
       <Screen preset="scroll" contentContainerStyle={$styles.container}>
         <View style={themed($formContainer)}>
           <TextField
-            value={displayName}
-            onChangeText={setDisplayName}
+            value={formState.displayName}
+            onChangeText={(v) => updateField("displayName", v)}
             labelTx="editProfileScreen:displayName"
             placeholderTx="editProfileScreen:displayNamePlaceholder"
             accessible={true}
@@ -75,19 +88,8 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
           />
 
           <TextField
-            value={age}
-            onChangeText={setAge}
-            labelTx="profileScreen:age"
-            placeholderTx="editProfileScreen:agePlaceholder"
-            keyboardType="numeric"
-            accessible={true}
-            accessibilityLabel="Age input"
-            accessibilityRole="text"
-          />
-
-          <TextField
-            value={about}
-            onChangeText={setAbout}
+            value={formState.about}
+            onChangeText={(v) => updateField("about", v)}
             labelTx="profileScreen:about"
             placeholderTx="editProfileScreen:aboutPlaceholder"
             multiline
@@ -97,7 +99,7 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
             accessibilityRole="text"
           />
 
-          <Button tx="common:saveChanges" onPress={handleSave} disabled={isSubmitting} />
+          <Button tx="common:saveChanges" onPress={handleSave} disabled={formState.isLoading} />
         </View>
       </Screen>
     )
