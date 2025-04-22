@@ -17,3 +17,25 @@ export type UserProfileFormState = {
   }
   isLoading: boolean
 }
+
+export type IUserEditPublicProfileFormState = {
+  display_name: string
+  about: string
+  errors: {
+    display_name?: TxKeyPath
+    about?: TxKeyPath
+    general?: TxKeyPath
+  }
+  isLoading: boolean
+}
+
+export type UserEditPrivateProfileFormState = {
+  displayName: string
+  about: string
+  errors: {
+    displayName?: TxKeyPath
+    about?: TxKeyPath
+    general?: TxKeyPath
+  }
+  isLoading: boolean
+}

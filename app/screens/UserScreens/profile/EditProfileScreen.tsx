@@ -17,7 +17,7 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
     const { userProfileStore } = useStores()
 
     const [formState, setFormState] = useState<IUserEditPublicProfileFormState>({
-      displayName: "",
+      display_name: "",
       about: "",
       errors: {},
       isLoading: false,
@@ -37,10 +37,13 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
             onPress: async () => {
               setFormState((prev) => ({ ...prev, isLoading: true }))
 
-              const result = await userProfileStore.updateProfile(formState)
+              const result = await userProfileStore.updateProfile({
+                display_name: formState.display_name,
+                about: formState.about,
+              })
               if (result === true) {
                 setFormState({
-                  displayName: "",
+                  display_name: "",
                   about: "",
                   errors: {},
                   isLoading: false,
@@ -78,8 +81,8 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
       <Screen preset="scroll" contentContainerStyle={$styles.container}>
         <View style={themed($formContainer)}>
           <TextField
-            value={formState.displayName}
-            onChangeText={(v) => updateField("displayName", v)}
+            value={formState.display_name}
+            onChangeText={(v) => updateField("display_name", v)}
             labelTx="editProfileScreen:displayName"
             placeholderTx="editProfileScreen:displayNamePlaceholder"
             accessible={true}

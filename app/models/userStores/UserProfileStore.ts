@@ -6,32 +6,72 @@ import { handleSuccess } from "@/utils/successHandler"
 import { getRootStore } from "@/models/helpers/getRootStore"
 import { withSetPropAction } from "@/models/helpers/withSetPropAction"
 
+export const UserPrivateProfileModel = types.model("UserPrivateProfile").props({
+  id: types.identifier,
+  identity_number: types.string,
+  phone_number: types.string,
+  name: types.string,
+  last_name: types.string,
+})
+
 export const UserProfileModel = types.model("UserProfile").props({
   id: types.identifier,
   display_name: types.maybeNull(types.string),
   avatar_url: types.maybeNull(types.string),
-  email: types.string,
   about: types.maybeNull(types.string),
   age: types.maybeNull(types.number),
 })
 
 export const UserProfileStoreModel: IAnyModelType = types
-
   .model("UserProfileStore")
   .props({
     profile: types.maybe(UserProfileModel),
+    privateProfile: types.maybe(UserPrivateProfileModel),
   })
-  .volatile(() => ({
-    isUploading: false,
-  }))
   .actions(withSetPropAction)
   .actions((store) => ({
     clearUser() {
       store.profile = undefined
     },
-    setUploading(value: boolean) {
-      store.isUploading = value
-    },
+  }))
+  .actions((store) => ({
+    fetchPrivateProfile: flow(function* (): Generator<any, boolean | string, any> {
+      try {
+        const userId = getRootStore(store).userAuthenticationStore.getUserId
+
+        const { data: privateProfile } = yield supabase
+          .from("user_private_profiles")
+          .select("*")
+          .eq("id", userId)
+          .single()
+          .throwOnError()
+
+        if (!privateProfile) throw new Error("errors:notFound")
+
+        store.setProp("privateProfile", privateProfile)
+        return true
+      } catch (error) {
+        return handleError(error).message
+      }
+    }),
+    upsertPrivateProfile: flow(function* (
+      updates: Omit<IUserPrivateProfile, "id">,
+    ): Generator<any, boolean | string, any> {
+      try {
+        const userId = getRootStore(store).userAuthenticationStore.getUserId
+
+        const { data: privateProfile } = yield supabase
+          .from("privateProfile")
+          .upsert({ id: userId, ...updates })
+          .select()
+          .throwOnError()
+
+        store.setProp("privateProfile", privateProfile)
+        return true
+      } catch (error) {
+        return handleError(error).message
+      }
+    }),
   }))
   .actions((store) => ({
     fetchProfile: flow(function* (userIdProp: string) {
@@ -56,18 +96,15 @@ export const UserProfileStoreModel: IAnyModelType = types
       }
     }),
     updateProfile: flow(function* (updates: Partial<IUserProfile>) {
-      if (!store.profile?.id) throw Error("errors:notFound")
-
       try {
-        const { error } = yield supabase.from("profiles").update(updates).eq("id", store.profile.id)
+        const userId = getRootStore(store).userAuthenticationStore.getUserId
 
-        if (error) throw error
+        yield supabase.from("profiles").update(updates).eq("id", userId).throwOnError()
 
-        store.setProp("profile", { ...store.profile, ...updates })
+        store.setProp("profile", { id: userId, ...store.profile, ...updates })
         return true
       } catch (error) {
-        handleError(error)
-        return false
+        return handleError(error).message
       }
     }),
   }))
@@ -138,6 +175,8 @@ export const UserProfileStoreModel: IAnyModelType = types
       }
     }),
   }))
+
+export interface IUserPrivateProfile extends Instance<typeof UserPrivateProfileModel> {}
 
 export interface IUserProfile extends Instance<typeof UserProfileModel> {}
 export interface IUserProfileSnapshotOut extends SnapshotOut<typeof UserProfileModel> {}

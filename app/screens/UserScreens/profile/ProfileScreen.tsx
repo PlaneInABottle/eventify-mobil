@@ -171,7 +171,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                   <View style={themed($infoTextContainer)}>
                     <Text preset="formLabel" tx="profileScreen:email" style={themed($infoLabel)} />
                     <Text
-                      tx={userProfile?.email || "profileScreen:addEmail"}
+                      tx={userAuthenticationStore.getEmail || "profileScreen:addEmail"}
                       style={themed($infoValue)}
                       accessibilityLabel={`Email: ${userProfile?.email || "not set"}`}
                     />
