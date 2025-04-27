@@ -5,7 +5,6 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
 import { $styles, ThemedStyle } from "@/theme"
-import { navigate } from "@/navigators/navigationUtilities"
 import { useHeader } from "@/utils/useHeader"
 import { translate } from "@/i18n"
 import { UserProfileStackScreenProps } from "@/navigators/userNavigationTypes"
@@ -13,6 +12,7 @@ import { IUserEditPublicProfileFormState } from "@/types/userFormTypes"
 
 export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditPersonalScreen">> =
   observer(function EditProfileScreen(_props) {
+    const navigation = _props.navigation
     const { themed } = useAppTheme()
     const { userProfileStore } = useStores()
 
@@ -48,7 +48,7 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
                   errors: {},
                   isLoading: false,
                 })
-                navigate("Profile", { screen: "UserProfileScreen" })
+                navigation.goBack()
               } else {
                 setFormState((prev) => ({
                   ...prev,
@@ -73,7 +73,7 @@ export const EditProfileScreen: FC<UserProfileStackScreenProps<"UserProfileEditP
       {
         titleTx: "editProfileScreen:editProfile",
         leftIcon: "back",
-        onLeftPress: () => navigate("Profile", { screen: "UserProfileScreen" }),
+        onLeftPress: () => navigation.goBack(),
       },
       [],
     )

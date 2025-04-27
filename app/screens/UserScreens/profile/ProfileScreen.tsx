@@ -14,7 +14,6 @@ import { observer } from "mobx-react-lite"
 import { translate } from "@/i18n"
 import { Screen, Text, Icon, Button, Card } from "@/components"
 import { $styles, colors, ThemedStyle } from "@/theme"
-import { navigate } from "@/navigators/navigationUtilities"
 import { UserProfileFormState } from "@/types/userFormTypes"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
@@ -22,6 +21,7 @@ import { UserProfileStackScreenProps } from "@/navigators/userNavigationTypes"
 
 export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">> = observer(
   function ProfileScreen(_props) {
+    const navigation = _props.navigation
     const { setThemeContextOverride, themeContext, themed } = useAppTheme()
     const { userProfileStore, userAuthenticationStore } = useStores()
     const userProfile = userProfileStore.profile
@@ -32,10 +32,10 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
     })
 
     const handleEditPersonalInfo = () => {
-      navigate("UserProfileEditPersonalScreen")
+      navigation.navigate("UserProfileEditPersonalScreen")
     }
     const handleEditPrivateProfile = () => {
-      navigate("UserProfileEditPrivateScreen")
+      // navigation.navigate("UserProfileEditPrivateScreen")
     }
 
     const handleUploadAvatar = async () => {
@@ -287,6 +287,15 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                 </View>
               </View>
             }
+          />
+          <Button
+            onPress={() => navigation.navigate("UserAddressListScreen")}
+            tx="profileScreen:listAddresses"
+            RightAccessory={(props) => <Icon icon="caretRight" containerStyle={props.style} />}
+            txOptions={{
+              themeContext,
+            }}
+            style={themed($itemsContainer)}
           />
           <Button
             onPress={toggleTheme}

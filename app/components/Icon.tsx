@@ -119,6 +119,10 @@ export const iconRegistry = {
   clock: require("../../assets/icons/clock.png"),
   plus: require("../../assets/icons/plus.png"),
   filter: require("../../assets/icons/filter.png"),
+  biometrics: require("../../assets/icons/biometrics.png"),
+  idCard: require("../../assets/icons/idcard.png"),
+  signature: require("../../assets/icons/signature.png"),
+  telephone: require("../../assets/icons/telephone.png"),
 }
 
 const $imageStyleBase: ImageStyle = {

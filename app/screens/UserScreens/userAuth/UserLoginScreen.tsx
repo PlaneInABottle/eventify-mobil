@@ -12,6 +12,7 @@ import {
   updateUserLoginFormField,
   validateUserLoginForm,
 } from "@/utils/formValidations/userLoginFormValidation"
+import { TxKeyPath } from "@/i18n"
 
 export const UserLoginScreen: FC<AppStackScreenProps<"UserLogin">> = observer(
   function UserLoginScreen(_props) {
@@ -95,7 +96,12 @@ export const UserLoginScreen: FC<AppStackScreenProps<"UserLogin">> = observer(
 
         <View style={themed($formContainer)}>
           {formState.errors.general && (
-            <Text tx={formState.errors.general} size="sm" weight="light" style={themed($hint)} />
+            <Text
+              tx={formState.errors.general as TxKeyPath}
+              size="sm"
+              weight="light"
+              style={themed($hint)}
+            />
           )}
 
           <TextField
