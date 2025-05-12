@@ -204,6 +204,14 @@ const en = {
     deleteAccountWarningDescription:
       "Are you sure you want to delete your account? This action can not taken back.",
   },
+  paymentScreen: {
+    ticketPayment: "Ticket Payment",
+    chooseBillingAddress: "Choose Billing Address",
+    chooseBillingAddressPlaceholder: "Billing Address",
+    readAndUnderstoodAccept: "I have read the contract and accept it.",
+    paymentContract: "Payment Contract",
+    acceptContract: "Accept Contract",
+  },
   editProfileScreen: {
     saveAccountWarningDescription: "Are you sure you want to save these profile changes?",
     editProfile: "Edit Profile",
