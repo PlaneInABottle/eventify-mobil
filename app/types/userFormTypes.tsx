@@ -59,3 +59,13 @@ export type IUserEditAddressFormState = {
   }
   isLoading: boolean
 }
+
+export type IUserPaymentScreenFormState = {
+  address_id: string
+  payment_contract: boolean
+  errors: {
+    address_id?: TxKeyPath
+    general?: TxKeyPath | string
+  }
+  isLoading: boolean
+}
