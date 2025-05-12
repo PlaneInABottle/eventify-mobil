@@ -20,6 +20,8 @@ import {
 } from "./userNavigationTypes"
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { UserAddressListScreen } from "@/screens/UserScreens/profile/AddressListScreen"
+import { UserAddressEditScreen } from "@/screens/UserScreens/profile/AddressEditScreen"
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 const EventTab = createMaterialTopTabNavigator<EventTabParamList>()
@@ -48,6 +50,25 @@ function UserProfileStackNavigator() {
         name="UserProfileEditPersonalScreen"
         component={EditProfileScreen}
         options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+      <UserProfileStack.Screen
+        name="UserAddressListScreen"
+        component={UserAddressListScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+      <UserProfileStack.Screen
+        name="UserAddressEditScreen"
+        component={UserAddressEditScreen}
+        options={{
+          headerShown: true,
           contentStyle: {
             paddingTop: 0,
           },
