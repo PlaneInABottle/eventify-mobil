@@ -171,13 +171,6 @@ const $listItemText: ThemedStyle<TextStyle> = ({ spacing }) => ({
   paddingLeft: spacing.md,
 })
 
-const $item: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  padding: spacing.md,
-  marginTop: spacing.sm,
-  minHeight: 60,
-  backgroundColor: colors.palette.neutral100,
-})
-
 const $itemThumbnail: ImageStyle = {
   alignSelf: "center",
   borderRadius: 25,
