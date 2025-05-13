@@ -136,7 +136,6 @@ const NewMarkerField = observer(
       themed,
       theme: { colors },
     } = useAppTheme()
-    console.log("LLLLL: ", eventsDateLocations)
 
     useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }))
 
