@@ -24,6 +24,13 @@ export const UserAddressStoreModel: IAnyModelType = types
     get addressesForList() {
       return store.addresses.slice()
     },
+    get forSelectField() {
+      return store.addresses
+        .map((val) => {
+          return { label: val.title, value: val.id }
+        })
+        .slice()
+    },
     addressById(addressId: string | undefined) {
       return store.addresses.find((addr) => addr.id === addressId)
     },
