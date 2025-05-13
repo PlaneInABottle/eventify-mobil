@@ -22,6 +22,7 @@ import { UserCampaignStoreModel } from "./userStores/UserCampaignStore"
 import { UserCampaignCodeStoreModel } from "./userStores/UserCampaignCodeStore"
 import { UserProfileStoreModel } from "./userStores/UserProfileStore"
 import { UserPaymentStoreModel } from "./userStores/UserPaymentStore"
+import { UserAddressStoreModel } from "./userStores/UserAddressStore"
 
 /**
  * A RootStore model.
@@ -52,6 +53,7 @@ export const RootStoreModel = types
     userCampaignStore: types.optional(UserCampaignStoreModel, {}),
     userCampaignCodeStore: types.optional(UserCampaignCodeStoreModel, {}),
     userPaymentStore: types.optional(UserPaymentStoreModel, {}),
+    userAddressStore: types.optional(UserAddressStoreModel, {}),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
