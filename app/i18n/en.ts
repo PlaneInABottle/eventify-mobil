@@ -220,6 +220,17 @@ const en = {
     agePlaceholder: "Enter your age",
     aboutPlaceholder: "Tell us about yourself",
   },
+  editPrivateProfileScreen: {
+    editPrivateProfile: "Edit Private Profile",
+    name: "Name",
+    namePH: "Yusuf",
+    lastName: "Last Name",
+    lastNamePH: "Mirza",
+    identityNumber: "Identity Number",
+    identityNumberPH: "44433322211",
+    phoneNumber: "Phone Number",
+    phoneNumberPH: "555 444 33 22",
+  },
   addressListScreen: {
     myAddresses: "My Addresses",
   },
