@@ -29,12 +29,16 @@ export type IUserEditPublicProfileFormState = {
   isLoading: boolean
 }
 
-export type UserEditPrivateProfileFormState = {
-  displayName: string
-  about: string
+export type IUserEditPrivateProfileFormState = {
+  name: string
+  lastName: string
+  identityNumber: string
+  phoneNumber: string
   errors: {
-    displayName?: TxKeyPath
-    about?: TxKeyPath
+    name?: TxKeyPath
+    lastName?: TxKeyPath
+    identityNumber?: TxKeyPath
+    phoneNumber?: TxKeyPath
     general?: TxKeyPath | string
   }
   isLoading: boolean

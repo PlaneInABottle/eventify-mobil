@@ -35,7 +35,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
       navigation.navigate("UserProfileEditPersonalScreen")
     }
     const handleEditPrivateProfile = () => {
-      // navigation.navigate("UserProfileEditPrivateScreen")
+      navigation.navigate("UserProfileEditPrivateScreen")
     }
 
     const handleUploadAvatar = async () => {
@@ -221,7 +221,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                     accessibilityRole="header"
                   />
                   <TouchableOpacity
-                    onPress={handleEditPersonalInfo}
+                    onPress={handleEditPrivateProfile}
                     accessible={true}
                     accessibilityLabel="Edit private information"
                     accessibilityRole="button"

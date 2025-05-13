@@ -7,6 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 export type UserProfileStackParamList = {
   UserProfileScreen: undefined
   UserProfileEditPersonalScreen: undefined
+  UserProfileEditPrivateScreen: undefined
   UserAddressListScreen: undefined
   UserAddressEditScreen: { addressId?: string }
 }

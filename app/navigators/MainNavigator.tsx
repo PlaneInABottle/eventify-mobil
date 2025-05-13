@@ -8,6 +8,7 @@ import { EventListScreen } from "@/screens/UserScreens/events/EventListScreen"
 import { EventMapScreen } from "@/screens/UserScreens/events/EventMapScreen"
 import { ProfileScreen } from "@/screens/UserScreens/profile/ProfileScreen"
 import { EditProfileScreen } from "@/screens/UserScreens/profile/EditProfileScreen"
+import { EditPrivateProfileScreen } from "@/screens/UserScreens/profile/EditPrivateProfileScreen"
 import { ChatListScreen } from "@/screens/chat/ChatListScreen"
 import { CampaignListScreen } from "@/screens/UserScreens/campaign/CampaignListScreen"
 import { CodeListScreen } from "@/screens/UserScreens/codesTickets/CodeListScreen"
@@ -49,6 +50,15 @@ function UserProfileStackNavigator() {
       <UserProfileStack.Screen
         name="UserProfileEditPersonalScreen"
         component={EditProfileScreen}
+        options={{
+          contentStyle: {
+            paddingTop: 0,
+          },
+        }}
+      />
+      <UserProfileStack.Screen
+        name="UserProfileEditPrivateScreen"
+        component={EditPrivateProfileScreen}
         options={{
           contentStyle: {
             paddingTop: 0,
