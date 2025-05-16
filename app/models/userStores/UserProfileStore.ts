@@ -56,18 +56,19 @@ export const UserProfileStoreModel: IAnyModelType = types
     }),
     upsertPrivateProfile: flow(function* (
       updates: Omit<IUserPrivateProfile, "id">,
-    ): Generator<any, boolean | string, any> {
+    ): Generator<any, undefined | string, any> {
       try {
         const userId = getRootStore(store).userAuthenticationStore.getUserId
 
         const { data: privateProfile } = yield supabase
-          .from("privateProfile")
+          .from("user_private_profiles")
           .upsert({ id: userId, ...updates })
-          .select()
+          .select(`id, name, last_name,phone_number,identity_number`)
+          .single()
           .throwOnError()
 
         store.setProp("privateProfile", privateProfile)
-        return true
+        return undefined
       } catch (error) {
         return handleError(error).message
       }
@@ -127,7 +128,7 @@ export const UserProfileStoreModel: IAnyModelType = types
 
         const image = result.assets[0]
         const fileExt = image.uri?.split(".").pop()?.toLowerCase() ?? "jpeg"
-        const path = `${store.profile.id}/${Date.now()}.${fileExt}`
+        const path = `${store.profile.id} / ${Date.now()}.${fileExt}`
         const arraybuffer = yield fetch(image.uri).then((res) => res.arrayBuffer())
         const { data, error: uploadError } = yield supabase.storage
           .from("avatars")
@@ -176,12 +177,12 @@ export const UserProfileStoreModel: IAnyModelType = types
     }),
   }))
 
-export interface IUserPrivateProfile extends Instance<typeof UserPrivateProfileModel> {}
+export interface IUserPrivateProfile extends Instance<typeof UserPrivateProfileModel> { }
 
-export interface IUserProfile extends Instance<typeof UserProfileModel> {}
-export interface IUserProfileSnapshotOut extends SnapshotOut<typeof UserProfileModel> {}
-export interface IUserProfileSnapshotIn extends SnapshotIn<typeof UserProfileModel> {}
+export interface IUserProfile extends Instance<typeof UserProfileModel> { }
+export interface IUserProfileSnapshotOut extends SnapshotOut<typeof UserProfileModel> { }
+export interface IUserProfileSnapshotIn extends SnapshotIn<typeof UserProfileModel> { }
 
-export interface IUserProfileStore extends Instance<typeof UserProfileStoreModel> {}
-export interface IUserProfileStoreSnapshotOut extends SnapshotOut<typeof UserProfileStoreModel> {}
-export interface IUserProfileStoreSnapshotIn extends SnapshotIn<typeof UserProfileStoreModel> {}
+export interface IUserProfileStore extends Instance<typeof UserProfileStoreModel> { }
+export interface IUserProfileStoreSnapshotOut extends SnapshotOut<typeof UserProfileStoreModel> { }
+export interface IUserProfileStoreSnapshotIn extends SnapshotIn<typeof UserProfileStoreModel> { }

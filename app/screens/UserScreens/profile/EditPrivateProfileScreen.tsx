@@ -38,16 +38,27 @@ export const EditPrivateProfileScreen: FC<UserProfileStackScreenProps<"UserProfi
           {
             text: translate("common:save"),
             onPress: async () => {
+              if (!validateUserPrivateProfileForm(
+                formState.name,
+                formState.lastName,
+                formState.identityNumber,
+                formState.phoneNumber,
+                setFormState,
+              )) return
               setFormState((prev) => ({ ...prev, isLoading: true }))
-              if (!validateUserPrivateProfileForm) return
-
-              const result = await userProfileStore.upsertPrivateProfile({
+              const error = await userProfileStore.upsertPrivateProfile({
                 name: formState.name,
                 last_name: formState.lastName,
                 identity_number: formState.identityNumber,
                 phone_number: formState.phoneNumber,
               })
-              if (result === true) {
+              if (error) {
+                setFormState((prev) => ({
+                  ...prev,
+                  errors: { general: error },
+                  isLoading: false,
+                }))
+              } else {
                 setFormState({
                   name: "",
                   lastName: "",
@@ -57,12 +68,6 @@ export const EditPrivateProfileScreen: FC<UserProfileStackScreenProps<"UserProfi
                   isLoading: false,
                 })
                 navigation.goBack()
-              } else {
-                setFormState((prev) => ({
-                  ...prev,
-                  errors: { general: result },
-                  isLoading: false,
-                }))
               }
             },
           },
@@ -88,6 +93,10 @@ export const EditPrivateProfileScreen: FC<UserProfileStackScreenProps<"UserProfi
             accessible={true}
             accessibilityLabel="Name input"
             accessibilityRole="text"
+            helperTx={formState.errors.name?.key}
+            helperTxOptions={formState.errors.name?.values}
+            status={formState.errors.name?.key ? "error" : undefined}
+            readOnly={formState.isLoading}
           />
 
           <TextField
@@ -98,6 +107,10 @@ export const EditPrivateProfileScreen: FC<UserProfileStackScreenProps<"UserProfi
             accessible={true}
             accessibilityLabel="Last name input"
             accessibilityRole="text"
+            helperTx={formState.errors.lastName?.key}
+            helperTxOptions={formState.errors.lastName?.values}
+            status={formState.errors.lastName ? "error" : undefined}
+            readOnly={formState.isLoading}
           />
           <TextField
             value={formState.identityNumber}
@@ -108,6 +121,10 @@ export const EditPrivateProfileScreen: FC<UserProfileStackScreenProps<"UserProfi
             accessible={true}
             accessibilityLabel="Identity Number input"
             accessibilityRole="text"
+            helperTx={formState.errors.identityNumber?.key}
+            helperTxOptions={formState.errors.identityNumber?.values}
+            status={formState.errors.identityNumber ? "error" : undefined}
+            readOnly={formState.isLoading}
           />
           <TextField
             value={formState.phoneNumber}
@@ -118,6 +135,10 @@ export const EditPrivateProfileScreen: FC<UserProfileStackScreenProps<"UserProfi
             accessible={true}
             accessibilityLabel="Phone Number input"
             accessibilityRole="text"
+            helperTx={formState.errors.phoneNumber?.key}
+            helperTxOptions={formState.errors.phoneNumber?.values}
+            status={formState.errors.phoneNumber ? "error" : undefined}
+            readOnly={formState.isLoading}
           />
 
           <Button tx="common:saveChanges" onPress={handleSave} disabled={formState.isLoading} />
