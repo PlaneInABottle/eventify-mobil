@@ -1,8 +1,6 @@
-import { TxKeyPath } from "@/i18n"
-import isValidEmail from "../validation/emailValidation"
-import isValidPassword from "../validation/passwordValidation"
-import { SetStateAction, Dispatch } from "react"
-import { IUserEditPrivateProfileFormState, UserLoginFormState } from "@/types/userFormTypes"
+import { IUserEditPrivateProfileFormState } from "@/types/userFormTypes"
+import { Dispatch, SetStateAction } from "react"
+import { validateIdentityNumber, validateLastName, validateName, validatePhoneNumber } from "../validation/allValidations"
 
 export const validateUserPrivateProfileForm = (
   name: string,
@@ -13,6 +11,10 @@ export const validateUserPrivateProfileForm = (
 ): boolean => {
 
   const newErrors = {
+    name: validateName(name),
+    lastName: validateLastName(lastName),
+    identityNumber: validateIdentityNumber(identityNumber),
+    phoneNumber: validatePhoneNumber(phoneNumber),
   }
 
   setFormState((prev: IUserEditPrivateProfileFormState) => ({

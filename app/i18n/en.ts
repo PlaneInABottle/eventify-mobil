@@ -1,4 +1,5 @@
 import demoEn from "./demo-en"
+import errorKeys from "./errors"
 import organizerEn from "./organizer-en"
 
 const en = {
@@ -310,6 +311,7 @@ const en = {
 
   ...demoEn,
   ...organizerEn,
+  ...errorKeys,
 }
 
 export default en

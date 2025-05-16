@@ -1,4 +1,4 @@
-import { TxKeyPath } from "@/i18n"
+import { IValidationError, TxKeyPath, ValidationResult } from "@/i18n"
 
 export type UserLoginFormState = {
   email: string
@@ -35,11 +35,11 @@ export type IUserEditPrivateProfileFormState = {
   identityNumber: string
   phoneNumber: string
   errors: {
-    name?: TxKeyPath
-    lastName?: TxKeyPath
-    identityNumber?: TxKeyPath
-    phoneNumber?: TxKeyPath
-    general?: TxKeyPath | string
+    name?: IValidationError
+    lastName?: IValidationError
+    identityNumber?: IValidationError
+    phoneNumber?: IValidationError
+    general?: IValidationError
   }
   isLoading: boolean
 }
