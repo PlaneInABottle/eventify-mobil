@@ -25,6 +25,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
     const { setThemeContextOverride, themeContext, themed } = useAppTheme()
     const { userProfileStore, userAuthenticationStore } = useStores()
     const userProfile = userProfileStore.profile
+    const userPrivateProfile = userProfileStore.privateProfile
 
     const [formState, setFormState] = useState<UserProfileFormState>({
       errors: {},
@@ -244,7 +245,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                     <Icon icon="idCard" size={20} containerStyle={themed($iconWrapper)} />
                   </View>
                   <View style={themed($infoTextContainer)}>
-                    <Text preset="formLabel" tx="profileScreen:name" style={themed($infoLabel)} />
+                    <Text preset="formLabel" tx={userPrivateProfile ? userPrivateProfile.name : "profileScreen:name"} style={themed($infoLabel)} />
                   </View>
                 </View>
 
@@ -255,7 +256,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                   <View style={themed($infoTextContainer)}>
                     <Text
                       preset="formLabel"
-                      tx="profileScreen:lastName"
+                      tx={userPrivateProfile ? "profileScreen:secret" : "profileScreen:lastName"}
                       style={themed($infoLabel)}
                     />
                   </View>
@@ -268,7 +269,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                   <View style={themed($infoTextContainer)}>
                     <Text
                       preset="formLabel"
-                      tx="profileScreen:identityNumber"
+                      tx={userPrivateProfile ? "profileScreen:secret" : "profileScreen:identityNumber"}
                       style={themed($infoLabel)}
                     />
                   </View>
@@ -280,7 +281,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                   <View style={themed($infoTextContainer)}>
                     <Text
                       preset="formLabel"
-                      tx="profileScreen:phoneNumber"
+                      tx={userPrivateProfile ? "profileScreen:secret" : "profileScreen:phoneNumber"}
                       style={themed($infoLabel)}
                     />
                   </View>

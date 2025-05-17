@@ -204,6 +204,7 @@ const en = {
     deleteAccountWarning: "YOU ARE DELETING YOUR ACCOUNT",
     deleteAccountWarningDescription:
       "Are you sure you want to delete your account? This action can not taken back.",
+    secret: "****",
   },
   paymentScreen: {
     ticketPayment: "Ticket Payment",
