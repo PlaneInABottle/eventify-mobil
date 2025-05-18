@@ -37,6 +37,7 @@ import { navigate } from "@/navigators/navigationUtilities"
 import { IUserEventDateLocation } from "@/models/userStores/UserEventDateStore"
 import { EventTabScreenProps } from "@/navigators/userNavigationTypes"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { handleError } from "@/utils/errorHandler"
 
 export const EventListScreen: FC<EventTabScreenProps<"EventListScreen">> = observer(
   function EventListScreen(_props) {
@@ -126,6 +127,8 @@ const EventCard = observer(function EventCard({
     themed,
   } = useAppTheme()
 
+  const { userProfileStore } = useStores()
+
   const { userChatStore, userAuthenticationStore, userEventDateLocationStore } = useStores()
   const eventChat = userChatStore.chatsByDateLocationId(eventDateLocation.id).at(0)
   const isFavorite = userEventDateLocationStore.datesLocationsAsList.find(
@@ -150,6 +153,9 @@ const EventCard = observer(function EventCard({
   }, [])
 
   const handleTicketPayment = () => {
+    if (!userProfileStore.privateProfile) {
+      handleError("forms:errors.privateProfile");
+    }
     dismissOptions()
     navigate("UserPaymentScreen")
     console.log("Buying Ticket")
