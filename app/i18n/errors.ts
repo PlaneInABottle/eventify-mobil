@@ -36,13 +36,17 @@ export const errorKeys = {
       generalSubmissionError: "An unexpected error occurred. Please try again.",
       networkError: "Network error. Please check your connection and try again.",
       formInvalid: "Please correct the errors in the form.",
+
+      fillPrivateProfile: "Please first fill the private profile for payment.",
+      fillAddressForPayment: "Please first fill the address part for payment.",
+
     },
     placeholders: { // You might also want to group placeholders
       name: "Enter your name",
       lastName: "Enter your last name",
       email: "your.email@example.com",
       identityNumber: "e.g., 1234567890",
-      phoneNumber: "e.g., +1 555 123 4567",
+      phoneNumber: "e.g., 555 123 4567",
     },
     labels: { // And labels
       name: "Name",
