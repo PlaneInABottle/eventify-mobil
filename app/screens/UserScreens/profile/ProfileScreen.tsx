@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from "react"
+import { FC, Fragment, useCallback, useState } from "react"
 import {
   ViewStyle,
   View,
@@ -93,13 +93,13 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
     }, [themeContext, setThemeContextOverride])
     return (
       <Screen preset="scroll" contentContainerStyle={$styles.container}>
-        <>
+        <Fragment>
           {/* Profile Header */}
           <View style={themed($headerContainer)}>
             {/* Profile Picture Section */}
             <View style={themed($profilePictureContainer)}>
               {userProfile?.avatar_url ? (
-                <>
+                <Fragment>
                   <Image
                     source={{
                       uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/avatars/${userProfile?.avatar_url}`,
@@ -116,7 +116,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
                       style={themed($profileImageActivityIndicator)}
                     />
                   )}
-                </>
+                </Fragment>
               ) : (
                 <View style={[$profilePicture, themed($placeholderImage)]} />
               )}
@@ -317,7 +317,7 @@ export const ProfileScreen: FC<UserProfileStackScreenProps<"UserProfileScreen">>
             style={themed($deleteButton)}
             preset="danger"
           />
-        </>
+        </Fragment>
       </Screen>
     )
   },
