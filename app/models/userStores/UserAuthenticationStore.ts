@@ -23,6 +23,9 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
     get getUserId(): string | null {
       return store.userId
     },
+    get getEmail(): string | null {
+      return store.authEmail
+    },
     get isAuthenticated(): boolean {
       return !!store.authEmail && !!store.userId
     },
@@ -51,8 +54,14 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
     userFirstRequest: flow(function* () {
       const userId = store.userId
 
-      const [profileRes, eventChatsRes] = yield Promise.all([
+      const [profileRes, privateProfile, eventChatsRes] = yield Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).single().throwOnError(),
+        supabase
+          .from("user_private_profiles")
+          .select("*")
+          .eq("id", userId)
+          .maybeSingle()
+          .throwOnError(),
         supabase
           .rpc("get_user_chat_events", {
             _user_id: userId,
@@ -76,7 +85,11 @@ export const UserAuthenticationStoreModel: IAnyModelType = types
         "codes",
         eventChatsRes.data.campaignCodes ?? [],
       )
-      getRootStore(store).userProfileStore.setProp("profile", profileRes.data ?? [])
+      getRootStore(store).userProfileStore.setProp("profile", profileRes.data ?? undefined)
+      getRootStore(store).userProfileStore.setProp(
+        "privateProfile",
+        privateProfile.data ?? undefined,
+      )
     }),
   }))
   .actions((store) => ({
