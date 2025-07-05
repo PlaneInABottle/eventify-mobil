@@ -1,0 +1,68 @@
+appId: com.eventify.app
+---
+# Explore App Hierarchy Test - No Login Required
+# This test maps out the visible components and navigation structure
+
+# Take screenshot of current screen
+- takeScreenshot: "01-current-screen.png"
+
+# Test top navigation tabs
+- assertVisible: "MAP"
+- assertVisible: "LIST" 
+- assertVisible: "CAMPAIGNS"
+
+# Test the search functionality
+- assertVisible: "Search This Area"
+
+# Test bottom navigation
+- assertVisible: "Events"
+- assertVisible: "Chats"
+- assertVisible: "Inventory"
+- assertVisible: "Profile"
+
+# Explore LIST tab
+- tapOn: "LIST"
+- waitForAnimationToEnd
+- takeScreenshot: "02-list-view.png"
+
+# Go back to MAP
+- tapOn: "MAP"
+- waitForAnimationToEnd
+
+# Explore CAMPAIGNS tab
+- tapOn: "CAMPAIGNS"
+- waitForAnimationToEnd
+- takeScreenshot: "03-campaigns-view.png"
+
+# Go back to MAP
+- tapOn: "MAP"
+- waitForAnimationToEnd
+
+# Test bottom navigation - Events
+- tapOn: "Events"
+- waitForAnimationToEnd
+- takeScreenshot: "04-events-tab.png"
+
+# Test bottom navigation - Chats
+- tapOn: "Chats"
+- waitForAnimationToEnd
+- takeScreenshot: "05-chats-tab.png"
+
+# Test bottom navigation - Inventory
+- tapOn: "Inventory"
+- waitForAnimationToEnd
+- takeScreenshot: "06-inventory-tab.png"
+
+# Test bottom navigation - Profile
+- tapOn: "Profile"
+- waitForAnimationToEnd
+- takeScreenshot: "07-profile-tab.png"
+
+# Go back to Events (main screen)
+- tapOn: "Events"
+- waitForAnimationToEnd
+
+# Try to interact with map elements
+- tapOn: "Search This Area"
+- waitForAnimationToEnd
+- takeScreenshot: "08-search-this-area.png"

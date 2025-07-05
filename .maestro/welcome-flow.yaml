@@ -1,0 +1,33 @@
+appId: com.eventify.app
+---
+- launchApp:
+    appId: com.eventify.app
+    clearState: false
+
+# Wait for app to load
+- waitForAnimationToEnd
+
+# Verify welcome screen elements
+- assertVisible: "Your one-stop platform for discovering and creating amazing events"
+- assertVisible: "Join our community today!"
+- assertVisible: "Log In"
+- assertVisible: "Register"
+
+# Test navigation to login screen
+- tapOn: "Log In"
+- waitForAnimationToEnd
+
+# Go back to welcome screen  
+- back
+- waitForAnimationToEnd
+
+# Test navigation to register screen
+- tapOn: "Register"
+- waitForAnimationToEnd
+
+# Go back to welcome screen
+- back
+- waitForAnimationToEnd
+
+# Verify we're back on welcome screen
+- assertVisible: "Join our community today!"

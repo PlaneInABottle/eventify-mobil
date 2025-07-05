@@ -1,0 +1,27 @@
+appId: com.eventify.app
+---
+# Development helper - explore current screen state
+# No app restart needed
+
+# Take screenshot of current state
+- takeScreenshot: "dev-current-screen.png"
+
+# Print current screen elements (for debugging)
+- runScript: |
+    console.log("=== CURRENT SCREEN DEBUG ===")
+    console.log("Visible elements:")
+    
+# Check what screen we're on and navigate accordingly
+- runScript: |
+    if (maestro.isVisible("Join our community today!")) {
+      console.log("Currently on: Welcome Screen")
+    } else if (maestro.isVisible("Welcome Back!")) {
+      console.log("Currently on: Login Screen")
+    } else if (maestro.isVisible("Register")) {
+      console.log("Currently on: Register Screen")
+    } else {
+      console.log("Currently on: Unknown Screen")
+    }
+
+# Interactive wait for manual inspection
+- wait: 3000

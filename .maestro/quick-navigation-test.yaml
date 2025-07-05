@@ -1,0 +1,20 @@
+appId: com.eventify.app
+---
+# No launchApp - assumes app is already running
+# Test quick navigation without restarting
+
+# Simple navigation test - if we're not on welcome, this will fail gracefully
+- assertVisible: "Join our community today!"
+
+# Quick navigation test
+- tapOn: "Register"
+- waitForAnimationToEnd
+- back
+- waitForAnimationToEnd
+
+- tapOn: "Log In" 
+- waitForAnimationToEnd
+- back
+- waitForAnimationToEnd
+
+- assertVisible: "Join our community today!"

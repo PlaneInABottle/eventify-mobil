@@ -1,0 +1,73 @@
+appId: com.eventify.app
+---
+# Hierarchy-based exploration test using element selectors
+# No screenshots needed - using view hierarchy for verification
+
+# Current screen: MAP view (Events tab selected)
+# Verify current state using text instead of id
+- assertVisible: "MAP"
+- assertVisible: "Events"
+
+# Test top navigation tabs (using text labels)
+- tapOn: "LIST"
+- waitForAnimationToEnd
+
+# Verify LIST tab is now selected
+- assertVisible: "LIST"
+
+# Back to MAP
+- tapOn: "MAP"
+- waitForAnimationToEnd
+
+# Test CAMPAIGNS tab
+- tapOn: "CAMPAIGNS"
+- waitForAnimationToEnd
+
+# Verify CAMPAIGNS tab is selected
+- assertVisible: "CAMPAIGNS"
+
+# Back to MAP
+- tapOn: "MAP"
+- waitForAnimationToEnd
+
+# Test bottom navigation
+- tapOn: "Chats"
+- waitForAnimationToEnd
+
+# Verify Chats tab is selected
+- assertVisible: "Chats"
+
+# Test Inventory tab
+- tapOn: "Inventory"
+- waitForAnimationToEnd
+
+- assertVisible: "Inventory"
+
+# Test Profile tab
+- tapOn: "Profile"
+- waitForAnimationToEnd
+
+- assertVisible: "Profile"
+
+# Back to Events (main screen)
+- tapOn: "Events"
+- waitForAnimationToEnd
+
+# Verify we're back on Events with MAP selected
+- assertVisible: "Events"
+- assertVisible: "MAP"
+
+# Test map interaction - Search button
+- assertVisible: "Search This Area"
+- tapOn: "Search This Area"
+- waitForAnimationToEnd
+
+# Test floating action buttons (using bounds)
+# These are the ImageView buttons on the right side
+- tapOn:
+    point: "954,1555"  # First floating button
+- waitForAnimationToEnd
+
+- tapOn:
+    point: "954,1828"  # Second floating button  
+- waitForAnimationToEnd

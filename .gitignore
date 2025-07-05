@@ -103,3 +103,18 @@ web-build/
 
 .env.local
 .mcp*
+
+# Test artifacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.mov
+/test-results/
+.maestro/screenshots/
+.maestro/videos/
+
+# Log files
+*.log
+*-logs.txt

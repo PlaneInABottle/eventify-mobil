@@ -1,0 +1,50 @@
+appId: com.eventify.app
+---
+- launchApp:
+    appId: com.eventify.app
+    clearState: false
+
+- waitForAnimationToEnd
+
+# Navigate to login screen
+- tapOn: "Log In"
+- waitForAnimationToEnd
+
+# Verify login screen elements
+- assertVisible: "Welcome Back!"
+- assertVisible: "Sign in to your account to discover and join amazing events happening around you."
+- assertVisible: "Email"
+- assertVisible: "Password"
+- assertVisible: "Sign In"
+
+# Test form interaction - fill email field
+- tapOn: 
+    text: "Enter your email address"
+- inputText: "test@example.com"
+
+# Fill password field
+- tapOn:
+    text: "Enter your password"
+- inputText: "testpassword123"
+
+# Try to scroll down to see if there are more elements
+- scroll
+
+# Check if "Trouble signing in?" is visible after scroll
+- assertVisible: "Trouble signing in?"
+
+# Scroll back up  
+- swipe:
+    start: "50%,80%"
+    end: "50%,20%"
+
+# Test the Sign In button (this will likely fail due to validation)
+- tapOn: "Sign In"
+- waitForAnimationToEnd
+
+# Go back to welcome screen
+- back
+- waitForAnimationToEnd
+
+# Verify we're back on welcome screen
+- assertVisible: "Join our community today!"
